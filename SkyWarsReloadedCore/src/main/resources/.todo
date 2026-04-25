@@ -1,0 +1,259 @@
+#version 5.5.1 - BETA #7
+Added a new message for /swr list that displays if no maps were found.
+Fixed inventory pre-game backup throwing ClassCastException
+Fixed taunts still working when in the waiting room.
+
+# version 5.5.1 - BETA #6
+Added async update checker on join
+Added many debug logs if debug mode is enabled
+Added ability to register map from console
+Added ability to create parties without specifying a name
+Added feature for maps auto-pick on server start for in bungee mode
+Added sanity check for map ids
+Fixed ClassCastException in 1.8.8 serverst
+Fixed SocketException if server is restarted while receiving ping
+Fixed NullPointerException when executing eco actions
+Fixed holograms not loading data on start if sign leaderboards are disabled
+Fixed dropping null item on damage causing death event
+Fixed armor contents not being applied back to player on restore
+Fixed typos in the code and in console messages
+Fixed not correctly resetting player join index on map reset
+Fixed projectile effect display name for key none showing No Particles
+Fixed players in bungeecord mode not being removed on cross-world teleport
+Fixed many issues related to saving maps when using SlimeWorldManager
+Fixed maps not refreshing correctly after game in SlimeWorldManager
+Fixed requiring multiple spawn locations per team even if useSeparateCages is disabled
+Fixed player being put in spectator even if damage event was cancelled
+Fixed many other bugs
+
+# version 5.5.1 - BETA #3
+Recoded how teams are handled internally.
+Added ability to disable sounds
+Added ability to refresh maps quickly without waiting for countdown to finish if all players have left that world.
+Fixed scoreboard, title, experience, and chat countdown not synced.
+Fixed only a single player being able to join on first setup.
+Potentially fixed: issue with all players joining in the same cage is as well (we could not reproduce that).
+Fixed signs in the lobby causing errors.
+Fixed players dying due to fall damage before pvp.
+Fixed daylightCycle being enabled in slime worlds.
+Fixed existing chests not removed before scanning for all chests (creating duplicates).
+Fixed issue where players joining within the same tick would cause the join message to show the total amount of players, not the amount of players they joined at (aka: with 2 people waiting and 2 people joining at the same time it would show (4/4) twice).
+
+# version 5.5.0
+Recoded player leave handling
+Fixed triple deaths bug
+
+# version 5.4.3
+Fixed NoMuchMethodException when joining a game on 1.8.
+
+# version 5.4.2
+Removed ELO from the plugin. Make sure to remove occurrences from the messages.yml, holograms.yml and other files.
+Recoded kit lores! They are no longer in format of "line1, line2" but are now in a list: "lores.unlocked"! [IMPORTANT!]
+Added a 'SkyWarsReloadEvent' event for developers, called when '/sw reload' is executed.
+Added a glow effect (enchantment) to the voting menu to the currently selected vote of a player.
+Fixed '/swm delete' throwing an error.
+Fixed scoreboard placeholders for spectators not being replaced.
+Fixed '/sw quit' not working for spectators.
+Fixed not showing the right scoreboard when leaving a game.
+Fixed taunts still working while spectating a game.
+Fixed being able to teleport to other players using the spectator menu.
+Fixed next event placeholders for scoreboards not displayed the right events and going negative.
+Fixed /sw holoadd's succession message placeholders not being replaced.
+Fixed {winners..} placeholders sometimes not being removed on scoreboard.
+Fixed game bug which caused players that were riding an entity when they joined to bug in a game.
+
+# version 5.4.1
+Fixed updater message showing when no update was available.
+
+# version 5.4.0
+Added a fun little updater to check for updates from MyGCNT.
+Added new config option to change the time display formats on scoreboards and other messages.
+Added a new command to teleport players to the skywars lobby: /sw lobby
+Added a new command to check if a chest is center/regular: /swm checkchest
+Added default voting types to arenas (including default chests), configurable per arena.
+Added a confirmation message to the /sw hologram command to let you know the hologram was created.
+Added a new config option to allow the disabling of displaying the timer on the xp level bar: "game.displayTimerOnLevelbar".
+Added configurable messages for the hologram creation and removing commands.
+Added async to Bungeecord pings to decrease the threat weight.
+Added a new option to the enderdragon event: "makeDragonInvulnerable" allowing dragons to be invulnerable.
+Fixed breaking diamond block of spawn location not removing the spawn on solo games.
+Fixed wrong inventory rollback when leaving a team game in waitstart.
+Fixed enderdragons not being able to break blocks in matches.
+Fixed teammates being able to damage each other when friendly fire was disabled.
+Fixed the player count on leave messages being invisible.
+Fixed UTF-8 characters not working in files.
+Fixed commands sending wrong usage messages when the usage was right.
+Fixed players getting kicked out of their game on Bungeecord servers.
+Removed some junk classes, saving space.
+
+# version 5.3.3
+Fixed a bug where it would say your teams were unbalanced on register when separate cages was disabled.
+Fixed a bug for bungeecord servers regarding JSON stuff.
+
+# version 5.3.2
+Added support for 1.16.4
+Fixed PAPI placeholders 'kill_death' and 'win_loss' to only be detected when all characters were lowercase.
+
+# version 5.3.1
+Fixed bug for 1.16x regarding quick death.
+
+# version 5.3.0
+Added team chats! Send messages to your team members only. Use an '!' in front of the message to talk globally.
+Added a {level} placeholder to the chat formats so you can display the player's EXP level.
+Added support for both WorldEdit version in one SWR version! There's no need to download a server-based version anymore.
+Added an option to set the team number as the material amount in the team selection menu.
+Added a 5 tick (0.25 second) cooldown for lobby items.
+Fixed bungeecord people not able to join games.
+Fixed bungeecord signs not updating correctly.
+Fixed the menus bugging back when opening from another menu on 1.16+.
+Fixed the teamMaterial item in the selection menu not being shown when it wasn't WOOL, BANNER or STAINED_GLASS
+Fixed a bug for chat messages in which the plugin would break when the message contained a '%'-character.
+Fixed a typo in the messages.yml
+Removed some debug.
+
+# version 5.2.0
+Added tab complete for all commands.
+Added new {votes} option to the messages that are sent when you vote for a game option.
+Rewritten all messages in the messages.yml to have less ugly color combinations and better grammar.
+Added join and leave messages in the chat.
+Re-added the join titles. Apparently, the start titles were displayed on join.
+Added some issue fixes in case a sign is missing at a registered sign location.
+Added new {map} and {creator} placeholders to the game start titles.
+Added a default string: "&cNo events" for the {nextevent_name} placeholder in case there are no events.
+Fixed the random vote item still popping up in the menu when disabled.
+Fixed some bugs for player option menus.
+Removed some debug that was left from a bug fixing.
+
+# version 5.1.1
+Fixed bug regarding the '/swm spawn' command producing an NPE.
+Fixed bug regarding the '/swm debug' command to display an empty string in the command list.
+
+# version 5.1.0
+Recoded the scoreboard system!
+Added 1.16.2 support.
+Added new placeholders to the scoreboards: {players_needed}, {waitingtimer}, {nextevent_time}, {nextevent_name}, {kills}.
+Added support for (MVdW)PlaceholderAPI on Scoreboards!
+Added support for SlimeWorldManager world storage, enable it in the config.
+Fixed scoreboard gap lines for {winnerX} placeholders when there were less winners than placeholders; those empty lines will now be removed.
+Fixed the {aliveplayers} placeholder on scoreboard which wasn't updating. It now works!
+Fixed the 'clearInventoryOnLobbyJoin' option which was clearing the inventory after giving the lobby items, it now clears it before.
+Removed some junk code.
+
+# version 5.0.0
+Recoded a LOT of the plugin's code!
+Added waiting lobbies to team games.
+Added separate cages for team games.
+Added a new subcommand to set team spawns / the waiting lobby spawn (/swm spawn player <team> AND /swm spawn lobby).
+Added 1.16 support.
+Added a new option to disable colored names in the tablist based on the team.
+Added a team selector menu for team games in waiting mode.
+Added a new option to clear the inventory on lobby join.
+Added a interaction block for worldedit wands when in a game.
+Added the countdown timer for the game to be displayed as the player's exp level instantly.
+Added more detailed messages in case registering an arena failed to complete.
+Added a new API event 'SkyWarsSelectTeamEvent'.
+Changed how kit and game options vote work. You are now required to be in a team in order to choose one.
+Fixed a bug regarding the Bungeecord join game signs.
+Fixed a bug regarding the ghast event.
+Fixed a bug regarding the crate drop event.
+Fixed an error that would come up on 1.13+ servers regarding the scoreboard.
+Fixed a bug where teammates were able to hit each other.
+Fixed a bug regarding the /swm register command where it would send the help message even after completing.
+Fixed a bug for 1.11+ where actionbar messages would be sent as a regular message.
+
+# version: 4.4.2
+Added a new feature that removes the player's join and quit messages.
+Fixed bug where players were instantly being returned to the lobby when joining a game on Bungeecord servers.
+Fixed the join menu being empty on Bungeecord game servers (this shouldn't really be used though).
+
+# version: 4.4.1
+Added console support for the '/swm list' command.
+Added a new option to disable the scavenger chest.
+Added a new option to just disable the join items without disabling the menus completely.
+Fixed some issues in the NMS (version based method) handlers causing the plugin to crash on some versions.
+
+# version: 4.4.0
+Added bungeecord support. The previous system was not working.
+Added sign support for bungeecord lobbies. Previously, it wasn't possible to join through signs on bungeecord networks.
+Added a {level} placeholder to the lobby scoreboard, and %swr_level% and {swr_level} to (MVdW)PAPI.
+Fixed some issues with the Messenger system that sends skywars messages.
+Fixed a bug regarding the PvP-wait-timer.
+Fixed the bug in Bungeecord games where you were teleported to a normal world first before being put in the game.
+Fixed the bug in Bungeecord games where you were teleported to a normal world first after leaving a game before being sent back to the lobby.
+
+# version: 4.3.4
+Added a new clear inventory on win option to the config
+Added a new enable flight on win option to the config (this already was a feature, but now it's configurable)
+Added quickRespawn for players that won a game. If they jump into the void and reach y=-10, they will be teleported to the spectator spawn
+Fixed cages folder not being created automatically.
+Fixed cages to support .schem files as well (for 1.13+)
+Fixed players not getting damage in games
+Fixed a bug regarding quickDeath
+Fixed team cages being removed when a team member left
+Removed the allowFallDamage option from the plugin
+
+
+# version: 4.3.3
+ADDED pvp wait timer after cages opened.
+ADDED schematic cages for solo games.
+ADDED quick death.
+ADDED kick on world teleport option. If a player teleports out of an arena, they get kicked from the game.
+    This could be useful if you have a command such as '/hub' which teleports the player to the hub without kicking them from the game.
+ADDED join sign support for worlds other than the lobby one. You can now place join signs in every world.
+FIXED not being able to die in the void when fallDamage was disabled.
+FIXED not being able to remove a join sign because you joined when u tried to do it.
+FIXED map failed to register message not being shown in the chat.
+FIXED a bug in the chest manager
+
+# version: 4.3.2
+FIXED arenas menu being empty
+ADDED option to disable the win broadcast message
+
+# version: 4.3.1
+ADDED customization for the join menus. Item lores are now editable in the messages.yml file.
+ADDED per-arena customization for join menu items. Each arena can now have its own join menu icon.
+FIXED a sign interaction error
+FIXED leaderboards signs giving errors when on wall
+
+
+# version: 4.3.0
+ADDED 1.15 support
+ADDED a command to set the team size: /swm teamsize
+Fixed join signs not working smoothly. You now no longer need to have an empty hand for joining through signs.
+Fixed a bug where the plugin wouldn't load due spawn issues
+
+
+
+
+
+
+
+
+
+
+
+# version: 4.2.4
+FIXED teleporting to not-game players being cancelled.
+NOW WORKING WITH THE EXTENSION
+
+# version: 4.2.3
+FIXED spawn bug being thrown on startup when it wasn't set.
+ADDED look direction for arenas. You can set the location players will look at when they spawn in their cages. This is configurable in the config
+FIXED wall sign bug for 1.13+
+
+# version: 4.2.2
+FIXED sign bug for 1.13+ where it was only detecting POST signs
+ADDED when deleting a world, all players in that world are being teleported to the lobby spawn
+FIXED a bug where normal players where able to break signs. You now need the permission 'sw.signs'. You also need to sneak now
+FIXED a bug where the gamemode was set before teleporting to arena. Could cause interruptions with perWorld plugins
+
+# version: 4.2.1
+FIXED spectate skulls being duplicated
+FIXED the player spawnpoints not being remembered
+
+# version: 4.2.0
+ADDED an option in the config that allows you to stop the timer from being reset every time a new player joins (game.resetTimerOnJoin)
+ADDED 1.14 support
+FIXED PlaceholderAPI hook using old methods
+FIXED holograms giving errors when HolographicDisplays was not installed
+

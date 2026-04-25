@@ -1,0 +1,10 @@
+.idea/
+SWR.iml
+*.iml
+/out/
+/target/
+/**/target/
+.flattened-pom.xml
+dependency-reduced-pom.xml
+settings.xml
+.run/

@@ -1,0 +1,16 @@
+wins: 0
+losses: 0
+kills: 0
+deaths: 0
+souls: 0
+soulwell_usages: 0
+soulwell_legendaries: 0
+soulwell_rares: 0
+soulwell_souls_gathered: 0
+soulwell_souls_purchased: 0
+pareffect: none
+proeffect: none
+glasscolor: none
+winsound: none
+killsound: none
+taunt: none
