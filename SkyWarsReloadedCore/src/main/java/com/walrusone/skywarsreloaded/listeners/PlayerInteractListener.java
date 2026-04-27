@@ -369,6 +369,7 @@ public class PlayerInteractListener implements Listener {
                 if (SkyWarsReloaded.getCfg().isPlayAgainItemEnabled()
                         && hand.isSimilar(SkyWarsReloaded.getIM().getItem("playAgainItem"))) {
                     final GameType gameType = gameMap.getTeamSize() > 1 ? GameType.TEAM : GameType.SINGLE;
+                    final boolean playAgainLucky = gameMap.isLuckyModeEnabled();
                     new BukkitRunnable() {
                         @Override
                         public void run() {
@@ -376,7 +377,7 @@ public class PlayerInteractListener implements Listener {
                                 return;
                             }
                             SkyWarsReloaded.get().getPlayerManager().removePlayer(player, PlayerRemoveReason.PLAYER_QUIT_GAME, null, false, false);
-                            if (MatchManager.get().joinGame(player, gameType) == null) {
+                            if (MatchManager.get().joinGame(player, gameType, playAgainLucky, true) == null) {
                                 player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
                             }
                         }
@@ -535,15 +536,7 @@ public class PlayerInteractListener implements Listener {
             }
         }
         if (SkyWarsReloaded.getGameMapMgr().getPlayableArenas(GameType.TEAM).isEmpty()) {
-            if (!SkyWarsReloaded.getIC().hasViewers("joinsinglemenu")) {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        SkyWarsReloaded.getIC().getMenu("joinsinglemenu").update();
-                    }
-                }.runTaskLater(SkyWarsReloaded.get(), 5);
-            }
-            SkyWarsReloaded.getIC().show(player, "joinsinglemenu");
+            SkyWarsReloaded.getIC().show(player, "joinsolomodemenu");
         } else if (SkyWarsReloaded.getGameMapMgr().getPlayableArenas(GameType.SINGLE).isEmpty()) {
             if (!SkyWarsReloaded.getIC().hasViewers("jointeammenu")) {
                 new BukkitRunnable() {

@@ -42,7 +42,7 @@ public class IconMenu {
     }
 
     public void update() {
-        if (SkyWarsReloaded.get().isEnabled()) {
+        if (SkyWarsReloaded.get().isEnabled() && update != null) {
             org.bukkit.Bukkit.getScheduler().scheduleSyncDelayedTask(SkyWarsReloaded.get(), update);
         }
     }

@@ -35,24 +35,35 @@ public class SWJoinCmd extends com.walrusone.skywarsreloaded.commands.BaseCmd {
 
         GameType type = GameType.ALL;
         String mapName = null;
+        boolean luckyMode = false;
         if (args.length >= 2) {
-            String a1 = args[1].toLowerCase(Locale.ROOT);
-            if ("single".equals(a1) || "solo".equals(a1)) {
-                type = GameType.SINGLE;
-                if (args.length >= 3) {
-                    mapName = args[2];
+            for (int i = 1; i < args.length; i++) {
+                String token = args[i].toLowerCase(Locale.ROOT);
+                if ("lucky".equals(token) || "luckymode".equals(token)
+                        || "luckyblock".equals(token) || "luckysolo".equals(token)) {
+                    luckyMode = true;
+                    type = GameType.SINGLE;
+                    continue;
                 }
-            } else if ("team".equals(a1)) {
-                type = GameType.TEAM;
-                if (args.length >= 3) {
-                    mapName = args[2];
+                if ("single".equals(token) || "solo".equals(token)) {
+                    type = GameType.SINGLE;
+                    continue;
                 }
-            } else {
-                mapName = args[1];
+                if ("team".equals(token)) {
+                    type = GameType.TEAM;
+                    continue;
+                }
+                if (mapName == null) {
+                    mapName = args[i];
+                }
             }
         }
 
         Party party = Party.getParty(player);
+        if (luckyMode && party != null) {
+            player.sendMessage(new Messaging.MessageFormatter().format("error.lucky-solo-only"));
+            return true;
+        }
         if (party != null && !party.getLeader().equals(player.getUniqueId())) {
             player.sendMessage(new Messaging.MessageFormatter().format("party.onlyleader"));
             return true;
@@ -67,9 +78,9 @@ public class SWJoinCmd extends com.walrusone.skywarsreloaded.commands.BaseCmd {
         if (mapName != null) {
             GameMap joined;
             if (party != null) {
-                joined = MatchManager.get().joinGame(party, type, mapName);
+                joined = MatchManager.get().joinGame(party, type, mapName, luckyMode);
             } else {
-                joined = MatchManager.get().joinGame(player, type, mapName);
+                joined = MatchManager.get().joinGame(player, type, mapName, luckyMode);
             }
             if (joined == null) {
                 player.sendMessage(new Messaging.MessageFormatter()
@@ -79,23 +90,23 @@ public class SWJoinCmd extends com.walrusone.skywarsreloaded.commands.BaseCmd {
             return true;
         }
 
-        boolean joined;
+        GameMap joinedMap = null;
         if (party != null) {
-            joined = MatchManager.get().joinGame(party, type) != null;
+            joinedMap = MatchManager.get().joinGame(party, type, luckyMode);
             int count = 0;
-            while (count < 4 && !joined) {
-                joined = MatchManager.get().joinGame(party, type) != null;
+            while (count < 4 && joinedMap == null) {
+                joinedMap = MatchManager.get().joinGame(party, type, luckyMode);
                 count++;
             }
         } else {
-            joined = MatchManager.get().joinGame(player, type) != null;
+            joinedMap = MatchManager.get().joinGame(player, type, luckyMode, true);
             int count = 0;
-            while (count < 4 && !joined) {
-                joined = MatchManager.get().joinGame(player, type) != null;
+            while (count < 4 && joinedMap == null) {
+                joinedMap = MatchManager.get().joinGame(player, type, luckyMode, true);
                 count++;
             }
         }
-        if (!joined) {
+        if (joinedMap == null) {
             player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join"));
         }
         return true;

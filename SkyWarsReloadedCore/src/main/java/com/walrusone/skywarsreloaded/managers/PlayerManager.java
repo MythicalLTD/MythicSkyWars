@@ -13,6 +13,7 @@ import com.walrusone.skywarsreloaded.game.TeamCard;
 import com.walrusone.skywarsreloaded.game.cages.schematics.SchematicCage;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import com.walrusone.skywarsreloaded.menus.playeroptions.KillSoundOption;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockBreakAttachment;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Tagged;
 import com.walrusone.skywarsreloaded.utilities.LevelManager;
@@ -51,6 +52,7 @@ public class PlayerManager {
     }
 
     public void removePlayer(final Player playerRemoved, PlayerRemoveReason removeReason, @Nullable EntityDamageEvent.DamageCause deathCause, boolean shouldSendToLobbyIn, boolean announceToOthers) {
+        LuckyBlockBreakAttachment.remove(playerRemoved);
         // General constants
         final UUID pUuid = playerRemoved.getUniqueId();
         final GameMap gameMap = matchManager.getPlayerMap(playerRemoved);

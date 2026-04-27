@@ -115,6 +115,10 @@ public class PlayerStat {
                             @Override
                             public void run() {
                                 if (Util.get().isSpawnWorld(player.getWorld())) {
+                                    MatchManager mm = MatchManager.get();
+                                    if (mm.getPlayerMap(player) != null || mm.getSpectatorMap(player) != null) {
+                                        return;
+                                    }
                                     if (SkyWarsReloaded.getCfg().isClearInventoryOnLobbyJoin()) {
                                         player.getInventory().clear();
                                     }

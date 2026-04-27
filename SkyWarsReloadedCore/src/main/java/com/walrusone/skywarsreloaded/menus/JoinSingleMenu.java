@@ -16,13 +16,16 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class JoinSingleMenu {
@@ -32,6 +35,28 @@ public class JoinSingleMenu {
     /** Bottom-row slot: left of exit (IconMenu uses size - 5 for exit). */
     private static final int AUTOJOIN_SLOT_FROM_END = 6;
     public static Map<Integer, String> arenaSlots = new HashMap<>();
+    private static final Set<UUID> luckySoloSelection = new HashSet<>();
+
+    public static void showFor(Player player, boolean luckyMode) {
+        if (luckyMode) {
+            luckySoloSelection.add(player.getUniqueId());
+        } else {
+            luckySoloSelection.remove(player.getUniqueId());
+        }
+        if (!SkyWarsReloaded.getIC().hasViewers("joinsinglemenu")) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    SkyWarsReloaded.getIC().getMenu("joinsinglemenu").update();
+                }
+            }.runTaskLater(SkyWarsReloaded.get(), 5);
+        }
+        SkyWarsReloaded.getIC().show(player, "joinsinglemenu");
+    }
+
+    private static boolean wantsLucky(Player player) {
+        return player != null && luckySoloSelection.contains(player.getUniqueId());
+    }
 
     /** Prefer WAITINGSTART (countdown) over WAITINGLOBBY, then busier games. */
     private static final Comparator<SWRServer> AUTOJOIN_SERVER_ORDER = new Comparator<SWRServer>() {
@@ -78,6 +103,11 @@ public class JoinSingleMenu {
             return;
         }
         Party party = Party.getParty(player);
+        boolean lucky = wantsLucky(player);
+        if (lucky && party != null) {
+            player.sendMessage(new Messaging.MessageFormatter().format("error.lucky-solo-only"));
+            return;
+        }
         if (SkyWarsReloaded.getCfg().bungeeMode() && SkyWarsReloaded.getCfg().isLobbyServer()) {
             if (party != null && !party.getLeader().equals(player.getUniqueId())) {
                 player.sendMessage(new Messaging.MessageFormatter().format("party.onlyleader"));
@@ -129,13 +159,13 @@ public class JoinSingleMenu {
                 return;
             }
             player.closeInventory();
-            if (MatchManager.get().joinGame(party, GameType.SINGLE) == null) {
+            if (MatchManager.get().joinGame(party, GameType.SINGLE, lucky) == null) {
                 player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
                 Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getErrorSound(), 1, 1);
             }
         } else {
             player.closeInventory();
-            if (MatchManager.get().joinGame(player, GameType.SINGLE) == null) {
+            if (MatchManager.get().joinGame(player, GameType.SINGLE, lucky, true) == null) {
                 player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
                 Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getErrorSound(), 1, 1);
             }
@@ -424,6 +454,10 @@ public class JoinSingleMenu {
                 }
                 if (party != null) {
                     if (party.getLeader().equals(player.getUniqueId())) {
+                        if (wantsLucky(player)) {
+                            player.sendMessage(new Messaging.MessageFormatter().format("error.lucky-solo-only"));
+                            return;
+                        }
                         if (gMap != null && gMap.canAddParty(party)) {
                             player.closeInventory();
                             joined = gMap.addPlayers(null, party);
@@ -446,7 +480,8 @@ public class JoinSingleMenu {
                 } else {
                     if (gMap != null && gMap.canAddPlayer(player)) {
                         player.closeInventory();
-                        joined = gMap.addPlayers(null, player);
+                        boolean lucky = wantsLucky(player);
+                        joined = MatchManager.get().joinGame(player, GameType.SINGLE, gMap.getName(), lucky) != null;
                         if (!joined) {
                             player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
                         }

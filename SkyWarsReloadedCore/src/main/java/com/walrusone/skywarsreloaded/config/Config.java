@@ -3,6 +3,7 @@ package com.walrusone.skywarsreloaded.config;
 import com.google.common.collect.Lists;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.LeaderType;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -607,6 +608,8 @@ public class Config {
 
                 addMaterial(name, SkyWarsReloaded.get().getConfig().getString("signs." + name), def);
             }
+
+            LuckyBlockHook.reloadLuckyBlocksYaml();
 
             if (requireSave) {
                 save();
@@ -1470,6 +1473,37 @@ public class Config {
 
     public int getMaxChest() {
         return maxChest;
+    }
+
+    /**
+     * Lucky block tuning lives in {@code plugins/SkyWarsReloaded/luckyblocks.yml} (not {@code config.yml}).
+     */
+    public boolean isLuckyBlockReplaceCenterChests() {
+        return LuckyBlockHook.isReplaceCenterChests();
+    }
+
+    public String getLuckyBlockIslandType(LuckyBlockHook.LuckyProfile profile) {
+        return LuckyBlockHook.getIslandType(profile);
+    }
+
+    public String getLuckyBlockCenterType(LuckyBlockHook.LuckyProfile profile) {
+        return LuckyBlockHook.getCenterType(profile);
+    }
+
+    public boolean isLuckyBlockDropsEnabled(LuckyBlockHook.LuckyProfile profile) {
+        return LuckyBlockHook.isDropsEnabled(profile);
+    }
+
+    public int getLuckyBlockDropChancePercent(LuckyBlockHook.LuckyProfile profile) {
+        return LuckyBlockHook.getDropChance(profile);
+    }
+
+    public List<String> getLuckyBlockDropMessages(LuckyBlockHook.LuckyProfile profile) {
+        return LuckyBlockHook.getDropMessages(profile);
+    }
+
+    public List<String> getLuckyBlockDropCommands(LuckyBlockHook.LuckyProfile profile) {
+        return LuckyBlockHook.getDropCommands(profile);
     }
 
     public boolean isChestRefillStatusHologramsEnabled() {

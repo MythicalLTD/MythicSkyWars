@@ -26,6 +26,7 @@ import com.walrusone.skywarsreloaded.menus.TeamSpectateMenu;
 import com.walrusone.skywarsreloaded.menus.gameoptions.*;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.GameKit;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Party;
 import com.walrusone.skywarsreloaded.utilities.Util;
@@ -125,6 +126,9 @@ public class GameMap {
     private boolean customJoinMenuIcon = false;
     private ItemStack customJoinMenuItem = null;
     private CoordLoc waitingLobbySpawn;
+    private boolean luckyModeEnabled;
+    /** Set when lucky chest replacement succeeds; used for join items and refills. */
+    private LuckyBlockHook.LuckyProfile activeLuckyProfile;
 
     public GameMap(final String name) {
         this.name = name;
@@ -1192,6 +1196,8 @@ public class GameMap {
         winners.clear();
         deathMatchWaiters.clear();
         waitingPlayers.clear();
+        luckyModeEnabled = false;
+        activeLuckyProfile = null;
         spectators.clear();
         playerKills.clear();
         if (SkyWarsReloaded.getCfg().kitVotingEnabled()) {
@@ -2212,6 +2218,23 @@ public class GameMap {
 
     public CoordLoc getWaitingLobbySpawn() {
         return waitingLobbySpawn;
+    }
+
+    public boolean isLuckyModeEnabled() {
+        return luckyModeEnabled;
+    }
+
+    public void setLuckyModeEnabled(boolean luckyModeEnabled) {
+        this.luckyModeEnabled = luckyModeEnabled;
+    }
+
+    @Nullable
+    public LuckyBlockHook.LuckyProfile getActiveLuckyProfile() {
+        return activeLuckyProfile;
+    }
+
+    public void setActiveLuckyProfile(@Nullable LuckyBlockHook.LuckyProfile activeLuckyProfile) {
+        this.activeLuckyProfile = activeLuckyProfile;
     }
 
     public void setWaitingLobbySpawn(Location location) {

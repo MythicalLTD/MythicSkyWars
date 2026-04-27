@@ -120,6 +120,35 @@ public class LobbyWaterPortalCmd extends BaseCmd {
             return true;
         }
 
+        if ("luckymode".equals(sub)) {
+            if (args.length < 4) {
+                sender.sendMessage(new Messaging.MessageFormatter().format("command.lobbywaterportal.usage-luckymode"));
+                return true;
+            }
+            String name = args[2];
+            LobbyWaterPortalManager.PortalRegion portal = manager.get(name);
+            if (portal == null) {
+                sender.sendMessage(new Messaging.MessageFormatter().setVariable("name", name).format("command.lobbywaterportal.not-found"));
+                return true;
+            }
+            String raw = args[3].toLowerCase(Locale.ROOT);
+            boolean on;
+            if ("on".equals(raw) || "true".equals(raw) || "yes".equals(raw)) {
+                on = true;
+            } else if ("off".equals(raw) || "false".equals(raw) || "no".equals(raw)) {
+                on = false;
+            } else {
+                sender.sendMessage(new Messaging.MessageFormatter().format("command.lobbywaterportal.invalid-luckymode"));
+                return true;
+            }
+            manager.setLuckyMode(name, on);
+            sender.sendMessage(new Messaging.MessageFormatter()
+                    .setVariable("name", name)
+                    .setVariable("state", on ? "on" : "off")
+                    .format("command.lobbywaterportal.set-luckymode"));
+            return true;
+        }
+
         sendUsage(sender);
         return true;
     }
@@ -130,6 +159,7 @@ public class LobbyWaterPortalCmd extends BaseCmd {
         sender.sendMessage(new Messaging.MessageFormatter().format("command.lobbywaterportal.usage-pos1"));
         sender.sendMessage(new Messaging.MessageFormatter().format("command.lobbywaterportal.usage-pos2"));
         sender.sendMessage(new Messaging.MessageFormatter().format("command.lobbywaterportal.usage-type"));
+        sender.sendMessage(new Messaging.MessageFormatter().format("command.lobbywaterportal.usage-luckymode"));
         sender.sendMessage(new Messaging.MessageFormatter().format("command.lobbywaterportal.usage-delete"));
         sender.sendMessage(new Messaging.MessageFormatter().format("command.lobbywaterportal.usage-list"));
     }

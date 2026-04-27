@@ -61,15 +61,7 @@ public class JoinMenu {
                 return;
             }
             if (event.getSlot() == SkyWarsReloaded.getCfg().getSingleSlot()) {
-                if (!SkyWarsReloaded.getIC().hasViewers("joinsinglemenu")) {
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            SkyWarsReloaded.getIC().getMenu("joinsinglemenu").update();
-                        }
-                    }.runTaskLater(SkyWarsReloaded.get(), 5);
-                }
-                SkyWarsReloaded.getIC().show(player, "joinsinglemenu");
+                SkyWarsReloaded.getIC().show(player, "joinsolomodemenu");
                 return;
             }
 

@@ -11,6 +11,7 @@ import com.walrusone.skywarsreloaded.game.PlayerCard;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import com.walrusone.skywarsreloaded.utilities.holograms.ChestRefillHologramManager;
 import org.bukkit.Bukkit;
@@ -103,11 +104,37 @@ public class ChestOption extends GameOption {
 
     public void completeOption() {
         Vote cVote = getChestVoteResult();
-        populateChests(gameMap.getChests(), cVote, false);
-        populateChests(gameMap.getCenterChests(), cVote, true);
+        if (gameMap.isLuckyModeEnabled()) {
+            Vote resolvedVote = cVote == Vote.CHESTRANDOM ? Vote.getRandom("chest") : cVote;
+            LuckyBlockHook.LuckyProfile profile = resolvedVote == Vote.CHESTOP
+                    ? LuckyBlockHook.LuckyProfile.OP
+                    : LuckyBlockHook.LuckyProfile.BASIC;
+            if (LuckyBlockHook.replaceChestsWithLuckyBlocks(gameMap, profile)) {
+                gameMap.setActiveLuckyProfile(profile);
+                ChestRefillHologramManager.clearForMap(gameMap);
+                if (SkyWarsReloaded.getCfg().isChestVoteEnabled() && gameMap.getTimer() < 5) {
+                    String tierLabel = getVoteString(resolvedVote);
+                    MatchManager.get().message(
+                            gameMap,
+                            new Messaging.MessageFormatter()
+                                    .setVariable("tier", tierLabel)
+                                    .format("game.vote-announcements.chests-lucky"));
+                }
+                return;
+            }
+            gameMap.setActiveLuckyProfile(null);
+        } else {
+            gameMap.setActiveLuckyProfile(null);
+        }
+        Vote resolvedVote = cVote;
+        if (resolvedVote == Vote.CHESTRANDOM) {
+            resolvedVote = Vote.getRandom("chest");
+        }
+        populateChests(gameMap.getChests(), resolvedVote, false);
+        populateChests(gameMap.getCenterChests(), resolvedVote, true);
         ChestRefillHologramManager.clearForMap(gameMap);
         if (SkyWarsReloaded.getCfg().isChestVoteEnabled() && gameMap.getTimer() < 5) {
-            String optionValue = getVoteString(cVote);
+            String optionValue = getVoteString(resolvedVote);
             MatchManager.get().message(
                     gameMap,
                     new Messaging.MessageFormatter().setVariable(

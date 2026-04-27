@@ -30,6 +30,7 @@ import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.nms.NMSUtils;
 import com.walrusone.skywarsreloaded.utilities.LobbyWaterPortalManager;
 import com.walrusone.skywarsreloaded.utilities.LevelManager;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.SoulWellManager;
 import com.walrusone.skywarsreloaded.utilities.SWRServer;
 import com.walrusone.skywarsreloaded.utilities.Util;
@@ -517,6 +518,11 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
         reloadConfig();
         config.load();
         cm = new ChestManager();
+        LuckyBlockHook.setup();
+        if (LuckyBlockHook.isAvailable()) {
+            getLogger().info("Lucky blocks: edit hand items, tiers, and NTD options in "
+                    + new File(getDataFolder(), "luckyblocks.yml").getAbsolutePath());
+        }
         im = new ItemsManager();
         pom = new PlayerOptionsManager();
         lobbyWaterPortalManager = new LobbyWaterPortalManager(this);
@@ -567,6 +573,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 
         if (SkyWarsReloaded.getCfg().joinMenuEnabled() || SkyWarsReloaded.getCfg().spectateMenuEnabled()) {
             new JoinMenu();
+            new JoinSoloModeMenu();
             new JoinSingleMenu();
             new JoinTeamMenu();
         }

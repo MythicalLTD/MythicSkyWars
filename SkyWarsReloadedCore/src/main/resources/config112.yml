@@ -512,10 +512,12 @@ disable-commands:
   - msg
   - r
   - sw quit
+  - leave
   enabled: true
 disable-commands-spectate:
   exceptions:
   - msg
   - r
   - sw quit
+  - leave
   enabled: true

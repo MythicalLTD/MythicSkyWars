@@ -79,6 +79,7 @@ public class LobbyWaterPortalManager {
             p.z2 = cfg.getInt(base + ".z2");
             p.pos1Set = cfg.getBoolean(base + ".pos1Set", false);
             p.pos2Set = cfg.getBoolean(base + ".pos2Set", false);
+            p.luckyMode = cfg.getBoolean(base + ".luckyMode", false);
             portals.put(nameKey.toLowerCase(Locale.ROOT), p);
         }
     }
@@ -160,6 +161,16 @@ public class LobbyWaterPortalManager {
         saveNow();
     }
 
+    public void setLuckyMode(String name, boolean luckyMode) {
+        PortalRegion p = get(name);
+        if (p == null) {
+            return;
+        }
+        p.luckyMode = luckyMode;
+        writePortal(p);
+        saveNow();
+    }
+
     private void writePortal(PortalRegion p) {
         String base = "portals." + p.name;
         cfg.set(base + ".world", p.world);
@@ -172,6 +183,7 @@ public class LobbyWaterPortalManager {
         cfg.set(base + ".z2", p.z2);
         cfg.set(base + ".pos1Set", p.pos1Set);
         cfg.set(base + ".pos2Set", p.pos2Set);
+        cfg.set(base + ".luckyMode", p.luckyMode);
     }
 
     public void tryEnterPortal(Player player) {
@@ -201,7 +213,10 @@ public class LobbyWaterPortalManager {
                 continue;
             }
             // Never use sw.admin.joinBypass spectator fallback from water portals — admins expect to play.
-            GameMap joinedMap = MatchManager.get().joinGame(player, portal.type, false);
+            if (portal.luckyMode && portal.type != GameType.SINGLE) {
+                continue;
+            }
+            GameMap joinedMap = MatchManager.get().joinGame(player, portal.type, portal.luckyMode, false);
             if (joinedMap != null) {
                 playerCooldown.put(player.getUniqueId(), now);
                 return;
@@ -226,7 +241,7 @@ public class LobbyWaterPortalManager {
                     if (!portal.contains(player.getLocation())) {
                         return;
                     }
-                    GameMap retryMap = MatchManager.get().joinGame(player, portal.type, false);
+                    GameMap retryMap = MatchManager.get().joinGame(player, portal.type, portal.luckyMode, false);
                     playerCooldown.put(player.getUniqueId(), System.currentTimeMillis());
                     if (retryMap == null) {
                         player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join"));
@@ -248,6 +263,7 @@ public class LobbyWaterPortalManager {
     public static String formatPortal(PortalRegion p) {
         String status = p.isReady() ? ChatColor.GREEN + "ready" : ChatColor.YELLOW + "incomplete";
         return ChatColor.AQUA + p.name + ChatColor.GRAY + " (" + p.type.name().toLowerCase(Locale.ROOT)
+                + ", lucky=" + (p.luckyMode ? "on" : "off")
                 + ", " + p.world + ") " + status;
     }
 
@@ -263,6 +279,7 @@ public class LobbyWaterPortalManager {
         public boolean pos1Set;
         public boolean pos2Set;
         public GameType type;
+        public boolean luckyMode = false;
 
         PortalRegion(String name, String world, GameType type) {
             this.name = name;

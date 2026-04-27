@@ -328,5 +328,99 @@ public class ChestManager {
         }
     }
 
+    /**
+     * Resolves the same loot table map used by {@link #populateChest(Object, Vote, boolean)} for the given vote tier.
+     */
+    private Map<Integer, Inventory> getFillMapForVote(Vote cVote, boolean center) {
+        if (cVote == Vote.CHESTOP) {
+            return center ? opCenterChestItemList : opChestItemList;
+        }
+        if (cVote == Vote.CHESTBASIC) {
+            return center ? basicCenterChestItemList : basicChestItemList;
+        }
+        if (cVote == Vote.CHESTNORMAL) {
+            return center ? centerChestItemList : chestItemList;
+        }
+        return null;
+    }
+
+    /**
+     * Gives random stacks from SkyWars chest.yml-style loot tables.
+     * Uses the same per-item percent rolls as fillChest (not one roll per whole tier).
+     * Used when lucky blocks add chest-loot bonus drops in lucky mode.
+     */
+    public void giveSkyWarsChestLoot(Player player, Vote tier, boolean centerChestTable, int minItems, int maxItems) {
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+        Map<Integer, Inventory> fill = getFillMapForVote(tier, centerChestTable);
+        if (fill == null || fill.isEmpty()) {
+            return;
+        }
+        int lo = Math.max(0, minItems);
+        int hi = Math.max(lo, maxItems);
+        int count = lo + (lo == hi ? 0 : random.nextInt(hi - lo + 1));
+        for (int i = 0; i < count; i++) {
+            ItemStack stack = rollOneChestLikeItem(fill, 24);
+            if (stack != null) {
+                player.getInventory().addItem(stack);
+            }
+        }
+    }
+
+    /**
+     * One successful drop mirrors fillChest: each template stack rolls {@code nextInt(100)+1 <= chance}
+     * for its tier. The old implementation picked only one random stack per tier per pass, which over-weighted
+     * high-percent buckets and made loot feel repetitive compared to real chest fills.
+     */
+    private ItemStack rollOneChestLikeItem(Map<Integer, Inventory> fill, int maxFullPasses) {
+        for (int pass = 0; pass < maxFullPasses; pass++) {
+            ArrayList<Integer> keys = new ArrayList<>(fill.keySet());
+            Collections.shuffle(keys, random);
+            for (Integer chance : keys) {
+                if (chance == null || chance <= 0) {
+                    continue;
+                }
+                Inventory inv = fill.get(chance);
+                if (inv == null) {
+                    continue;
+                }
+                ArrayList<ItemStack> candidates = new ArrayList<>();
+                for (ItemStack s : inv.getContents()) {
+                    if (s != null && !s.getType().equals(Material.AIR)) {
+                        candidates.add(s);
+                    }
+                }
+                if (candidates.isEmpty()) {
+                    continue;
+                }
+                Collections.shuffle(candidates, random);
+                for (ItemStack template : candidates) {
+                    if (random.nextInt(100) + 1 <= chance) {
+                        return template.clone();
+                    }
+                }
+            }
+        }
+        return pickAnyItemIgnoringChance(fill);
+    }
+
+    private ItemStack pickAnyItemIgnoringChance(Map<Integer, Inventory> fill) {
+        ArrayList<ItemStack> pool = new ArrayList<>();
+        for (Inventory inv : fill.values()) {
+            if (inv == null) {
+                continue;
+            }
+            for (ItemStack s : inv.getContents()) {
+                if (s != null && !s.getType().equals(Material.AIR)) {
+                    pool.add(s);
+                }
+            }
+        }
+        if (pool.isEmpty()) {
+            return null;
+        }
+        return pool.get(random.nextInt(pool.size())).clone();
+    }
 
 }

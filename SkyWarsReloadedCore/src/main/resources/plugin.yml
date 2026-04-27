@@ -17,6 +17,7 @@ softdepend:
   - PartyAndFriends
   - SlimeWorldManager
   - My_Worlds
+  - ntdLuckyBlock
 commands:
   skywars:
     description: This is the main plugin command.

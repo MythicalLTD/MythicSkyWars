@@ -15,6 +15,8 @@ import com.walrusone.skywarsreloaded.menus.gameoptions.objects.GameKit;
 import com.walrusone.skywarsreloaded.menus.playeroptions.ParticleEffectOption;
 import com.walrusone.skywarsreloaded.menus.playeroptions.WinSoundOption;
 import com.walrusone.skywarsreloaded.menus.playeroptions.objects.ParticleEffect;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockBreakAttachment;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Party;
 import com.walrusone.skywarsreloaded.utilities.LevelManager;
@@ -65,7 +67,7 @@ public class MatchManager {
      * @return GameMap The map that was successfully joined or null
      */
     public GameMap joinGame(Player player, GameType type) {
-        return joinGame(player, type, true);
+        return joinGame(player, type, false, true);
     }
 
     /**
@@ -73,6 +75,10 @@ public class MatchManager {
      *                                      forced in as spectators if no arena accepts them (e.g. lobby portal).
      */
     public GameMap joinGame(Player player, GameType type, boolean allowSpectatorBypassOnFailure) {
+        return joinGame(player, type, false, allowSpectatorBypassOnFailure);
+    }
+
+    public GameMap joinGame(Player player, GameType type, boolean luckyMode, boolean allowSpectatorBypassOnFailure) {
         GameMap currentMap = getPlayerMap(player);
         if (currentMap != null) {
             return currentMap;
@@ -84,7 +90,7 @@ public class MatchManager {
             if (SkyWarsReloaded.getCfg().debugEnabled()) {
                 SkyWarsReloaded.get().getLogger().info("#joinGame: --game: " + gameMap.getName());
             }
-            if (gameMap.canAddPlayer(player)) {
+            if (gameMap.canAddPlayer(player) && canJoinLuckyMode(gameMap, luckyMode)) {
                 eligible.add(gameMap);
             }
         }
@@ -92,6 +98,9 @@ public class MatchManager {
 
         GameMap map = null;
         for (final GameMap gameMap : eligible) {
+            if (luckyMode && gameMap.getPlayerCount() == 0) {
+                gameMap.setLuckyModeEnabled(true);
+            }
             if (gameMap.addPlayers(null, player)) {
                 map = gameMap;
                 break;
@@ -120,13 +129,18 @@ public class MatchManager {
      */
     @Nullable
     public GameMap joinGame(Player player, GameType type, String mapName) {
+        return joinGame(player, type, mapName, false);
+    }
+
+    @Nullable
+    public GameMap joinGame(Player player, GameType type, String mapName, boolean luckyMode) {
         GameMap currentMap = getPlayerMap(player);
         if (currentMap != null) {
             return currentMap;
         }
 
         if (mapName == null || mapName.trim().isEmpty()) {
-            return joinGame(player, type);
+            return joinGame(player, type, luckyMode, true);
         }
         String token = ChatColor.stripColor(mapName).trim();
         GameMap map = SkyWarsReloaded.getGameMapMgr().getMap(token);
@@ -145,6 +159,12 @@ public class MatchManager {
         if (!map.canAddPlayer(player)) {
             return null;
         }
+        if (!canJoinLuckyMode(map, luckyMode)) {
+            return null;
+        }
+        if (luckyMode && map.getPlayerCount() == 0) {
+            map.setLuckyModeEnabled(true);
+        }
         if (map.addPlayers(null, player)) {
             return map;
         }
@@ -156,8 +176,13 @@ public class MatchManager {
      */
     @Nullable
     public GameMap joinGame(Party party, GameType type, String mapName) {
+        return joinGame(party, type, mapName, false);
+    }
+
+    @Nullable
+    public GameMap joinGame(Party party, GameType type, String mapName, boolean luckyMode) {
         if (mapName == null || mapName.trim().isEmpty()) {
-            return joinGame(party, type);
+            return joinGame(party, type, luckyMode);
         }
         String token = ChatColor.stripColor(mapName).trim();
         GameMap map = SkyWarsReloaded.getGameMapMgr().getMap(token);
@@ -175,6 +200,12 @@ public class MatchManager {
         }
         if (!map.canAddParty(party)) {
             return null;
+        }
+        if (!canJoinLuckyMode(map, luckyMode)) {
+            return null;
+        }
+        if (luckyMode && map.getPlayerCount() == 0) {
+            map.setLuckyModeEnabled(true);
         }
         if (map.addPlayers(null, party)) {
             return map;
@@ -238,6 +269,10 @@ public class MatchManager {
      * @return GameMap The map that was successfully joined or null
      */
     public GameMap joinGame(Party party, GameType type) {
+        return joinGame(party, type, false);
+    }
+
+    public GameMap joinGame(Party party, GameType type, boolean luckyMode) {
         ArrayList<GameMap> games;
         if (type == GameType.ALL) {
             games = SkyWarsReloaded.getGameMapMgr().getPlayableArenas(GameType.ALL);
@@ -249,7 +284,7 @@ public class MatchManager {
 
         ArrayList<GameMap> eligible = new ArrayList<>();
         for (final GameMap gameMap : games) {
-            if (gameMap.canAddParty(party)) {
+            if (gameMap.canAddParty(party) && canJoinLuckyMode(gameMap, luckyMode)) {
                 eligible.add(gameMap);
             }
         }
@@ -257,6 +292,9 @@ public class MatchManager {
 
         GameMap map = null;
         for (final GameMap gameMap : eligible) {
+            if (luckyMode && gameMap.getPlayerCount() == 0) {
+                gameMap.setLuckyModeEnabled(true);
+            }
             if (gameMap.addPlayers(null, party)) {
                 map = gameMap;
                 break;
@@ -265,6 +303,16 @@ public class MatchManager {
 
         // Return which map we joined
         return map;
+    }
+
+    private static boolean canJoinLuckyMode(GameMap gameMap, boolean luckyMode) {
+        if (gameMap == null) {
+            return false;
+        }
+        if (gameMap.getPlayerCount() == 0) {
+            return true;
+        }
+        return gameMap.isLuckyModeEnabled() == luckyMode;
     }
 
     public void start(final GameMap gameMap) {
@@ -447,7 +495,7 @@ public class MatchManager {
             player.setGameMode(GameMode.SURVIVAL);
         }
         player.setFoodLevel(20);
-        player.setSaturation(20);
+        player.setSaturation(0f);
         player.setHealth(20.0);
         player.setExp(0.0f);
         player.setLevel(0);
@@ -484,6 +532,7 @@ public class MatchManager {
         if (debug) {
             Util.get().logToFile(getDebugName(gameMap) + ChatColor.YELLOW + "Finished Preparing " + player.getName() + " for SkyWars on map " + gameMap.getName());
         }
+        LuckyBlockBreakAttachment.applyIfLuckyPlaying(player, gameMap);
     }
 
     private void waitStart(final GameMap gameMap) {
@@ -695,6 +744,10 @@ public class MatchManager {
             gameMap.getHealthOption().completeOption();
         }
         selectKit(gameMap);
+        LuckyBlockHook.giveLuckyModeHandItems(gameMap);
+        if (gameMap.isLuckyModeEnabled()) {
+            LuckyBlockBreakAttachment.refreshAlivePlayers(gameMap);
+        }
         gameMap.getCage().removeSpawnHousing(gameMap);
         gameMap.getWaitingPlayers().clear();
 
@@ -1132,7 +1185,7 @@ public class MatchManager {
         long expiresAt = System.currentTimeMillis() + SkyWarsReloaded.getCfg().getRejoinWindowSeconds() * 1000L;
         synchronized (rejoinStates) {
             rejoinStates.put(player.getUniqueId(), new RejoinState(
-                    map.getName(), expiresAt, teamIndex, wasSpectator, wasDead,
+                    map.getName(), expiresAt, teamIndex, wasSpectator, wasDead, map.isLuckyModeEnabled(),
                     location, inv, armor, exp, level, health, food, saturation));
         }
     }
@@ -1351,6 +1404,7 @@ public class MatchManager {
         private final int teamIndex;
         private final boolean wasSpectator;
         private final boolean wasDead;
+        private final boolean luckyMode;
         private final Location location;
         private final ItemStack[] inventory;
         private final ItemStack[] armor;
@@ -1361,13 +1415,14 @@ public class MatchManager {
         private final float saturation;
 
         private RejoinState(String mapName, long expiresAtMillis, int teamIndex, boolean wasSpectator,
-                            boolean wasDead, Location location, ItemStack[] inventory, ItemStack[] armor,
+                            boolean wasDead, boolean luckyMode, Location location, ItemStack[] inventory, ItemStack[] armor,
                             float exp, int level, double health, int food, float saturation) {
             this.mapName = mapName;
             this.expiresAtMillis = expiresAtMillis;
             this.teamIndex = teamIndex;
             this.wasSpectator = wasSpectator;
             this.wasDead = wasDead;
+            this.luckyMode = luckyMode;
             this.location = location;
             this.inventory = inventory;
             this.armor = armor;
