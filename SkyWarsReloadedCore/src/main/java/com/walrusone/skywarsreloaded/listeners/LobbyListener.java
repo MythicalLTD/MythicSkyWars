@@ -56,6 +56,14 @@ public class LobbyListener implements org.bukkit.event.Listener {
         }
     }
 
+    private boolean isInSkyWarsMatch(Player player) {
+        if (player == null) {
+            return false;
+        }
+        GameMap map = MatchManager.get().getPlayerMap(player);
+        return map != null && map.getMatchState() != com.walrusone.skywarsreloaded.enums.MatchState.ENDING;
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent e) {
         if (SkyWarsReloaded.getCfg().bungeeMode() && !SkyWarsReloaded.getCfg().isLobbyServer()) {
@@ -74,6 +82,9 @@ public class LobbyListener implements org.bukkit.event.Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityDamage(EntityDamageByEntityEvent e) {
+        if (e.getEntity() instanceof Player && isInSkyWarsMatch((Player) e.getEntity())) {
+            return;
+        }
         if ((SkyWarsReloaded.getCfg().protectLobby()) && (Util.get().isSpawnWorld(e.getEntity().getWorld()))) {
             e.setCancelled(true);
         }
@@ -88,6 +99,9 @@ public class LobbyListener implements org.bukkit.event.Listener {
             return;
         }
         Player player = (Player) e.getEntity();
+        if (isInSkyWarsMatch(player)) {
+            return;
+        }
         e.setCancelled(true);
         player.setFireTicks(0);
         player.setHealth(player.getMaxHealth());
@@ -102,6 +116,9 @@ public class LobbyListener implements org.bukkit.event.Listener {
             return;
         }
         Player player = (Player) e.getEntity();
+        if (isInSkyWarsMatch(player)) {
+            return;
+        }
         e.setCancelled(true);
         player.setFoodLevel(20);
         player.setSaturation(20f);
@@ -114,6 +131,9 @@ public class LobbyListener implements org.bukkit.event.Listener {
         }
         Player player = e.getPlayer();
         if (!Util.get().isSpawnWorld(player.getWorld())) {
+            return;
+        }
+        if (isInSkyWarsMatch(player)) {
             return;
         }
         if (player.getLocation().getY() <= SkyWarsReloaded.getCfg().getQuickDeathY()) {
@@ -155,6 +175,9 @@ public class LobbyListener implements org.bukkit.event.Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
         Player player = (Player) e.getWhoClicked();
+        if (isInSkyWarsMatch(player)) {
+            return;
+        }
         if ((SkyWarsReloaded.getCfg().protectLobby()) && (Util.get().isSpawnWorld(player.getWorld())) &&
                 (!SkyWarsReloaded.getIC().has(player))) {
             e.setCancelled(true);
@@ -163,6 +186,9 @@ public class LobbyListener implements org.bukkit.event.Listener {
 
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent e) {
+        if (isInSkyWarsMatch(e.getPlayer())) {
+            return;
+        }
         if ((SkyWarsReloaded.getCfg().protectLobby()) && (Util.get().isSpawnWorld(e.getPlayer().getWorld()))) {
             e.setCancelled(true);
         }

@@ -230,8 +230,12 @@ public class SWRServer {
     }
 
     public void setMatchState(String gameStarted) {
+        if (gameStarted == null) {
+            this.setMatchState(MatchState.OFFLINE);
+            return;
+        }
         try {
-            this.setMatchState(MatchState.valueOf(gameStarted));
+            this.setMatchState(MatchState.valueOf(gameStarted.trim().toUpperCase()));
         } catch (IllegalArgumentException e) {
             this.setMatchState(MatchState.OFFLINE);
         }

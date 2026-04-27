@@ -33,6 +33,7 @@ import java.util.*;
 public class MatchManager {
 
     private static MatchManager instance = null;
+    private static final Map<UUID, RejoinState> rejoinStates = new HashMap<>();
 
     private int waitTime;
     private int gameTime;
@@ -81,7 +82,7 @@ public class MatchManager {
                 eligible.add(gameMap);
             }
         }
-        sortMapsForAutojoin(eligible);
+        eligible = prioritizeAutojoinMaps(eligible);
 
         GameMap map = null;
         for (final GameMap gameMap : eligible) {
@@ -188,6 +189,27 @@ public class MatchManager {
         });
     }
 
+    /**
+     * Prefer arenas that already have players; if all are empty, randomize empty arenas.
+     */
+    private static ArrayList<GameMap> prioritizeAutojoinMaps(List<GameMap> maps) {
+        ArrayList<GameMap> withPlayers = new ArrayList<>();
+        ArrayList<GameMap> empty = new ArrayList<>();
+        for (GameMap map : maps) {
+            if (map.getPlayerCount() > 0) {
+                withPlayers.add(map);
+            } else {
+                empty.add(map);
+            }
+        }
+        if (!withPlayers.isEmpty()) {
+            sortMapsForAutojoin(withPlayers);
+            return withPlayers;
+        }
+        Collections.shuffle(empty);
+        return empty;
+    }
+
     private static int rankWaitingState(MatchState s) {
         if (s == MatchState.WAITINGSTART) {
             return 0;
@@ -220,7 +242,7 @@ public class MatchManager {
                 eligible.add(gameMap);
             }
         }
-        sortMapsForAutojoin(eligible);
+        eligible = prioritizeAutojoinMaps(eligible);
 
         GameMap map = null;
         for (final GameMap gameMap : eligible) {
@@ -607,7 +629,13 @@ public class MatchManager {
         }
         GameMap map = getPlayerMap(player);
         if (map == null) {
+            map = getSpectatorMap(player);
+        }
+        if (map == null) {
             return false;
+        }
+        if (!map.getSpectators().contains(player.getUniqueId())) {
+            markRejoinCandidate(player, map);
         }
         if (map.getTeamCard(player) == null && map.getSpectators().contains(player.getUniqueId())) {
             SkyWarsReloaded.get().getPlayerManager().removePlayer(
@@ -635,6 +663,13 @@ public class MatchManager {
         if (gameMap.getMatchState() != MatchState.ENDING) {
             this.matchCountdown(gameMap);
         }
+        Bukkit.getScheduler().runTaskLater(SkyWarsReloaded.get(), () -> {
+            for (Player player : gameMap.getAlivePlayers()) {
+                if (player != null && player.getGameMode() != GameMode.SURVIVAL) {
+                    player.setGameMode(GameMode.SURVIVAL);
+                }
+            }
+        }, 20L);
         gameMap.getChestOption().completeOption();
         if (SkyWarsReloaded.getCfg().isTimeVoteEnabled()) {
             gameMap.getTimeOption().completeOption();
@@ -1041,6 +1076,208 @@ public class MatchManager {
         return this.getSpectatorMap(player) != null;
     }
 
+    public void markRejoinCandidate(Player player, GameMap map) {
+        if (player == null || map == null || !SkyWarsReloaded.getCfg().isRejoinEnabled()) {
+            return;
+        }
+        if (map.getMatchState() != MatchState.PLAYING
+                && map.getMatchState() != MatchState.WAITINGSTART
+                && map.getMatchState() != MatchState.WAITINGLOBBY) {
+            return;
+        }
+        TeamCard teamCard = map.getTeamCard(player);
+        int teamIndex = teamCard == null ? -1 : map.getTeamCardPosition(teamCard);
+        boolean wasSpectator = map.getSpectators().contains(player.getUniqueId());
+        PlayerCard pCard = map.getPlayerCard(player);
+        boolean wasDead = pCard != null && pCard.isDead();
+        Location location = player.getLocation() == null ? null : player.getLocation().clone();
+        ItemStack[] inv = cloneItems(player.getInventory().getContents());
+        ItemStack[] armor = cloneItems(player.getInventory().getArmorContents());
+        float exp = player.getExp();
+        int level = player.getLevel();
+        double health = player.getHealth();
+        int food = player.getFoodLevel();
+        float saturation = player.getSaturation();
+        long expiresAt = System.currentTimeMillis() + SkyWarsReloaded.getCfg().getRejoinWindowSeconds() * 1000L;
+        synchronized (rejoinStates) {
+            rejoinStates.put(player.getUniqueId(), new RejoinState(
+                    map.getName(), expiresAt, teamIndex, wasSpectator, wasDead,
+                    location, inv, armor, exp, level, health, food, saturation));
+        }
+    }
+
+    public boolean hasPendingRejoin(Player player) {
+        if (player == null || !SkyWarsReloaded.getCfg().isRejoinEnabled()) {
+            return false;
+        }
+        RejoinState state;
+        synchronized (rejoinStates) {
+            state = rejoinStates.get(player.getUniqueId());
+        }
+        if (state == null || System.currentTimeMillis() > state.expiresAtMillis) {
+            clearRejoin(player);
+            return false;
+        }
+        GameMap map = findMapByName(state.mapName);
+        if (map == null) {
+            clearRejoin(player);
+            return false;
+        }
+        MatchState ms = map.getMatchState();
+        if (ms != MatchState.PLAYING && ms != MatchState.WAITINGSTART && ms != MatchState.WAITINGLOBBY) {
+            clearRejoin(player);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean tryRejoin(Player player) {
+        if (!hasPendingRejoin(player)) {
+            return false;
+        }
+        RejoinState state;
+        synchronized (rejoinStates) {
+            state = rejoinStates.get(player.getUniqueId());
+        }
+        if (state == null) {
+            return false;
+        }
+        GameMap map = findMapByName(state.mapName);
+        if (map == null) {
+            clearRejoin(player);
+            return false;
+        }
+        boolean joined = false;
+        if (map.getMatchState() == MatchState.WAITINGLOBBY || map.getMatchState() == MatchState.WAITINGSTART) {
+            joined = map.addPlayers(null, player);
+        } else if (map.getMatchState() == MatchState.PLAYING) {
+            if (state.wasSpectator || state.wasDead) {
+                joined = rejoinAsSpectator(player, map);
+            } else {
+                joined = tryRejoinAsAlivePlayer(player, map, state);
+                if (!joined) {
+                    joined = rejoinAsSpectator(player, map);
+                }
+            }
+        }
+        if (joined) {
+            message(map, new Messaging.MessageFormatter()
+                    .setVariable("player", player.getDisplayName())
+                    .setVariable("playercount", String.valueOf(map.getPlayerCount()))
+                    .setVariable("players", String.valueOf(map.getPlayerCount()))
+                    .setVariable("maxplayers", String.valueOf(map.getMaxPlayers()))
+                    .format("game.rejoined-the-game"), player);
+            clearRejoin(player);
+        }
+        return joined;
+    }
+
+    public void clearRejoin(Player player) {
+        if (player == null) {
+            return;
+        }
+        synchronized (rejoinStates) {
+            rejoinStates.remove(player.getUniqueId());
+        }
+    }
+
+    private GameMap findMapByName(String name) {
+        if (name == null) {
+            return null;
+        }
+        for (GameMap map : SkyWarsReloaded.getGameMapMgr().getMapsCopy()) {
+            if (name.equalsIgnoreCase(map.getName())) {
+                return map;
+            }
+        }
+        return null;
+    }
+
+    private boolean rejoinAsSpectator(Player player, GameMap map) {
+        SkyWarsReloaded.get().getPlayerManager().addSpectator(map, player);
+        return true;
+    }
+
+    private boolean tryRejoinAsAlivePlayer(Player player, GameMap map, RejoinState state) {
+        if (player == null || map == null || map.getMatchState() != MatchState.PLAYING) {
+            return false;
+        }
+        PlayerStat ps = PlayerStat.getPlayerStats(player.getUniqueId());
+        if (ps == null || !ps.isInitialized()) {
+            return false;
+        }
+
+        TeamCard selected = null;
+        int preferredTeamIndex = state.teamIndex;
+        if (preferredTeamIndex >= 0) {
+            TeamCard preferred = map.getTeamCardByIndex(preferredTeamIndex);
+            if (preferred != null && preferred.getEmptySlots() > 0) {
+                selected = preferred.sendReservation(player, ps);
+            }
+        }
+        if (selected == null) {
+            for (TeamCard card : map.getTeamCards()) {
+                if (card.getEmptySlots() > 0) {
+                    selected = card.sendReservation(player, ps);
+                    if (selected != null) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (selected == null) {
+            return false;
+        }
+
+        PlayerCard pCard = map.getPlayerCard(player);
+        if (pCard == null || pCard.getSpawn() == null || map.getCurrentWorld() == null) {
+            return false;
+        }
+        if (PlayerData.getPlayerData(player.getUniqueId()) == null) {
+            PlayerData.getAllPlayerData().add(new PlayerData(player));
+        }
+        Location spawn = new Location(
+                map.getCurrentWorld(),
+                pCard.getSpawn().getX() + 0.5,
+                pCard.getSpawn().getY() + 1,
+                pCard.getSpawn().getZ() + 0.5);
+        player.teleport(spawn, TeleportCause.PLUGIN);
+        player.setGameMode(GameMode.SURVIVAL);
+        player.setAllowFlight(false);
+        player.setFlying(false);
+        map.getSpectators().remove(player.getUniqueId());
+        if (state.location != null && state.location.getWorld() != null
+                && map.getCurrentWorld() != null
+                && state.location.getWorld().equals(map.getCurrentWorld())) {
+            player.teleport(state.location, TeleportCause.PLUGIN);
+        }
+        if (state.inventory != null) {
+            player.getInventory().setContents(cloneItems(state.inventory));
+        }
+        if (state.armor != null) {
+            player.getInventory().setArmorContents(cloneItems(state.armor));
+        }
+        player.setExp(state.exp);
+        player.setLevel(state.level);
+        player.setFoodLevel(Math.max(1, state.food));
+        player.setSaturation(Math.max(0f, state.saturation));
+        double hp = Math.max(1.0, Math.min(player.getMaxHealth(), state.health));
+        player.setHealth(hp);
+        map.getGameBoard().updateScoreboard();
+        return true;
+    }
+
+    private ItemStack[] cloneItems(ItemStack[] items) {
+        if (items == null) {
+            return null;
+        }
+        ItemStack[] clone = new ItemStack[items.length];
+        for (int i = 0; i < items.length; i++) {
+            clone[i] = items[i] == null ? null : items[i].clone();
+        }
+        return clone;
+    }
+
     private int getGameTime() {
         return gameTime;
     }
@@ -1075,5 +1312,39 @@ public class MatchManager {
             time = v1 + " " + ((v1 > 1) ? new Messaging.MessageFormatter().format("timer.seconds") : new Messaging.MessageFormatter().format("timer.second"));
         }
         this.message(gameMap, new Messaging.MessageFormatter().setVariable("time", time).format("timer.wait-timer"), null);
+    }
+
+    private static final class RejoinState {
+        private final String mapName;
+        private final long expiresAtMillis;
+        private final int teamIndex;
+        private final boolean wasSpectator;
+        private final boolean wasDead;
+        private final Location location;
+        private final ItemStack[] inventory;
+        private final ItemStack[] armor;
+        private final float exp;
+        private final int level;
+        private final double health;
+        private final int food;
+        private final float saturation;
+
+        private RejoinState(String mapName, long expiresAtMillis, int teamIndex, boolean wasSpectator,
+                            boolean wasDead, Location location, ItemStack[] inventory, ItemStack[] armor,
+                            float exp, int level, double health, int food, float saturation) {
+            this.mapName = mapName;
+            this.expiresAtMillis = expiresAtMillis;
+            this.teamIndex = teamIndex;
+            this.wasSpectator = wasSpectator;
+            this.wasDead = wasDead;
+            this.location = location;
+            this.inventory = inventory;
+            this.armor = armor;
+            this.exp = exp;
+            this.level = level;
+            this.health = health;
+            this.food = food;
+            this.saturation = saturation;
+        }
     }
 }

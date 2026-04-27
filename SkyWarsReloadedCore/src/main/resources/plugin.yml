@@ -25,6 +25,9 @@ commands:
   leave:
     description: Leave the current SkyWars match (same as /sw quit).
     usage: /leave
+  rejoin:
+    description: Rejoin your previous SkyWars match if still available.
+    usage: /rejoin
   swparty:
     description: This is the main party command.
     aliases: [swp]
@@ -121,6 +124,7 @@ permissions:
       sw.quit: true
       sw.soulwell: true
       sw.leave: true
+      sw.rejoin: true
   sw.join:
     description: Allows a player to use sw join command.
     default: true
@@ -147,6 +151,9 @@ permissions:
     default: false
   sw.leave:
     description: Allows a player to use the standalone /leave command.
+    default: true
+  sw.rejoin:
+    description: Allows a player to use /rejoin.
     default: true
   sw.send:
     description: Allows sending a player to a SkyWars arena (/sw send).

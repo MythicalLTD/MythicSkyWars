@@ -9,6 +9,7 @@ import com.walrusone.skywarsreloaded.matchevents.MatchEvent;
 import com.walrusone.skywarsreloaded.game.TeamCard;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
+import com.walrusone.skywarsreloaded.utilities.Util;
 import eu.decentsoftware.holograms.api.DHAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -180,7 +181,9 @@ public final class ChestRefillHologramManager implements Listener {
                 int seconds = (int) Math.ceil((t.refillAtMillis - now) / 1000.0);
                 if (t.lastShownSeconds == null || t.lastShownSeconds != seconds) {
                     List<String> lines = Collections.singletonList(
-                            new Messaging.MessageFormatter().setVariable("seconds", Integer.toString(seconds))
+                            new Messaging.MessageFormatter()
+                                    .setVariable("seconds", Integer.toString(seconds))
+                                    .setVariable("time", Util.get().secondsToTimeString(seconds))
                                     .format("game.chest-refill-hologram.line-countdown"));
                     backend.setLines(t.holoLoc, t.holoId, lines);
                     t.lastShownSeconds = seconds;
@@ -321,7 +324,8 @@ public final class ChestRefillHologramManager implements Listener {
             return;
         }
         Location holoLoc = blockLoc.clone().add(0.5, SkyWarsReloaded.getCfg().getChestRefillHologramOffsetY(), 0.5);
-        long refillAt = System.currentTimeMillis() + SkyWarsReloaded.getCfg().getChestRefillHologramCooldownSeconds() * 1000L;
+        int refillSeconds = resolveRefillCountdownSeconds(map);
+        long refillAt = System.currentTimeMillis() + refillSeconds * 1000L;
         int bx = blockLoc.getBlockX();
         int by = blockLoc.getBlockY();
         int bz = blockLoc.getBlockZ();
@@ -329,15 +333,19 @@ public final class ChestRefillHologramManager implements Listener {
         tracked.put(holoId, t);
         setChestVisualOpen(t, SkyWarsReloaded.getCfg().isChestRefillHologramKeepChestOpen());
 
-        int sec = SkyWarsReloaded.getCfg().getChestRefillHologramCooldownSeconds();
+        int sec = refillSeconds;
         List<String> lines = Collections.singletonList(
-                new Messaging.MessageFormatter().setVariable("seconds", Integer.toString(sec))
+                new Messaging.MessageFormatter()
+                        .setVariable("seconds", Integer.toString(sec))
+                        .setVariable("time", Util.get().secondsToTimeString(sec))
                         .format("game.chest-refill-hologram.line-countdown"));
         backend.setLines(holoLoc, holoId, lines);
 
         if (announceIfConfigured && SkyWarsReloaded.getCfg().isChestRefillHologramAnnounceEmpty()) {
             Location at = blockLoc.clone().add(0.5, 0.5, 0.5);
-            String msg = new Messaging.MessageFormatter().setVariable("seconds", Integer.toString(sec))
+            String msg = new Messaging.MessageFormatter()
+                    .setVariable("seconds", Integer.toString(sec))
+                    .setVariable("time", Util.get().secondsToTimeString(sec))
                     .format("game.chest-refill-hologram.announce-empty");
             announceNear(at, map, msg);
         }
@@ -554,6 +562,24 @@ public final class ChestRefillHologramManager implements Listener {
             }
         }
         return false;
+    }
+
+    private static int resolveRefillCountdownSeconds(GameMap map) {
+        int fallback = Math.max(1, SkyWarsReloaded.getCfg().getChestRefillHologramCooldownSeconds());
+        if (map == null) {
+            return fallback;
+        }
+        for (MatchEvent event : map.getEvents()) {
+            if (event == null || !"ChestRefillEvent".equalsIgnoreCase(event.getEventName()) || !event.isEnabled()) {
+                continue;
+            }
+            int remaining = event.getStartTime() - map.getTimer();
+            if (remaining > 0) {
+                return remaining;
+            }
+            break;
+        }
+        return fallback;
     }
 
     private void setChestVisualOpen(TrackedChest trackedChest, boolean open) {

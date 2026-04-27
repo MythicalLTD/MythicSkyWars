@@ -26,6 +26,7 @@ public class PlayerQuitListener implements org.bukkit.event.Listener {
 
         GameMap playerMap = SkyWarsReloaded.get().getMatchManager().getPlayerMap(player);
         if (playerMap != null) {
+            SkyWarsReloaded.get().getMatchManager().markRejoinCandidate(player, playerMap);
             SkyWarsReloaded.get().getPlayerManager().removePlayer(
                     player, PlayerRemoveReason.PLAYER_QUIT_SERVER, null, true);
         }

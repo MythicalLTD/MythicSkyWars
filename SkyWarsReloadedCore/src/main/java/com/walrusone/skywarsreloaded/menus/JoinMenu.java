@@ -17,6 +17,8 @@ import java.util.List;
 public class JoinMenu {
 
     private static final String menuName = new Messaging.MessageFormatter().format("menu.joingame-menu-title");
+    // Bottom-center in the 3x9 content area.
+    private static final int REJOIN_MENU_SLOT = 22;
 
     public JoinMenu() {
         int menuSize = 27;
@@ -36,8 +38,16 @@ public class JoinMenu {
         ItemStack team = SkyWarsReloaded.getNMS().getItemStack(SkyWarsReloaded.getIM().getItem("teammenu"), lores,
                 new Messaging.MessageFormatter().format("items.jointeam"));
 
+        lores.clear();
+        lores.add(new Messaging.MessageFormatter().format("items.click-to-rejoin"));
+        ItemStack playAgain = SkyWarsReloaded.getNMS().getItemStack(SkyWarsReloaded.getIM().getItem("playAgainItem"), lores,
+                new Messaging.MessageFormatter().format("items.rejoin-game-item"));
+
         invs.get(0).setItem(SkyWarsReloaded.getCfg().getSingleSlot(), single);
         invs.get(0).setItem(SkyWarsReloaded.getCfg().getTeamSlot(), team);
+        if (SkyWarsReloaded.getCfg().isPlayAgainItemEnabled()) {
+            invs.get(0).setItem(REJOIN_MENU_SLOT, playAgain);
+        }
 
         SkyWarsReloaded.getIC().create("joinmenu", invs, event -> {
             Player player = event.getPlayer();
@@ -73,6 +83,15 @@ public class JoinMenu {
                     }.runTaskLater(SkyWarsReloaded.get(), 5);
                 }
                 SkyWarsReloaded.getIC().show(player, "jointeammenu");
+                return;
+            }
+
+            if (SkyWarsReloaded.getCfg().isPlayAgainItemEnabled()
+                    && event.getSlot() == REJOIN_MENU_SLOT) {
+                player.closeInventory();
+                if (!MatchManager.get().tryRejoin(player)) {
+                    player.sendMessage(new Messaging.MessageFormatter().format("error.rejoin-not-available"));
+                }
             }
         });
     }

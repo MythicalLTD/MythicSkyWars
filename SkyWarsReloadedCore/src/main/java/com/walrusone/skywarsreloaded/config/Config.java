@@ -26,6 +26,7 @@ public class Config {
             "modifiervote", "modifierrandom", "modifierspeed", "modifierjump", "modifierstrength", "modifiernone",
             "joinselect",
             "backlobbyitem",
+            "rejoinitem",
             "statsitem",
             "singlemenu",
             "teammenu",
@@ -45,7 +46,7 @@ public class Config {
             "CLOCK", "NETHER_STAR", "CLOCK", "CLOCK", "CLOCK", "CLOCK",
             "BLAZE_POWDER", "NETHER_STAR", "PRISMARINE_SHARD", "PRISMARINE_SHARD", "PRISMARINE_SHARD", "PRISMARINE_SHARD",
             "DRAGON_BREATH", "NETHER_STAR", "BOOK", "BOOK", "BOOK", "BOOK",
-            "DIAMOND_SWORD", "RED_BED", "BOOK",
+            "DIAMOND_SWORD", "RED_BED", "DIAMOND_SWORD", "BOOK",
             "REDSTONE_TORCH",
             "COMPARATOR",
             "WOOD_SWORD",
@@ -64,7 +65,7 @@ public class Config {
             "WATCH", "NETHER_STAR", "WATCH", "WATCH", "WATCH", "WATCH",
             "BLAZE_POWDER", "NETHER_STAR", "PRISMARINE_SHARD", "PRISMARINE_SHARD", "PRISMARINE_SHARD", "PRISMARINE_SHARD",
             "DRAGONS_BREATH", "NETHER_STAR", "BOOK", "BOOK", "BOOK", "BOOK",
-            "DIAMOND_SWORD", "BED", "BOOK",
+            "DIAMOND_SWORD", "BED", "DIAMOND_SWORD", "BOOK",
             "REDSTONE_TORCH_OFF",
             "REDSTONE_COMPARATOR",
             "WOOD_SWORD",
@@ -83,7 +84,7 @@ public class Config {
             "WATCH", "NETHER_STAR", "WATCH", "WATCH", "WATCH", "WATCH",
             "BLAZE_POWDER", "NETHER_STAR", "PRISMARINE_SHARD", "PRISMARINE_SHARD", "PRISMARINE_SHARD", "PRISMARINE_SHARD",
             "DRAGON_EGG", "NETHER_STAR", "BOOK", "BOOK", "BOOK", "BOOK",
-            "DIAMOND_SWORD", "BED", "BOOK",
+            "DIAMOND_SWORD", "BED", "DIAMOND_SWORD", "BOOK",
             "REDSTONE_TORCH_OFF",
             "REDSTONE_COMPARATOR",
             "WOOD_SWORD",
@@ -125,9 +126,13 @@ public class Config {
     private boolean optionsGameItemEnabled;
     private boolean playAgainItemEnabled;
     private boolean backToLobbyItemEnabled;
+    private boolean rejoinItemEnabled;
     private boolean statsItemEnabled;
     private int backToLobbyPos;
+    private int rejoinItemPos;
     private int statsItemPos;
+    private boolean rejoinEnabled;
+    private int rejoinWindowSeconds;
 
     private int chestvotepos;
     private boolean chestVoteEnabled;
@@ -467,6 +472,7 @@ public class Config {
             optionsGameItemEnabled =    SkyWarsReloaded.get().getConfig().getBoolean("items.optionsItemEnabled");
             playAgainItemEnabled =      SkyWarsReloaded.get().getConfig().getBoolean("items.playAgainItemEnabled", true);
             backToLobbyItemEnabled =    SkyWarsReloaded.get().getConfig().getBoolean("items.backToLobbyItemEnabled", true);
+            rejoinItemEnabled =         SkyWarsReloaded.get().getConfig().getBoolean("items.rejoinItemEnabled", true);
             statsItemEnabled =          SkyWarsReloaded.get().getConfig().getBoolean("items.statsItemEnabled", true);
 
             teamSelectPos =         SkyWarsReloaded.get().getConfig().getInt("items.teamSelectPosition");
@@ -477,7 +483,10 @@ public class Config {
             exitpos =               SkyWarsReloaded.get().getConfig().getInt("items.exitPosition");
             playAgainPos =          SkyWarsReloaded.get().getConfig().getInt("items.playAgainPosition", 8);
             backToLobbyPos =        SkyWarsReloaded.get().getConfig().getInt("items.backToLobbyPosition", 8);
+            rejoinItemPos =         SkyWarsReloaded.get().getConfig().getInt("items.rejoinItemPosition", 1);
             statsItemPos =          SkyWarsReloaded.get().getConfig().getInt("items.statsItemPosition", 6);
+            rejoinEnabled =         SkyWarsReloaded.get().getConfig().getBoolean("rejoin.enabled", true);
+            rejoinWindowSeconds =   SkyWarsReloaded.get().getConfig().getInt("rejoin.windowSeconds", 180);
             chestvotepos =          SkyWarsReloaded.get().getConfig().getInt("items.chestVotePosition");
             chestVoteEnabled =      SkyWarsReloaded.get().getConfig().getBoolean("items.chestVoteEnabled");
             healthvotepos =         SkyWarsReloaded.get().getConfig().getInt("items.healthVotePosition");
@@ -771,6 +780,7 @@ public class Config {
         SkyWarsReloaded.get().getConfig().set("items.optionsItemEnabled", optionsGameItemEnabled);
         SkyWarsReloaded.get().getConfig().set("items.playAgainItemEnabled", playAgainItemEnabled);
         SkyWarsReloaded.get().getConfig().set("items.backToLobbyItemEnabled", backToLobbyItemEnabled);
+        SkyWarsReloaded.get().getConfig().set("items.rejoinItemEnabled", rejoinItemEnabled);
         SkyWarsReloaded.get().getConfig().set("items.statsItemEnabled", statsItemEnabled);
 
         SkyWarsReloaded.get().getConfig().set("items.teamSelectPosition", teamSelectPos);
@@ -781,7 +791,10 @@ public class Config {
         SkyWarsReloaded.get().getConfig().set("items.exitPosition", exitpos);
         SkyWarsReloaded.get().getConfig().set("items.playAgainPosition", playAgainPos);
         SkyWarsReloaded.get().getConfig().set("items.backToLobbyPosition", backToLobbyPos);
+        SkyWarsReloaded.get().getConfig().set("items.rejoinItemPosition", rejoinItemPos);
         SkyWarsReloaded.get().getConfig().set("items.statsItemPosition", statsItemPos);
+        SkyWarsReloaded.get().getConfig().set("rejoin.enabled", rejoinEnabled);
+        SkyWarsReloaded.get().getConfig().set("rejoin.windowSeconds", rejoinWindowSeconds);
         SkyWarsReloaded.get().getConfig().set("items.chestVotePosition", chestvotepos);
         SkyWarsReloaded.get().getConfig().set("items.chestVoteEnabled", chestVoteEnabled);
         SkyWarsReloaded.get().getConfig().set("items.healthVotePosition", healthvotepos);
@@ -1626,12 +1639,16 @@ public class Config {
     public boolean isOptionsItemEnabled() { return optionsGameItemEnabled; }
     public boolean isPlayAgainItemEnabled() { return playAgainItemEnabled; }
     public boolean isBackToLobbyItemEnabled() { return backToLobbyItemEnabled; }
+    public boolean isRejoinItemEnabled() { return rejoinItemEnabled; }
     public boolean isStatsItemEnabled() { return statsItemEnabled; }
 
     public int getTeamSelectPos() { return teamSelectPos; }
     public int getPlayAgainPos() { return playAgainPos; }
     public int getBackToLobbyPos() { return backToLobbyPos; }
+    public int getRejoinItemPos() { return rejoinItemPos; }
     public int getStatsItemPos() { return statsItemPos; }
+    public boolean isRejoinEnabled() { return rejoinEnabled; }
+    public int getRejoinWindowSeconds() { return Math.max(10, rejoinWindowSeconds); }
 
     public boolean isUseTeamMaterialBytes() { return useTeamMaterialBytes; }
     public int getStandardTeamMaterialByte() { return standardTeamMaterialByte; }

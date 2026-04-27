@@ -169,6 +169,8 @@ items:
   playAgainItemEnabled: true
   playAgainPosition: 8
   playAgainItem: EMERALD
+  rejoinItemEnabled: true
+  rejoinItemPosition: 1
   statsItemEnabled: true
   statsItemPosition: 6
   backToLobbyItemEnabled: true
@@ -217,6 +219,7 @@ items:
   modifiernone: BOOK
   modifierrandom: NETHER_STAR
   joinselect: DIAMOND_SWORD
+  rejoinitem: DIAMOND_SWORD
   singleSlot: 11
   singlemenu: REDSTONE_TORCH
   teamSlot: 15
@@ -269,6 +272,9 @@ stats-menu:
     economy-material: GOLD_INGOT
     soulwell-material: NETHER_STAR
     close-material: BARRIER
+rejoin:
+  enabled: true
+  windowSeconds: 180
 soulwell:
   enabled: false
   souls-per-kill: 1

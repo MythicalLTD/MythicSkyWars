@@ -9,6 +9,7 @@ import com.walrusone.skywarsreloaded.api.SkywarsReloadedAPI;
 import com.walrusone.skywarsreloaded.api.impl.SkywarsReloadedImpl;
 import com.walrusone.skywarsreloaded.commands.*;
 import com.walrusone.skywarsreloaded.commands.player.LeaveMatchExecutor;
+import com.walrusone.skywarsreloaded.commands.player.RejoinMatchExecutor;
 import com.walrusone.skywarsreloaded.config.Config;
 import com.walrusone.skywarsreloaded.config.ConfigMerge;
 import com.walrusone.skywarsreloaded.database.DataStorage;
@@ -577,6 +578,9 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
         getCommand("skywars").setTabCompleter(swTabCompleter);
         if (getCommand("leave") != null) {
             getCommand("leave").setExecutor(new LeaveMatchExecutor());
+        }
+        if (getCommand("rejoin") != null) {
+            getCommand("rejoin").setExecutor(new RejoinMatchExecutor());
         }
 
         kitCmdManager = new KitCmdManager();

@@ -84,6 +84,7 @@ public class ItemsManager {
 
         addItem("optionselect", lore, "items.skywars-options");
         addItem("backlobbyitem", lore, "items.back-to-lobby-item");
+        addItem("rejoinitem", lore, "items.rejoin-game-item");
         addItem("statsitem", lore, "items.stats-book-item");
         addItem("joinselect", lore, "items.joinmenu");
         addItem("spectateselect", lore, "items.spectatemenu");

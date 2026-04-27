@@ -55,6 +55,11 @@ public class PlayerManager {
         final GameMap gameMap = matchManager.getPlayerMap(playerRemoved);
         final PlayerData playerData;
 
+        if (removeReason != PlayerRemoveReason.PLAYER_QUIT_SERVER
+                && removeReason != PlayerRemoveReason.PLAYER_QUIT_GAME) {
+            matchManager.clearRejoin(playerRemoved);
+        }
+
         // Remove player options (no matter if in game or not)
         SkyWarsReloaded.getOM().removePlayer(pUuid);
 
@@ -308,17 +313,31 @@ public class PlayerManager {
             isRecentTag = false;
         }
         boolean wasKilledByTagger = taggerPlayer != null && isRecentTag;
+        boolean isQuitReason = removeReason.equals(PlayerRemoveReason.PLAYER_QUIT_GAME)
+                || removeReason.equals(PlayerRemoveReason.PLAYER_QUIT_SERVER);
+        boolean punishVoidQuit = playerRemoved.getLocation().getY() <= SkyWarsReloaded.getCfg().getQuickDeathY();
+        boolean punishQuit = isQuitReason && (wasKilledByTagger || punishVoidQuit);
+        boolean punishWithGods = punishQuit && !wasKilledByTagger;
+        PlayerRemoveReason effectiveRemoveReason = punishQuit ? PlayerRemoveReason.DEATH : removeReason;
+        EntityDamageEvent.DamageCause effectiveDeathCause = deathCause;
+        if (punishQuit) {
+            effectiveDeathCause = punishVoidQuit
+                    ? EntityDamageEvent.DamageCause.VOID
+                    : EntityDamageEvent.DamageCause.CUSTOM;
+            // Combat log / void log should not stay rejoinable.
+            matchManager.clearRejoin(playerRemoved);
+        }
 
         // ------------------ KILL HANDLING & EVENTS -----------------------
         // Player was removed by other plugin reason - ex: server restart or map unload
         // In this case no death should be recorded since this action was forced
-        if (removeReason.equals(PlayerRemoveReason.OTHER)) {
+        if (effectiveRemoveReason.equals(PlayerRemoveReason.OTHER)) {
             // Don't count in player stats since this is caused by plugin force removal
             // Player died or quit the game while playing
         } else {
             // Process loser
             this.updateStatsForLoser(playerRemoved);
-            Bukkit.getPluginManager().callEvent(new SkyWarsDeathEvent(playerRemoved, deathCause, gameMap, taggerPlayer));
+            Bukkit.getPluginManager().callEvent(new SkyWarsDeathEvent(playerRemoved, effectiveDeathCause, gameMap, taggerPlayer));
             // Process killer (if exists)
             if (wasKilledByTagger) {
                 this.updateStatsForKiller(taggerPlayer);
@@ -330,7 +349,7 @@ public class PlayerManager {
 
         // ---------------- GAME MAP UPDATES -----------------
         gameMap.removePlayer(pUuid);
-        if (SkyWarsReloaded.getCfg().spectateEnable() && removeReason.equals(PlayerRemoveReason.DEATH)) {
+        if (SkyWarsReloaded.getCfg().spectateEnable() && effectiveRemoveReason.equals(PlayerRemoveReason.DEATH)) {
             this.addSpectator(gameMap, playerRemoved);
             shouldSendToLobby = false;
         }
@@ -340,12 +359,17 @@ public class PlayerManager {
         // --------------------- MESSAGES ---------------------
         if (announceToOthers) {
             // Killed by player or environment
-            if (removeReason.equals(PlayerRemoveReason.DEATH)) {
+            if (effectiveRemoveReason.equals(PlayerRemoveReason.DEATH)) {
                 String message;
-                if (taggerPlayer == null) {
-                    message = Util.get().getDeathMessage(deathCause, false, playerRemoved, null);
+                if (punishWithGods) {
+                    message = new Messaging.MessageFormatter()
+                            .setVariable("player", playerRemoved.getName())
+                            .format("game.death.quit-killed-by-gods");
+                    playerRemoved.getWorld().strikeLightningEffect(playerRemoved.getLocation());
+                } else if (taggerPlayer == null) {
+                    message = Util.get().getDeathMessage(effectiveDeathCause, false, playerRemoved, null);
                 } else {
-                    message = Util.get().getDeathMessage(deathCause, true, playerRemoved, taggerPlayer);
+                    message = Util.get().getDeathMessage(effectiveDeathCause, true, playerRemoved, taggerPlayer);
                 }
                 this.matchManager.message(gameMap, message, null);
                 // Tell the player they lost the game
@@ -359,8 +383,8 @@ public class PlayerManager {
                     }
                 }.runTaskLater(SkyWarsReloaded.get(), 10L);
                 // Leaving game or server
-            } else if (removeReason.equals(PlayerRemoveReason.PLAYER_QUIT_GAME) ||
-                    removeReason.equals(PlayerRemoveReason.PLAYER_QUIT_SERVER)
+            } else if (effectiveRemoveReason.equals(PlayerRemoveReason.PLAYER_QUIT_GAME) ||
+                    effectiveRemoveReason.equals(PlayerRemoveReason.PLAYER_QUIT_SERVER)
             ) {
                 if (wasKilledByTagger) {
                     this.matchManager.message(gameMap, new Messaging.MessageFormatter()

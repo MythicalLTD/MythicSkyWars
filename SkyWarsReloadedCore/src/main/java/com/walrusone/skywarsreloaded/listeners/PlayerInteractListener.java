@@ -445,11 +445,13 @@ public class PlayerInteractListener implements Listener {
 
                 if (item != null && (item.equals(SkyWarsReloaded.getIM().getItem("optionselect"))
                         || item.equals(SkyWarsReloaded.getIM().getItem("statsitem"))
+                        || item.equals(SkyWarsReloaded.getIM().getItem("rejoinitem"))
                         || item.equals(SkyWarsReloaded.getIM().getItem("joinselect"))
                         || item.equals(SkyWarsReloaded.getIM().getItem("backlobbyitem"))
                         || item.equals(SkyWarsReloaded.getIM().getItem("spectateselect")))
                         || item2 != null && (item2.equals(SkyWarsReloaded.getIM().getItem("optionselect"))
                         || item2.equals(SkyWarsReloaded.getIM().getItem("statsitem"))
+                        || item2.equals(SkyWarsReloaded.getIM().getItem("rejoinitem"))
                         || item2.equals(SkyWarsReloaded.getIM().getItem("joinselect"))
                         || item2.equals(SkyWarsReloaded.getIM().getItem("backlobbyitem"))
                         || item2.equals(SkyWarsReloaded.getIM().getItem("spectateselect")))) {
@@ -644,6 +646,9 @@ public class PlayerInteractListener implements Listener {
             }.runTaskLater(SkyWarsReloaded.get(), 2);
         }
         if (playerPlayingMap.getMatchState().equals(MatchState.PLAYING)) {
+            if (player.getGameMode() != GameMode.SURVIVAL && !MatchManager.get().isSpectating(player)) {
+                player.setGameMode(GameMode.SURVIVAL);
+            }
             Block block = e.getBlock();
             if (block.getType().equals(Material.ENDER_CHEST)) {
                 for (Crate crate : playerPlayingMap.getCrates()) {
@@ -659,6 +664,11 @@ public class PlayerInteractListener implements Listener {
     @EventHandler
     public void onBlockPlaced(BlockPlaceEvent e) {
         GameMap gameMap = MatchManager.get().getPlayerMap(e.getPlayer());
+        if (gameMap != null && gameMap.getMatchState() == MatchState.PLAYING
+                && e.getPlayer().getGameMode() != GameMode.SURVIVAL
+                && !MatchManager.get().isSpectating(e.getPlayer())) {
+            e.getPlayer().setGameMode(GameMode.SURVIVAL);
+        }
         if (gameMap != null || !(e.getBlockPlaced().getState() instanceof Chest)) {
             return;
         }
