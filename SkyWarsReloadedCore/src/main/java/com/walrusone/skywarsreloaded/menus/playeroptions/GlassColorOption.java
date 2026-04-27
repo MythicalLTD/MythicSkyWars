@@ -68,6 +68,13 @@ public class GlassColorOption extends PlayerOption {
                         if (mat != null) {
                             itemStack = new ItemStack(mat, 1);
                             playerOptions.add(new GlassColorOption(key, name, itemStack, level, cost, position, page, menuSize));
+                        } else if (SkyWarsReloaded.getNMS().getVersion() < 13) {
+                            // 1.8 compatibility: accept modern material names like WHITE_STAINED_GLASS.
+                            Byte legacyData = resolveLegacyGlassData(key, material);
+                            if (legacyData != null) {
+                                itemStack = SkyWarsReloaded.getNMS().getColorItem("STAINED_GLASS", legacyData);
+                                playerOptions.add(new GlassColorOption(key, name, itemStack, level, cost, position, page, menuSize));
+                            }
                         }
                     } else {
                         itemStack = SkyWarsReloaded.getNMS().getColorItem(material, (byte) data);
@@ -99,6 +106,37 @@ public class GlassColorOption extends PlayerOption {
             storage.save(file);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static Byte resolveLegacyGlassData(String key, String material) {
+        String color = key == null ? "" : key.trim().toLowerCase();
+        if (color.isEmpty() && material != null) {
+            color = material.toLowerCase().replace("_stained_glass", "");
+        }
+        switch (color) {
+            case "white": return 0;
+            case "orange": return 1;
+            case "magenta": return 2;
+            case "lightblue":
+            case "light_blue": return 3;
+            case "yellow": return 4;
+            case "lime": return 5;
+            case "pink": return 6;
+            case "gray":
+            case "grey": return 7;
+            case "lightgray":
+            case "lightgrey":
+            case "light_gray":
+            case "light_grey": return 8;
+            case "cyan": return 9;
+            case "purple": return 10;
+            case "blue": return 11;
+            case "brown": return 12;
+            case "green": return 13;
+            case "red": return 14;
+            case "black": return 15;
+            default: return null;
         }
     }
 

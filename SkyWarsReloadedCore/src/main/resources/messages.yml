@@ -158,6 +158,7 @@ error:
   not-looking-at-chest: '&cYou must be looking at a chest within a 5 blocks ratio!'
   no-holograms-found: '&cNo holograms were found!'
   holograms-not-enabled: '&cHolograms are not enabled! Set holograms.enabled in config.yml and install DecentHolograms. If the option disables itself, stop the server, fix the config, and start again.'
+  option-menu-not-ready: '&cThis options menu is not ready yet. Check your options config files and reload the plugin.'
   map-min-be-int: '&cYou must specify a number!'
   map-name-too-short: '&cThe display name must have at least one character!'
   map-id-invalid: '&cThe map id provided has invalid characters. You may use the following characters: a-z, A-Z, 0-9, underscores and dashes.'

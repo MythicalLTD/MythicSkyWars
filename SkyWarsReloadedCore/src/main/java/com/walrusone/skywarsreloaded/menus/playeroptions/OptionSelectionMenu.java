@@ -43,6 +43,11 @@ public class OptionSelectionMenu {
             default:
                 availableItems = GlassColorOption.getPlayerOptions();
         }
+        if (availableItems.isEmpty()) {
+            player.sendMessage(new Messaging.MessageFormatter().format("error.option-menu-not-ready"));
+            Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getErrorSound(), 1, 1);
+            return;
+        }
 
         String menuName = new Messaging.MessageFormatter().format(availableItems.get(0).getMenuName());
         int menuSize = availableItems.get(0).getMenuSize();
