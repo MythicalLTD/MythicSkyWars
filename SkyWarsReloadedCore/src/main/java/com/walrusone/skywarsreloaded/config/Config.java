@@ -171,15 +171,8 @@ public class Config {
     private int killerEco;
     private int snowballDamage;
     private int eggDamage;
-    private int winnerXP;
     private List<String> winCommands;
-    private int killerXP;
     private List<String> killCommands;
-    private int vip1;
-    private int vip2;
-    private int vip3;
-    private int vip4;
-    private int vip5;
     private boolean tauntsEnabled;
     private boolean titlesEnabled;
     private boolean kitVotingEnabled;
@@ -384,17 +377,10 @@ public class Config {
             showHealth =            SkyWarsReloaded.get().getConfig().getBoolean("game.showHealth");
             winnerEco =             SkyWarsReloaded.get().getConfig().getInt("game.ecoForWin");
             killerEco =             SkyWarsReloaded.get().getConfig().getInt("game.ecoForKill");
-            winnerXP =              SkyWarsReloaded.get().getConfig().getInt("game.xpForWin");
             snowballDamage =        SkyWarsReloaded.get().getConfig().getInt("game.snowballDamage");
             eggDamage =             SkyWarsReloaded.get().getConfig().getInt("game.eggDamage");
             winCommands =           SkyWarsReloaded.get().getConfig().getStringList("game.winCommands");
-            killerXP =              SkyWarsReloaded.get().getConfig().getInt("game.xpForKill");
             killCommands =          SkyWarsReloaded.get().getConfig().getStringList("game.killCommands");
-            vip1 =                  SkyWarsReloaded.get().getConfig().getInt("game.vip1Multiplier");
-            vip2 =                  SkyWarsReloaded.get().getConfig().getInt("game.vip2Multiplier");
-            vip3 =                  SkyWarsReloaded.get().getConfig().getInt("game.vip3Multiplier");
-            vip4 =                  SkyWarsReloaded.get().getConfig().getInt("game.vip4Multiplier");
-            vip5 =                  SkyWarsReloaded.get().getConfig().getInt("game.vip5Multiplier");
             spawn = Util.get().stringToLocation(SkyWarsReloaded.get().getConfig().getString("spawn"));
             debugTesting();
             timeAfterMatch =        SkyWarsReloaded.get().getConfig().getInt("game.timeAfterMatch");
@@ -715,15 +701,8 @@ public class Config {
         SkyWarsReloaded.get().getConfig().set("game.ecoForKill", killerEco);
         SkyWarsReloaded.get().getConfig().set("game.snowballDamage", snowballDamage);
         SkyWarsReloaded.get().getConfig().set("game.eggDamage", eggDamage);
-        SkyWarsReloaded.get().getConfig().set("game.xpForWin", winnerXP);
         SkyWarsReloaded.get().getConfig().set("game.winCommands", winCommands);
-        SkyWarsReloaded.get().getConfig().set("game.xpForKill", killerXP);
         SkyWarsReloaded.get().getConfig().set("game.killCommands", killCommands);
-        SkyWarsReloaded.get().getConfig().set("game.vip1Multiplier", vip1);
-        SkyWarsReloaded.get().getConfig().set("game.vip2Multiplier", vip2);
-        SkyWarsReloaded.get().getConfig().set("game.vip3Multiplier", vip3);
-        SkyWarsReloaded.get().getConfig().set("game.vip4Multiplier", vip4);
-        SkyWarsReloaded.get().getConfig().set("game.vip5Multiplier", vip5);
         SkyWarsReloaded.get().getConfig().set("titles.enabled", titlesEnabled);
         SkyWarsReloaded.get().getConfig().set("game.waitTimer", waitTimer);
         SkyWarsReloaded.get().getConfig().set("game.resetTimerOnJoin", resetTimerOnJoin);
@@ -1000,34 +979,6 @@ public class Config {
 
     public String getCountdownSound() {
         return countdown;
-    }
-
-    public int getWinnerXP() {
-        return winnerXP;
-    }
-
-    public int getKillerXP() {
-        return killerXP;
-    }
-
-    public int getVip1() {
-        return vip1;
-    }
-
-    public int getVip2() {
-        return vip2;
-    }
-
-    public int getVip3() {
-        return vip3;
-    }
-
-    public int getVip4() {
-        return vip4;
-    }
-
-    public int getVip5() {
-        return vip5;
     }
 
     public List<String> getWinCommands() {

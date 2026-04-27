@@ -131,26 +131,12 @@ game:
   # The amount of money to receive when a player kills an opponent
   # VAULT REQUIRED, and "enableEconomy" has to be enabled
   ecoForKill: 1
-  # The amount of XP that a player receives when they win a game
-  xpForWin: 5
   # A list of commands to be executed for the winning players when a game is won
   # You can use the <player> placeholder as name of the winning player
   winCommands: []
-  # The amount of XP that a player receives when they kill an opponent
-  xpForKill: 1
   # A list of commands to be executed for a player when they kill an opponent
   # You can use the <player> placeholder as name of the player who killed
   killCommands: []
-  # The amount that one vote counts for for a player that has the permission "sw.vip1"
-  vip1Multiplier: 2
-  # The amount that one vote counts for for a player that has the permission "sw.vip2"
-  vip2Multiplier: 3
-  # The amount that one vote counts for for a player that has the permission "sw.vip3"
-  vip3Multiplier: 4
-  # The amount that one vote counts for for a player that has the permission "sw.vip4"
-  vip4Multiplier: 5
-  # The amount that one vote counts for for a player that has the permission "sw.vip5"
-  vip5Multiplier: 10
   # Number of seconds after which the game stops when it has ended
   timeAfterMatch: 15
   # Number of seconds for countdown when the game is starting

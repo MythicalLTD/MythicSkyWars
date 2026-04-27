@@ -46,15 +46,8 @@ game:
   eggDamage: 1
   ecoForWin: 5
   ecoForKill: 1
-  xpForWin: 5
   winCommands: []
-  xpForKill: 1
   killCommands: []
-  vip1Multiplier: 2
-  vip2Multiplier: 3
-  vip3Multiplier: 4
-  vip4Multiplier: 5
-  vip5Multiplier: 10
   timeAfterMatch: 15
   waitTimer: 10
   resetTimerOnJoin: false

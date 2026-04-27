@@ -17,6 +17,7 @@ import com.walrusone.skywarsreloaded.menus.playeroptions.WinSoundOption;
 import com.walrusone.skywarsreloaded.menus.playeroptions.objects.ParticleEffect;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Party;
+import com.walrusone.skywarsreloaded.utilities.LevelManager;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import com.walrusone.skywarsreloaded.utilities.VaultUtils;
 import org.bukkit.*;
@@ -790,6 +791,25 @@ public class MatchManager {
                         gameMap.setStrikeCounter(gameMap.getStrikeCounter() + 1);
                     }
                 }
+                if (gameMap.getTimer() > 0 && gameMap.getTimer() % 60 == 0) {
+                    int perMinute = LevelManager.get().getXpReward("per-minute", 10);
+                    int perTeammate = LevelManager.get().getXpReward("per-teammate", 5);
+                    for (Player alive : gameMap.getAlivePlayers()) {
+                        PlayerStat ps = PlayerStat.getPlayerStats(alive);
+                        if (ps == null) {
+                            continue;
+                        }
+                        int teammates = 0;
+                        TeamCard tc = gameMap.getTeamCard(alive);
+                        if (tc != null) {
+                            teammates = Math.max(0, tc.getPlayersSize() - 1);
+                        }
+                        int gain = Math.max(0, perMinute + (teammates * perTeammate));
+                        if (gain > 0) {
+                            ps.setXp(ps.getXp() + gain);
+                        }
+                    }
+                }
                 gameMap.setTimer(gameMap.getTimer() + 1);
                 gameMap.getGameBoard().updateScoreboardVar(ScoreVar.TIME);
             }
@@ -861,7 +881,8 @@ public class MatchManager {
                             pWinner.sendMessage(new Messaging.MessageFormatter().format("soulwell.xezbeth-granted"));
                         }
                         final int multiplier = Util.get().getMultiplier(pWinner);
-                        winnerData.setXp(winnerData.getXp() + (multiplier * SkyWarsReloaded.getCfg().getWinnerXP()));
+                        int winXp = LevelManager.get().getXpReward("game-win", 100);
+                        winnerData.setXp(winnerData.getXp() + (multiplier * winXp));
                         if (SkyWarsReloaded.getCfg().economyEnabled()) {
                             VaultUtils.get().give(pWinner, multiplier * SkyWarsReloaded.getCfg().getWinnerEco());
                         }
@@ -870,7 +891,7 @@ public class MatchManager {
                             sound.playSound(pWinner.getLocation());
                         }
 
-                        Util.get().sendActionBar(pWinner, new Messaging.MessageFormatter().setVariable("xp", "" + multiplier * SkyWarsReloaded.getCfg().getWinnerXP()).format("game.win-actionbar"));
+                        Util.get().sendActionBar(pWinner, new Messaging.MessageFormatter().setVariable("xp", "" + multiplier * winXp).format("game.win-actionbar"));
                         Util.get().doCommands(SkyWarsReloaded.getCfg().getWinCommands(), pWinner);
                         if (SkyWarsReloaded.getCfg().getEnableFlightOnWin()) {
                             pWinner.setAllowFlight(true);

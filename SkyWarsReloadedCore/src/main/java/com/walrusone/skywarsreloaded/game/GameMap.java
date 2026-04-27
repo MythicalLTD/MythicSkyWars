@@ -354,21 +354,24 @@ public class GameMap {
 
         File mapFile = new File(mapDataDirectory, name + ".yml");
         FileConfiguration fc = YamlConfiguration.loadConfiguration(mapFile);
-        events.add(new DisableRegenEvent(this, fc.getBoolean("events.DisableRegenEvent.enabled")));
-        events.add(new HealthDecayEvent(this, fc.getBoolean("events.HealthDecayEvent.enabled")));
-        events.add(new EnderDragonEvent(this, fc.getBoolean("events.EnderDragonEvent.enabled")));
-        events.add(new WitherEvent(this, fc.getBoolean("events.WitherEvent.enabled")));
-        events.add(new MobSpawnEvent(this, fc.getBoolean("events.MobSpawnEvent.enabled")));
-        events.add(new ChestRefillEvent(this, fc.getBoolean("events.ChestRefillEvent.enabled")));
-        events.add(new DeathMatchEvent(this, fc.getBoolean("events.DeathMatchEvent.enabled")));
-        events.add(new ArrowRainEvent(this, fc.getBoolean("events.ArrowRainEvent.enabled")));
-        events.add(new AnvilRainEvent(this, fc.getBoolean("events.AnvilRainEvent.enabled")));
-        events.add(new CrateDropEvent(this, fc.getBoolean("events.CrateDropEvent.enabled")));
-        events.add(new ShrinkingBorderEvent(this, fc.getBoolean("events.ShrinkingBorderEvent.enabled")));
-        events.add(new ProjectilesOnlyEvent(this, fc.getBoolean("events.ProjectilesOnlyEvent.enabled")));
-        events.add(new ProjectileSpleefEvent(this, fc.getBoolean("events.ProjectileSpleefEvent.enabled")));
-        events.add(new DoubleDamageEvent(this, fc.getBoolean("events.DoubleDamageEvent.enabled")));
-        events.add(new GhastEvent(this, fc.getBoolean("events.GhastEvent.enabled")));
+        events.add(new DisableRegenEvent(this, GameEventsConfig.resolveEnabled(this, "DisableRegenEvent", fc.getBoolean("events.DisableRegenEvent.enabled"))));
+        events.add(new HealthDecayEvent(this, GameEventsConfig.resolveEnabled(this, "HealthDecayEvent", fc.getBoolean("events.HealthDecayEvent.enabled"))));
+        events.add(new EnderDragonEvent(this, GameEventsConfig.resolveEnabled(this, "EnderDragonEvent", fc.getBoolean("events.EnderDragonEvent.enabled"))));
+        events.add(new WitherEvent(this, GameEventsConfig.resolveEnabled(this, "WitherEvent", fc.getBoolean("events.WitherEvent.enabled"))));
+        events.add(new MobSpawnEvent(this, GameEventsConfig.resolveEnabled(this, "MobSpawnEvent", fc.getBoolean("events.MobSpawnEvent.enabled"))));
+        events.add(new ChestRefillEvent(this, GameEventsConfig.resolveEnabled(this, "ChestRefillEvent", fc.getBoolean("events.ChestRefillEvent.enabled"))));
+        events.add(new DeathMatchEvent(this, GameEventsConfig.resolveEnabled(this, "DeathMatchEvent", fc.getBoolean("events.DeathMatchEvent.enabled"))));
+        events.add(new ArrowRainEvent(this, GameEventsConfig.resolveEnabled(this, "ArrowRainEvent", fc.getBoolean("events.ArrowRainEvent.enabled"))));
+        events.add(new AnvilRainEvent(this, GameEventsConfig.resolveEnabled(this, "AnvilRainEvent", fc.getBoolean("events.AnvilRainEvent.enabled"))));
+        events.add(new CrateDropEvent(this, GameEventsConfig.resolveEnabled(this, "CrateDropEvent", fc.getBoolean("events.CrateDropEvent.enabled"))));
+        events.add(new ShrinkingBorderEvent(this, GameEventsConfig.resolveEnabled(this, "ShrinkingBorderEvent", fc.getBoolean("events.ShrinkingBorderEvent.enabled"))));
+        events.add(new ProjectilesOnlyEvent(this, GameEventsConfig.resolveEnabled(this, "ProjectilesOnlyEvent", fc.getBoolean("events.ProjectilesOnlyEvent.enabled"))));
+        events.add(new ProjectileSpleefEvent(this, GameEventsConfig.resolveEnabled(this, "ProjectileSpleefEvent", fc.getBoolean("events.ProjectileSpleefEvent.enabled"))));
+        events.add(new DoubleDamageEvent(this, GameEventsConfig.resolveEnabled(this, "DoubleDamageEvent", fc.getBoolean("events.DoubleDamageEvent.enabled"))));
+        events.add(new GhastEvent(this, GameEventsConfig.resolveEnabled(this, "GhastEvent", fc.getBoolean("events.GhastEvent.enabled"))));
+        for (MatchEvent event : events) {
+            GameEventsConfig.apply(this, event);
+        }
     }
 
     public void update() {

@@ -15,6 +15,7 @@ import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import com.walrusone.skywarsreloaded.menus.playeroptions.KillSoundOption;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Tagged;
+import com.walrusone.skywarsreloaded.utilities.LevelManager;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import com.walrusone.skywarsreloaded.utilities.VaultUtils;
 import org.bukkit.*;
@@ -521,7 +522,8 @@ public class PlayerManager {
                     killerData.addSoulWellSoulsGathered(per * multiplier);
                 }
             }
-            killerData.setXp(killerData.getXp() + (multiplier * SkyWarsReloaded.getCfg().getKillerXP()));
+            int xpReward = LevelManager.get().getXpReward("per-kill", 10);
+            killerData.setXp(killerData.getXp() + (multiplier * xpReward));
             KillSoundOption sound = (KillSoundOption) KillSoundOption.getPlayerOptionByKey(killerData.getKillSound());
             if (sound != null) {
                 sound.playSound(killer.getLocation());
@@ -530,7 +532,8 @@ public class PlayerManager {
         if (SkyWarsReloaded.getCfg().economyEnabled()) {
             VaultUtils.get().give(killer, multiplier * SkyWarsReloaded.getCfg().getKillerEco());
         }
-        Util.get().sendActionBar(killer, new Messaging.MessageFormatter().setVariable("xp", "" + multiplier * SkyWarsReloaded.getCfg().getKillerXP()).format("game.kill-actionbar"));
+        int xpReward = LevelManager.get().getXpReward("per-kill", 10);
+        Util.get().sendActionBar(killer, new Messaging.MessageFormatter().setVariable("xp", "" + multiplier * xpReward).format("game.kill-actionbar"));
         Util.get().doCommands(SkyWarsReloaded.getCfg().getKillCommands(), killer);
     }
 

@@ -96,15 +96,15 @@ public class Util {
 
     public int getMultiplier(Player player) {
         if (player.hasPermission("sw.vip5")) {
-            return SkyWarsReloaded.getCfg().getVip5();
+            return LevelManager.get().getXpReward("vip5-multiplier", 10);
         } else if (player.hasPermission("sw.vip4")) {
-            return SkyWarsReloaded.getCfg().getVip4();
+            return LevelManager.get().getXpReward("vip4-multiplier", 5);
         } else if (player.hasPermission("sw.vip3")) {
-            return SkyWarsReloaded.getCfg().getVip3();
+            return LevelManager.get().getXpReward("vip3-multiplier", 4);
         } else if (player.hasPermission("sw.vip2")) {
-            return SkyWarsReloaded.getCfg().getVip2();
+            return LevelManager.get().getXpReward("vip2-multiplier", 3);
         } else if (player.hasPermission("sw.vip1")) {
-            return SkyWarsReloaded.getCfg().getVip1();
+            return LevelManager.get().getXpReward("vip1-multiplier", 2);
         } else {
             return 1;
         }
@@ -531,13 +531,7 @@ public class Util {
             PlayerStat ps = PlayerStat.getPlayerStats(player);
             if (ps != null) {
                 int amount = ps.getXp();
-                if (amount <= 352) {
-                    return (int) Math.floor(quadraticEquationRoot(1, 6, -amount));
-                } else if (amount <= 1507) {
-                    return (int) Math.floor(quadraticEquationRoot(2.5, -40.5, 360 - amount));
-                } else {
-                    return (int) Math.floor(quadraticEquationRoot(4.5, -162.5, 2220 - amount));
-                }
+                return LevelManager.get().getLevelForXp(amount);
             } else {
                 return 0;
             }

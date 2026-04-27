@@ -22,12 +22,14 @@ import com.walrusone.skywarsreloaded.game.PlayerData;
 import com.walrusone.skywarsreloaded.listeners.*;
 import com.walrusone.skywarsreloaded.managers.*;
 import com.walrusone.skywarsreloaded.managers.worlds.*;
+import com.walrusone.skywarsreloaded.matchevents.GameEventsConfig;
 import com.walrusone.skywarsreloaded.menus.*;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.GameKit;
 import com.walrusone.skywarsreloaded.nms.NMS;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.nms.NMSUtils;
 import com.walrusone.skywarsreloaded.utilities.LobbyWaterPortalManager;
+import com.walrusone.skywarsreloaded.utilities.LevelManager;
 import com.walrusone.skywarsreloaded.utilities.SoulWellManager;
 import com.walrusone.skywarsreloaded.utilities.SWRServer;
 import com.walrusone.skywarsreloaded.utilities.Util;
@@ -508,6 +510,9 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
     public void load() {
         messaging = null;
         messaging = new Messaging(this);
+        LevelManager.get().load(this);
+        GameEventsConfig.load(this);
+        purgeLegacyMapEventSections();
         mergeConfigFromBundledTemplate();
         reloadConfig();
         config.load();
@@ -610,6 +615,33 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
         }
         ChestRefillHologramManager.init(this);
         loaded = true;
+    }
+
+    private void purgeLegacyMapEventSections() {
+        File mapDataDirectory = new File(getDataFolder(), "mapsData");
+        if (!mapDataDirectory.exists() || !mapDataDirectory.isDirectory()) {
+            return;
+        }
+        File[] files = mapDataDirectory.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
+        if (files == null || files.length == 0) {
+            return;
+        }
+        int touched = 0;
+        for (File file : files) {
+            try {
+                org.bukkit.configuration.file.FileConfiguration fc = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(file);
+                if (fc.contains("events")) {
+                    fc.set("events", null);
+                    fc.save(file);
+                    touched++;
+                }
+            } catch (Exception ex) {
+                getLogger().warning("Could not purge legacy events from " + file.getName() + ": " + ex.getMessage());
+            }
+        }
+        if (touched > 0) {
+            getLogger().info("Removed legacy per-map event sections from " + touched + " map file(s). Using gameevents.yml now.");
+        }
     }
 
     private void mergeConfigFromBundledTemplate() {

@@ -5,8 +5,10 @@ import com.walrusone.skywarsreloaded.database.DataStorage;
 import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.matchevents.MatchEvent;
+import com.walrusone.skywarsreloaded.utilities.LevelManager;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import com.walrusone.skywarsreloaded.utilities.VaultUtils;
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -261,16 +263,40 @@ public class PlayerStat {
 
             GameMap gMap = MatchManager.get().getPlayerMap(player);
             if (identifier.equals("lobbyboard") || gMap == null) {
-                return line
+                int xp = ps.getXp();
+                int level = LevelManager.get().getLevelForXp(xp);
+                int nextLevel = LevelManager.get().getNextLevel(level);
+                int xpToNext = LevelManager.get().getXpToNextLevel(xp);
+                int xpIntoLevel = LevelManager.get().getXpIntoCurrentLevel(xp);
+                int xpNeedForLevel = LevelManager.get().getXpRequiredForCurrentLevel(xp);
+                int progressPct = LevelManager.get().getProgressPercent(xp);
+                String formatted = line
                         .replace("{wins}", Integer.toString(ps.getWins()))
                         .replace("{losses}", Integer.toString(ps.getLosses()))
                         .replace("{kills}", Integer.toString(ps.getKills()))
                         .replace("{deaths}", Integer.toString(ps.getDeaths()))
-                        .replace("{xp}", Integer.toString(ps.getXp()))
+                        .replace("{souls}", Integer.toString(ps.getSouls()))
+                        .replace("{soulwell_usages}", Integer.toString(ps.getSoulWellUsages()))
+                        .replace("{soulwell_legendaries}", Integer.toString(ps.getSoulWellLegendaries()))
+                        .replace("{soulwell_rares}", Integer.toString(ps.getSoulWellRares()))
+                        .replace("{soulwell_souls_gathered}", Integer.toString(ps.getSoulWellSoulsGathered()))
+                        .replace("{soulwell_souls_purchased}", Integer.toString(ps.getSoulWellSoulsPurchased()))
+                        .replace("{xp}", Integer.toString(xp))
+                        .replace("{level}", Integer.toString(level))
+                        .replace("{next_level}", Integer.toString(nextLevel))
+                        .replace("{xp_to_next}", Integer.toString(xpToNext))
+                        .replace("{xp_current_level}", Integer.toString(xpIntoLevel))
+                        .replace("{xp_next_level}", Integer.toString(xpNeedForLevel))
+                        .replace("{level_progress}", Integer.toString(progressPct))
                         .replace("{killdeath}", killdeath)
                         .replace("{winloss}", winloss)
                         .replace("{balance}", "" + getBalance(player))
-                        .replace("{level}", Integer.toString(Util.get().getPlayerLevel(player)));
+                        .replace("{level_prefix}", LevelManager.get().getPrefixForLevel(level))
+                        .replace("{level_progress_bar}", LevelManager.get().getProgressBar(xp));
+                if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+                    formatted = PlaceholderAPI.setPlaceholders(player, formatted);
+                }
+                return formatted;
             }
             else {
                 int currentPlayers;
@@ -286,7 +312,7 @@ public class PlayerStat {
                     eventTime = Util.get().secondsToTimeString(nextEvent.getStartTime() - gMap.getTimer());
                 }
 
-                return line
+                String formatted = line
                         .replace("{players_needed}", (gMap.getAllPlayers().size() >= gMap.getMinTeams() ? "0" : gMap.getMinTeams()-gMap.getAllPlayers().size()) + "")
                         .replace("{waitingtimer}", Util.get().getFormattedTime(gMap.getTimer()))
                         .replace("{nextevent_time}", eventTime)
@@ -312,6 +338,10 @@ public class PlayerStat {
                         .replace("{healthvote}", ChatColor.stripColor(gMap.getCurrentHealth()))
                         .replace("{weathervote}", ChatColor.stripColor(gMap.getCurrentWeather()))
                         .replace("{modifiervote}", ChatColor.stripColor(gMap.getCurrentModifier()));
+                if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+                    formatted = PlaceholderAPI.setPlaceholders(player, formatted);
+                }
+                return formatted;
             }
         }
         return "";
