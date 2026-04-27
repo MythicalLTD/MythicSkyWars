@@ -73,6 +73,11 @@ public class MatchManager {
      *                                      forced in as spectators if no arena accepts them (e.g. lobby portal).
      */
     public GameMap joinGame(Player player, GameType type, boolean allowSpectatorBypassOnFailure) {
+        GameMap currentMap = getPlayerMap(player);
+        if (currentMap != null) {
+            return currentMap;
+        }
+
         ArrayList<GameMap> games = SkyWarsReloaded.getGameMapMgr().getPlayableArenas(type);
         ArrayList<GameMap> eligible = new ArrayList<>();
         for (final GameMap gameMap : games) {
@@ -115,6 +120,11 @@ public class MatchManager {
      */
     @Nullable
     public GameMap joinGame(Player player, GameType type, String mapName) {
+        GameMap currentMap = getPlayerMap(player);
+        if (currentMap != null) {
+            return currentMap;
+        }
+
         if (mapName == null || mapName.trim().isEmpty()) {
             return joinGame(player, type);
         }

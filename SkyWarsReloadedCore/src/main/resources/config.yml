@@ -20,6 +20,8 @@ enabledLobbyGuard: false
 lobby:
   forceSunnyWhenProtected: true
   forceDayWhenProtected: true
+  hideJoinQuitMessages: true
+  hideDeathMessages: true
 economyEnabled: false
 clearInventoryOnLobbyJoin: true
 timeFormat: simplified

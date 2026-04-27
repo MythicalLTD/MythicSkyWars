@@ -66,7 +66,8 @@ public class LobbyListener implements org.bukkit.event.Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent e) {
-        if (SkyWarsReloaded.getCfg().bungeeMode() && !SkyWarsReloaded.getCfg().isLobbyServer()) {
+        if ((SkyWarsReloaded.getCfg().bungeeMode() && !SkyWarsReloaded.getCfg().isLobbyServer())
+                || (SkyWarsReloaded.getCfg().isLobbyHideJoinQuitMessages() && Util.get().isSpawnWorld(e.getPlayer().getWorld()))) {
             e.setJoinMessage("");
         }
         enforceLobbyEnvironment(e.getPlayer().getWorld());
@@ -74,7 +75,8 @@ public class LobbyListener implements org.bukkit.event.Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onQuit(PlayerQuitEvent e) {
-        if (SkyWarsReloaded.getCfg().bungeeMode() && !SkyWarsReloaded.getCfg().isLobbyServer()) {
+        if ((SkyWarsReloaded.getCfg().bungeeMode() && !SkyWarsReloaded.getCfg().isLobbyServer())
+                || (SkyWarsReloaded.getCfg().isLobbyHideJoinQuitMessages() && Util.get().isSpawnWorld(e.getPlayer().getWorld()))) {
             e.setQuitMessage("");
         }
     }

@@ -58,6 +58,12 @@ public class SWJoinCmd extends com.walrusone.skywarsreloaded.commands.BaseCmd {
             return true;
         }
 
+        // Prevent re-running join flow while already in or recently dead from a match.
+        if (MatchManager.get().getPlayerMap(player) != null || MatchManager.get().getDeadPlayerMap(player) != null) {
+            player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
+            return true;
+        }
+
         if (mapName != null) {
             GameMap joined;
             if (party != null) {

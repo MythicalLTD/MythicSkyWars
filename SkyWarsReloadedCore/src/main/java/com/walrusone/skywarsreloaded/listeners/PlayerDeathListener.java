@@ -111,6 +111,10 @@ public class PlayerDeathListener implements org.bukkit.event.Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onDeathByDeathEvent(PlayerDeathEvent event) {
+        if (SkyWarsReloaded.getCfg().isLobbyHideDeathMessages()
+                && Util.get().isSpawnWorld(event.getEntity().getWorld())) {
+            event.setDeathMessage("");
+        }
         GameMap gameMap = MatchManager.get().getPlayerMap(event.getEntity());
         if (gameMap == null) return;
         /*event.setDeathMessage("");

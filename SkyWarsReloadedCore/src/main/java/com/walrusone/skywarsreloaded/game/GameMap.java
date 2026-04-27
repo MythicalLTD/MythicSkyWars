@@ -391,8 +391,20 @@ public class GameMap {
     }
 
     public boolean addPlayers(@Nullable TeamCard teamToTry, final Player player) {
+        // Idempotency guard: repeated /sw join spam should not enqueue duplicate joins.
+        if (player == null) {
+            return false;
+        }
+        UUID playerId = player.getUniqueId();
+        if (waitingPlayers.contains(playerId) || spectators.contains(playerId)) {
+            return true;
+        }
+        if (getAllPlayers().contains(player)) {
+            return true;
+        }
+
         // If busy return false
-        if (Util.get().isBusy(player.getUniqueId())) {
+        if (Util.get().isBusy(playerId)) {
             if (SkyWarsReloaded.getCfg().debugEnabled()) {
                 SkyWarsReloaded.get().getLogger().info("#addPlayers: " + player.getName() + " is busy, cannot join " + this.getName());
             }

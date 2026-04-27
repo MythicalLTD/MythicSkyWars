@@ -163,6 +163,8 @@ public class Config {
     private boolean protectlobby;
     private boolean lobbyForceSunny;
     private boolean lobbyForceDay;
+    private boolean lobbyHideJoinQuitMessages;
+    private boolean lobbyHideDeathMessages;
     private boolean displayPlayerExeperience;
     private boolean borderEnabled;
     private int borderSize;
@@ -351,6 +353,8 @@ public class Config {
             protectlobby = SkyWarsReloaded.get().getConfig().getBoolean("enabledLobbyGuard");
             lobbyForceSunny = SkyWarsReloaded.get().getConfig().getBoolean("lobby.forceSunnyWhenProtected", true);
             lobbyForceDay = SkyWarsReloaded.get().getConfig().getBoolean("lobby.forceDayWhenProtected", true);
+            lobbyHideJoinQuitMessages = SkyWarsReloaded.get().getConfig().getBoolean("lobby.hideJoinQuitMessages", false);
+            lobbyHideDeathMessages = SkyWarsReloaded.get().getConfig().getBoolean("lobby.hideDeathMessages", false);
             displayPlayerExeperience = SkyWarsReloaded.get().getConfig().getBoolean("displayPlayerLevelOnXpBar");
             leaderSize = SkyWarsReloaded.get().getConfig().getInt("leaderboards.length");
             leaderSignsEnabled = SkyWarsReloaded.get().getConfig().getBoolean("leaderboards.signsEnabled");
@@ -674,6 +678,8 @@ public class Config {
         SkyWarsReloaded.get().getConfig().set("enabledLobbyGuard", protectlobby);
         SkyWarsReloaded.get().getConfig().set("lobby.forceSunnyWhenProtected", lobbyForceSunny);
         SkyWarsReloaded.get().getConfig().set("lobby.forceDayWhenProtected", lobbyForceDay);
+        SkyWarsReloaded.get().getConfig().set("lobby.hideJoinQuitMessages", lobbyHideJoinQuitMessages);
+        SkyWarsReloaded.get().getConfig().set("lobby.hideDeathMessages", lobbyHideDeathMessages);
         SkyWarsReloaded.get().getConfig().set("leaderboards.length", leaderSize);
         SkyWarsReloaded.get().getConfig().set("leaderboards.signsEnabled", leaderSignsEnabled);
         SkyWarsReloaded.get().getConfig().set("leaderboards.headsEnabled", leaderHeadsEnabled);
@@ -1323,6 +1329,14 @@ public class Config {
 
     public boolean isLobbyForceDay() {
         return lobbyForceDay;
+    }
+
+    public boolean isLobbyHideJoinQuitMessages() {
+        return lobbyHideJoinQuitMessages;
+    }
+
+    public boolean isLobbyHideDeathMessages() {
+        return lobbyHideDeathMessages;
     }
 
     public boolean displayPlayerExeperience() {
