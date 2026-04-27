@@ -522,7 +522,6 @@ scoreboards:
   waitboard:
     lines:
       - '&b&lSKYWARS'
-      - '&7%server_time_dd/MM/yyyy%'
       - ''
       - '&6&lGame Info'
       - ' &eMap: &b{mapname}'
@@ -536,7 +535,6 @@ scoreboards:
   waitboard-countdown:
     lines:
       - '&b&lSKYWARS'
-      - '&7%server_time_dd/MM/yyyy%'
       - ''
       - '&6&lGame Info'
       - ' &eMap: &b{mapname}'
@@ -548,7 +546,6 @@ scoreboards:
   playboard:
     lines:
       - '&b&lSKYWARS'
-      - '&7%server_time_dd/MM/yyyy%'
       - ''
       - '&6&lNext Event'
       - ' &7> &e{nextevent_name} &b{nextevent_time}'
@@ -582,7 +579,6 @@ scoreboards:
   lobbyboard:
     lines:
       - '&b&lSKYWARS'
-      - '&7%server_time_dd/MM/yyyy% SW-Lobby'
       - ''
       - '&6Solo Stats'
       - ' &eKills: &b{kills}'
