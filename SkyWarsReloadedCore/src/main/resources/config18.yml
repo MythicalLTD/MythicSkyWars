@@ -1,6 +1,7 @@
 # Extra join/leave and map traces in console (INFO, not errors). Set false on production to reduce noise.
 debugMode: true
 bungeeMode: false
+bungeeModeType: server
 bungeeRandomMapPickOnStart: false
 bungeeLobby: lobby
 isLobbyServer: false

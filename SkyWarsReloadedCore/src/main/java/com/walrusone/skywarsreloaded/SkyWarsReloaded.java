@@ -360,7 +360,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
         }
 
         // Plugin messaging channels
-        if (getCfg().bungeeMode()) {
+        if (getCfg().isBungeeEnabled()) {
             this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
             this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
             Bukkit.getPluginManager().registerEvents(new PingListener(), this);

@@ -186,7 +186,7 @@ public class PlayerInteractListener implements Listener {
                         StatsMenu.open(player);
                     } else if (event.getItem().isSimilar(SkyWarsReloaded.getIM().getItem("backlobbyitem"))) {
                         event.setCancelled(true);
-                        if (SkyWarsReloaded.getCfg().bungeeMode() && SkyWarsReloaded.getCfg().getBungeeLobby() != null
+                        if (SkyWarsReloaded.getCfg().isBungeeEnabled() && SkyWarsReloaded.getCfg().getBungeeLobby() != null
                                 && !SkyWarsReloaded.getCfg().getBungeeLobby().trim().isEmpty()) {
                             SkyWarsReloaded.get().sendBungeeMsg(player, "Connect", SkyWarsReloaded.getCfg().getBungeeLobby());
                         } else {

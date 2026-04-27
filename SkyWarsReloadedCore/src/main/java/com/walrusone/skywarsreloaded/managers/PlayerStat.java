@@ -146,7 +146,7 @@ public class PlayerStat {
                                     if (SkyWarsReloaded.getCfg().isStatsItemEnabled() && player.hasPermission("sw.stats")) {
                                         player.getInventory().setItem(SkyWarsReloaded.getCfg().getStatsItemPos(), SkyWarsReloaded.getIM().getItem("statsitem"));
                                     }
-                                    if (SkyWarsReloaded.getCfg().bungeeMode() && SkyWarsReloaded.getCfg().isBackToLobbyItemEnabled()) {
+                                    if (SkyWarsReloaded.getCfg().isBungeeEnabled() && SkyWarsReloaded.getCfg().isBackToLobbyItemEnabled()) {
                                         player.getInventory().setItem(SkyWarsReloaded.getCfg().getBackToLobbyPos(), SkyWarsReloaded.getIM().getItem("backlobbyitem"));
                                     }
                                     if (!SkyWarsReloaded.getCfg().bungeeMode() && SkyWarsReloaded.getCfg().isSpectateGameItemEnabled() && SkyWarsReloaded.getCfg().spectateMenuEnabled() && player.hasPermission("sw.spectate")) {

@@ -98,6 +98,8 @@ public class Config {
     private final List<String> signDef13 = Arrays.asList("COAL_BLOCK", "EMERALD_BLOCK", "REDSTONE_BLOCK", "LAPIS_BLOCK", "DIAMOND_SWORD", "GOLDEN_HELMET", "IRON_HELMET", "WOODEN_SWORD");
     private boolean debug;
     private boolean bungeeMode;
+    /** proxy = network lobby/sign mode, server = local maps with optional lobby bed transfer */
+    private String bungeeModeType;
     private boolean bungeeRandomMapPickOnStart;
     private String bungeeLobby;
     private boolean economyEnabled;
@@ -334,6 +336,7 @@ public class Config {
             gameServers = SkyWarsReloaded.get().getConfig().getStringList("gameServers");
 
             bungeeMode = SkyWarsReloaded.get().getConfig().getBoolean("bungeeMode");
+            bungeeModeType = SkyWarsReloaded.get().getConfig().getString("bungeeModeType", "proxy");
             bungeeRandomMapPickOnStart = SkyWarsReloaded.get().getConfig().getBoolean("bungeeRandomMapPickOnStart");
             bungeeLobby = SkyWarsReloaded.get().getConfig().getString("bungeeLobby");
             isLobbyServer = SkyWarsReloaded.get().getConfig().getBoolean("isLobbyServer");
@@ -661,6 +664,7 @@ public class Config {
 
         SkyWarsReloaded.get().getConfig().set("economyEnabled", economyEnabled);
         SkyWarsReloaded.get().getConfig().set("bungeeMode", bungeeMode);
+        SkyWarsReloaded.get().getConfig().set("bungeeModeType", bungeeModeType);
         SkyWarsReloaded.get().getConfig().set("bungeeRandomMapPickOnStart", bungeeRandomMapPickOnStart);
         SkyWarsReloaded.get().getConfig().set("bungeeLobby", bungeeLobby);
         SkyWarsReloaded.get().getConfig().set("gameEndCommands", gameEndCommands);
@@ -938,7 +942,19 @@ public class Config {
     }
 
     public boolean bungeeMode() {
-        return (bungeeMode && SkyWarsReloaded.get().isEnabled());
+        return isBungeeProxyMode();
+    }
+
+    public boolean isBungeeEnabled() {
+        return bungeeMode && SkyWarsReloaded.get().isEnabled();
+    }
+
+    public boolean isBungeeProxyMode() {
+        return isBungeeEnabled() && !"server".equalsIgnoreCase(bungeeModeType);
+    }
+
+    public boolean isBungeeServerMode() {
+        return isBungeeEnabled() && "server".equalsIgnoreCase(bungeeModeType);
     }
 
     public boolean getBungeeRandomMapPickOnStart() {

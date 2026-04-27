@@ -10,6 +10,8 @@ debugMode: true
 # Enable bungee mode if you intend to use Skywars on a bungee server WITH one arena per server.
 # Do not enable this if your server is bungee, but you are hosting all arenas on one server.
 bungeeMode: false
+# proxy = bungee network lobby/sign mode, server = local maps + lobby bed transfer
+bungeeModeType: server
 # If using bungee mode, should a random registered map be picked to register on start? All other
 # maps be not be registered. Any unregistered maps in the mapsData folder can also be picked.
 # Remove any maps you don't want to make available to players by deleting the file from the folder.
