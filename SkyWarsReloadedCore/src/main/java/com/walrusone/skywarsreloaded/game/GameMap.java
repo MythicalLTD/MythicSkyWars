@@ -604,9 +604,14 @@ public class GameMap {
     }
 
     public boolean mapContainsDead(UUID uuid) {
+        if (uuid == null) {
+            return false;
+        }
         for (TeamCard tCard : teamCards) {
             for (PlayerCard p : tCard.getPlayerCards()) {
-                if (p.isDead()) return true;
+                if (uuid.equals(p.getUUID()) && p.isDead()) {
+                    return true;
+                }
             }
         }
         return false;
