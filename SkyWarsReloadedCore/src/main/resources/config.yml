@@ -90,16 +90,12 @@ chests:
   loadTrappedChestsAsCenter: false
   maxItemsChest: 26
   maxItemsDoubleChest: 53
-  # Temporary holograms above island/center chests when emptied (DecentHolograms): countdown until refill.
-  refillStatusHolograms:
+  # Global automatic chest refill during matches (in seconds).
+  refill:
     enabled: true
-    cooldownSeconds: 60
-    offsetY: 1.1
-    showWhenFull: false
-    announceLootEmpty: true
-    announceRefilled: true
-    keepChestOpenDuringCountdown: true
-    messageRadius: 24
+    intervalSeconds: 180
+    keepChestOpen: true
+    showHologram: true
 kit:
   menuSize: 45
   randPos: 0

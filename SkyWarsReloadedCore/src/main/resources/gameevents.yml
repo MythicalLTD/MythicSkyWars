@@ -35,13 +35,6 @@ events:
       chance: 20
       announceTimer: true
       repeatable: false
-    ChestRefillEvent:
-      enabled: true
-      minStart: 240
-      maxStart: 300
-      chance: 100
-      announceTimer: true
-      repeatable: false
     ArrowRainEvent:
       enabled: false
       minStart: 300
@@ -108,16 +101,10 @@ events:
       announceTimer: true
       repeatable: false
   solo:
-    ChestRefillEvent:
-      minStart: 180
-      maxStart: 240
     DeathMatchEvent:
       minStart: 540
       maxStart: 600
   team:
-    ChestRefillEvent:
-      minStart: 240
-      maxStart: 300
     DeathMatchEvent:
       minStart: 600
       maxStart: 720

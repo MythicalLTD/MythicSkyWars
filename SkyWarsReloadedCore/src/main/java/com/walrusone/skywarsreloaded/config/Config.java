@@ -208,14 +208,10 @@ public class Config {
     private boolean loadTrappedChestsAsCenter;
     private int maxChest;
     private int maxDoubleChest;
-    private boolean chestRefillHoloEnabled;
-    private int chestRefillHoloCooldownSeconds;
-    private double chestRefillHoloOffsetY;
-    private boolean chestRefillHoloShowWhenFull;
-    private boolean chestRefillHoloAnnounceEmpty;
-    private boolean chestRefillHoloAnnounceRefilled;
-    private boolean chestRefillHoloKeepChestOpen;
-    private int chestRefillHoloMessageRadius;
+    private boolean chestRefillEnabled;
+    private int chestRefillIntervalSeconds;
+    private boolean chestRefillKeepChestOpen;
+    private boolean chestRefillShowHologram;
     private boolean useHolograms;
     private int cooldown;
     private int kitMenuSize;
@@ -430,14 +426,10 @@ public class Config {
             loadTrappedChestsAsCenter = SkyWarsReloaded.get().getConfig().getBoolean("chests.loadTrappedChestsAsCenter", true);
             maxChest =                  SkyWarsReloaded.get().getConfig().getInt("chests.maxItemsChest");
             maxDoubleChest =            SkyWarsReloaded.get().getConfig().getInt("chests.maxItemsDoubleChest");
-            chestRefillHoloEnabled =    SkyWarsReloaded.get().getConfig().getBoolean("chests.refillStatusHolograms.enabled", true);
-            chestRefillHoloCooldownSeconds = SkyWarsReloaded.get().getConfig().getInt("chests.refillStatusHolograms.cooldownSeconds", 60);
-            chestRefillHoloOffsetY =    SkyWarsReloaded.get().getConfig().getDouble("chests.refillStatusHolograms.offsetY", 1.1);
-            chestRefillHoloShowWhenFull = SkyWarsReloaded.get().getConfig().getBoolean("chests.refillStatusHolograms.showWhenFull", false);
-            chestRefillHoloAnnounceEmpty = SkyWarsReloaded.get().getConfig().getBoolean("chests.refillStatusHolograms.announceLootEmpty", true);
-            chestRefillHoloAnnounceRefilled = SkyWarsReloaded.get().getConfig().getBoolean("chests.refillStatusHolograms.announceRefilled", true);
-            chestRefillHoloKeepChestOpen = SkyWarsReloaded.get().getConfig().getBoolean("chests.refillStatusHolograms.keepChestOpenDuringCountdown", true);
-            chestRefillHoloMessageRadius = SkyWarsReloaded.get().getConfig().getInt("chests.refillStatusHolograms.messageRadius", 24);
+            chestRefillEnabled =        SkyWarsReloaded.get().getConfig().getBoolean("chests.refill.enabled", true);
+            chestRefillIntervalSeconds = SkyWarsReloaded.get().getConfig().getInt("chests.refill.intervalSeconds", 180);
+            chestRefillKeepChestOpen =  SkyWarsReloaded.get().getConfig().getBoolean("chests.refill.keepChestOpen", false);
+            chestRefillShowHologram =   SkyWarsReloaded.get().getConfig().getBoolean("chests.refill.showHologram", false);
 
             useHolograms =              SkyWarsReloaded.get().getConfig().getBoolean("holograms.enabled");
 
@@ -749,14 +741,10 @@ public class Config {
         SkyWarsReloaded.get().getConfig().set("chests.loadTrappedChestsAsCenter", loadTrappedChestsAsCenter);
         SkyWarsReloaded.get().getConfig().set("chests.maxItemsChest", maxChest);
         SkyWarsReloaded.get().getConfig().set("chests.maxItemsDoubleChest", maxDoubleChest);
-        SkyWarsReloaded.get().getConfig().set("chests.refillStatusHolograms.enabled", chestRefillHoloEnabled);
-        SkyWarsReloaded.get().getConfig().set("chests.refillStatusHolograms.cooldownSeconds", chestRefillHoloCooldownSeconds);
-        SkyWarsReloaded.get().getConfig().set("chests.refillStatusHolograms.offsetY", chestRefillHoloOffsetY);
-        SkyWarsReloaded.get().getConfig().set("chests.refillStatusHolograms.showWhenFull", chestRefillHoloShowWhenFull);
-        SkyWarsReloaded.get().getConfig().set("chests.refillStatusHolograms.announceLootEmpty", chestRefillHoloAnnounceEmpty);
-        SkyWarsReloaded.get().getConfig().set("chests.refillStatusHolograms.announceRefilled", chestRefillHoloAnnounceRefilled);
-        SkyWarsReloaded.get().getConfig().set("chests.refillStatusHolograms.keepChestOpenDuringCountdown", chestRefillHoloKeepChestOpen);
-        SkyWarsReloaded.get().getConfig().set("chests.refillStatusHolograms.messageRadius", chestRefillHoloMessageRadius);
+        SkyWarsReloaded.get().getConfig().set("chests.refill.enabled", chestRefillEnabled);
+        SkyWarsReloaded.get().getConfig().set("chests.refill.intervalSeconds", chestRefillIntervalSeconds);
+        SkyWarsReloaded.get().getConfig().set("chests.refill.keepChestOpen", chestRefillKeepChestOpen);
+        SkyWarsReloaded.get().getConfig().set("chests.refill.showHologram", chestRefillShowHologram);
 
 
         SkyWarsReloaded.get().getConfig().set("holograms.enabled", useHolograms);
@@ -1475,6 +1463,22 @@ public class Config {
         return maxChest;
     }
 
+    public boolean isChestRefillEnabled() {
+        return chestRefillEnabled;
+    }
+
+    public int getChestRefillIntervalSeconds() {
+        return Math.max(5, chestRefillIntervalSeconds);
+    }
+
+    public boolean isChestRefillKeepChestOpen() {
+        return chestRefillKeepChestOpen;
+    }
+
+    public boolean isChestRefillShowHologram() {
+        return chestRefillShowHologram;
+    }
+
     /**
      * Lucky block tuning lives in {@code plugins/SkyWarsReloaded/luckyblocks.yml} (not {@code config.yml}).
      */
@@ -1504,38 +1508,6 @@ public class Config {
 
     public List<String> getLuckyBlockDropCommands(LuckyBlockHook.LuckyProfile profile) {
         return LuckyBlockHook.getDropCommands(profile);
-    }
-
-    public boolean isChestRefillStatusHologramsEnabled() {
-        return chestRefillHoloEnabled;
-    }
-
-    public int getChestRefillHologramCooldownSeconds() {
-        return chestRefillHoloCooldownSeconds;
-    }
-
-    public double getChestRefillHologramOffsetY() {
-        return chestRefillHoloOffsetY;
-    }
-
-    public boolean isChestRefillHologramShowWhenFull() {
-        return chestRefillHoloShowWhenFull;
-    }
-
-    public boolean isChestRefillHologramAnnounceEmpty() {
-        return chestRefillHoloAnnounceEmpty;
-    }
-
-    public boolean isChestRefillHologramAnnounceRefilled() {
-        return chestRefillHoloAnnounceRefilled;
-    }
-
-    public boolean isChestRefillHologramKeepChestOpen() {
-        return chestRefillHoloKeepChestOpen;
-    }
-
-    public int getChestRefillHologramMessageRadius() {
-        return chestRefillHoloMessageRadius;
     }
 
     public boolean useExternalChat() {

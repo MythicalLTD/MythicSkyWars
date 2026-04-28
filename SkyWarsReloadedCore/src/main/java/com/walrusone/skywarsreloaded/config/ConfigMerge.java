@@ -62,7 +62,7 @@ public final class ConfigMerge {
         }
         int added = 0;
         List<String> keys = new ArrayList<>(defaults.getKeys(true));
-        // Shorter paths first so a missing parent section (e.g. chests.refillStatusHolograms) is set before its leaves.
+        // Shorter paths first so a missing parent section is set before its leaves.
         keys.sort(Comparator.comparingInt(k -> k.split("\\.").length));
         for (String key : keys) {
             // 1.8.x has no ConfigurationSection#contains(String, boolean); use it via reflection when available.

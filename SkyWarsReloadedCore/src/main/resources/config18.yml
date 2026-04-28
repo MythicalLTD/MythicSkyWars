@@ -90,15 +90,11 @@ chests:
   loadTrappedChestsAsCenter: false
   maxItemsChest: 26
   maxItemsDoubleChest: 53
-  refillStatusHolograms:
+  refill:
     enabled: true
-    cooldownSeconds: 60
-    offsetY: 1.1
-    showWhenFull: false
-    announceLootEmpty: true
-    announceRefilled: true
-    keepChestOpenDuringCountdown: true
-    messageRadius: 24
+    intervalSeconds: 180
+    keepChestOpen: false
+    showHologram: false
 kit:
   randPos: 0
   menuSize: 45

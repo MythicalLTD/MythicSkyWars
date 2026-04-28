@@ -34,7 +34,6 @@ import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.SoulWellManager;
 import com.walrusone.skywarsreloaded.utilities.SWRServer;
 import com.walrusone.skywarsreloaded.utilities.Util;
-import com.walrusone.skywarsreloaded.utilities.holograms.ChestRefillHologramManager;
 import com.walrusone.skywarsreloaded.utilities.holograms.DecentHoloUtil;
 import com.walrusone.skywarsreloaded.utilities.holograms.HologramsUtil;
 import com.walrusone.skywarsreloaded.utilities.minecraftping.MinecraftPing;
@@ -469,7 +468,6 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 
     public void onDisable() {
         loaded = false;
-        ChestRefillHologramManager.shutdown();
         if (soulWellManager != null) {
             soulWellManager.deleteHologram();
         }
@@ -620,7 +618,6 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
                 }
             }.runTaskTimer(SkyWarsReloaded.get(), 0, 40);
         }
-        ChestRefillHologramManager.init(this);
         loaded = true;
     }
 

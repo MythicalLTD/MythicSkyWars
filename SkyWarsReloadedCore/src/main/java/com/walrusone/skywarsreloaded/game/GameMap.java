@@ -299,6 +299,8 @@ public class GameMap {
             editWorld.getBlockAt(cl.getX(), cl.getY(), cl.getZ()).setType(Material.EMERALD_BLOCK);
         }
         SkyWarsReloaded.get().getServer().getScheduler().scheduleSyncDelayedTask(SkyWarsReloaded.get(), () -> {
+            // Remove lobby items/menu tools when entering map editor mode.
+            Util.get().clear(player);
             player.teleport(new Location(editWorld, 0, 95, 0), TeleportCause.PLUGIN);
             player.setGameMode(GameMode.CREATIVE);
             player.setAllowFlight(true);
@@ -368,7 +370,6 @@ public class GameMap {
         events.add(new EnderDragonEvent(this, GameEventsConfig.resolveEnabled(this, "EnderDragonEvent", fc.getBoolean("events.EnderDragonEvent.enabled"))));
         events.add(new WitherEvent(this, GameEventsConfig.resolveEnabled(this, "WitherEvent", fc.getBoolean("events.WitherEvent.enabled"))));
         events.add(new MobSpawnEvent(this, GameEventsConfig.resolveEnabled(this, "MobSpawnEvent", fc.getBoolean("events.MobSpawnEvent.enabled"))));
-        events.add(new ChestRefillEvent(this, GameEventsConfig.resolveEnabled(this, "ChestRefillEvent", fc.getBoolean("events.ChestRefillEvent.enabled"))));
         events.add(new DeathMatchEvent(this, GameEventsConfig.resolveEnabled(this, "DeathMatchEvent", fc.getBoolean("events.DeathMatchEvent.enabled"))));
         events.add(new ArrowRainEvent(this, GameEventsConfig.resolveEnabled(this, "ArrowRainEvent", fc.getBoolean("events.ArrowRainEvent.enabled"))));
         events.add(new AnvilRainEvent(this, GameEventsConfig.resolveEnabled(this, "AnvilRainEvent", fc.getBoolean("events.AnvilRainEvent.enabled"))));

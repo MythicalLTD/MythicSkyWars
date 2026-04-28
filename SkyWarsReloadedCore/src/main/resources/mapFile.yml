@@ -96,18 +96,6 @@ events:
     repeatable: false
     maxItemsPerCrate: 5
     maxNumOfCrates: 3
-  ChestRefillEvent:
-    enabled: false
-    minStart: 300
-    maxStart: 600
-    length: -1
-    chance: 100
-    title: "&cChest Refill"
-    subtitle: "&1Chests have been refilled"
-    startMessage: "&cChest refill &bevent has begun!"
-    endMessage: "&cChest refill &bevent has ended!"
-    announceTimer: false
-    repeatable: false
   DeathMatchEvent:
     enabled: false
     minStart: 900

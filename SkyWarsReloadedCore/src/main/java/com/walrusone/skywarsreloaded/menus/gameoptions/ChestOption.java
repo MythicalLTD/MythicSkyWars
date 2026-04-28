@@ -13,7 +13,6 @@ import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Util;
-import com.walrusone.skywarsreloaded.utilities.holograms.ChestRefillHologramManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Chest;
@@ -111,7 +110,6 @@ public class ChestOption extends GameOption {
                     : LuckyBlockHook.LuckyProfile.BASIC;
             if (LuckyBlockHook.replaceChestsWithLuckyBlocks(gameMap, profile)) {
                 gameMap.setActiveLuckyProfile(profile);
-                ChestRefillHologramManager.clearForMap(gameMap);
                 if (SkyWarsReloaded.getCfg().isChestVoteEnabled() && gameMap.getTimer() < 5) {
                     String tierLabel = getVoteString(resolvedVote);
                     MatchManager.get().message(
@@ -132,7 +130,6 @@ public class ChestOption extends GameOption {
         }
         populateChests(gameMap.getChests(), resolvedVote, false);
         populateChests(gameMap.getCenterChests(), resolvedVote, true);
-        ChestRefillHologramManager.clearForMap(gameMap);
         if (SkyWarsReloaded.getCfg().isChestVoteEnabled() && gameMap.getTimer() < 5) {
             String optionValue = getVoteString(resolvedVote);
             MatchManager.get().message(
