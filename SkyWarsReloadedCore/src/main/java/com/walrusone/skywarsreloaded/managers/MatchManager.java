@@ -555,8 +555,9 @@ public class MatchManager {
                 }
 
                 if (gameMap.getMatchState().equals(MatchState.WAITINGSTART)) {
+                    int queuedPlayers = gameMap.getPlayerCount();
                     // if there is at least one player per team OR forcestart is triggered while at least one player is present
-                    if (gameMap.getAllPlayers().size() >= gameMap.getMinTeams() || (gameMap.getForceStart() && gameMap.getAllPlayers().size() > 0)) {
+                    if (queuedPlayers >= gameMap.getMinTeams() || (gameMap.getForceStart() && queuedPlayers > 0)) {
                         if (gameMap.getTimer() <= 0) {
                             this.cancel();
                             gameMap.setTimer(0);
@@ -597,9 +598,10 @@ public class MatchManager {
                         gameMap.setTimer(waitTime);
                     }
                 } else { // If not in waitingstart state (aka are we in a lobby mode?)
+                    int queuedPlayers = gameMap.getWaitingPlayers().size();
 
                     // if there is at least one player per team OR forcestart is triggered while at least one player is present
-                    if (gameMap.getAllPlayers().size() >= gameMap.getMinTeams() || (gameMap.getForceStart() && gameMap.getAllPlayers().size() > 0)) {
+                    if (queuedPlayers >= gameMap.getMinTeams() || (gameMap.getForceStart() && queuedPlayers > 0)) {
                         if (gameMap.getTimer() <= 0) {
 
                             // Team assigning
@@ -619,7 +621,11 @@ public class MatchManager {
                                             the existing players in a team is higher than previously recorded lowest
                                             and increase previous lowest to += 1
                             */
-                            for (Player player : gameMap.getAllPlayers()) {
+                            for (UUID waitingUuid : ImmutableList.copyOf(gameMap.getWaitingPlayers())) {
+                                Player player = Bukkit.getPlayer(waitingUuid);
+                                if (player == null || gameMap.getTeamCard(player) != null) {
+                                    continue;
+                                }
                                 if (gameMap.getTeamCard(player) == null) {
                                     List<TeamCard> cards = gameMap.getTeamCards();
                                     Collections.shuffle(cards);
