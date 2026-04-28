@@ -22,6 +22,25 @@ public class SWTabCompleter implements TabCompleter {
     public SWTabCompleter() {
     }
 
+    private void addMapNamesForAction(List<String> possibilities, String action) {
+        GameMapManager mapMgr = SkyWarsReloaded.getGameMapMgr();
+        if (mapMgr == null) {
+            return;
+        }
+        for (GameMap map : mapMgr.getMapsCopy()) {
+            if (map == null) {
+                continue;
+            }
+            if ("register".equalsIgnoreCase(action) && map.isRegistered()) {
+                continue;
+            }
+            if (("unregister".equalsIgnoreCase(action) || "refresh".equalsIgnoreCase(action)) && !map.isRegistered()) {
+                continue;
+            }
+            possibilities.add(map.getName());
+        }
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
         List<String> possibilities = Lists.newArrayList();
@@ -41,7 +60,7 @@ public class SWTabCompleter implements TabCompleter {
                         args[0].equalsIgnoreCase("min") || args[0].equalsIgnoreCase("creator") ||
                         args[0].equalsIgnoreCase("debug") || args[0].equalsIgnoreCase("legacyload")) {
                     if (Util.get().hasPerm("map", commandSender, args[0].toLowerCase())) {
-                        for (GameMap map : SkyWarsReloaded.getGameMapMgr().getMapsCopy()) possibilities.add(map.getName());
+                        addMapNamesForAction(possibilities, args[0]);
                     }
                 } else if (args[0].equalsIgnoreCase("spawn") && Util.get().hasPerm("map", commandSender, "spawn")) {
                     possibilities = Lists.newArrayList("player", "spec", "look", "lobby", "deathmatch");
