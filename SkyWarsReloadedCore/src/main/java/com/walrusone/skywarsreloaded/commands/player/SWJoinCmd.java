@@ -4,6 +4,7 @@ import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.GameType;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Party;
 import com.walrusone.skywarsreloaded.utilities.SWRServer;
@@ -60,6 +61,10 @@ public class SWJoinCmd extends com.walrusone.skywarsreloaded.commands.BaseCmd {
         }
 
         Party party = Party.getParty(player);
+        if (luckyMode && !LuckyBlockHook.isAvailable()) {
+            player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
+            return true;
+        }
         if (luckyMode && party != null) {
             player.sendMessage(new Messaging.MessageFormatter().format("error.lucky-solo-only"));
             return true;

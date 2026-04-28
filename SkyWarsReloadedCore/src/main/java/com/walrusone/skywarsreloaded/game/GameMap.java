@@ -206,9 +206,14 @@ public class GameMap {
             }
             if (mapExists) {
                 SkyWarsReloaded.getWM().deleteWorld(name, false);
+                SkyWarsReloaded.get().getLogger().info("Deleted existing map: " + name);
             }
 
-            wm.copyWorld(source, target);
+            if (source.exists()) {
+                wm.copyWorld(source, target);
+            } else {
+                SkyWarsReloaded.get().getLogger().info("Map source does not exist: " + source.getAbsolutePath());
+            }
         }
 
         final boolean[] loaded = {false};

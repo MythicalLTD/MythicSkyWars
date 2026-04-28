@@ -17,6 +17,8 @@ import com.walrusone.skywarsreloaded.menus.gameoptions.VotingMenu;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import com.walrusone.skywarsreloaded.menus.playeroptions.OptionsSelectionMenu;
 import com.walrusone.skywarsreloaded.menus.soulwell.SoulWellMenu;
+import com.walrusone.skywarsreloaded.menus.JoinSingleMenu;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Party;
 import com.walrusone.skywarsreloaded.utilities.SWRServer;
@@ -536,7 +538,11 @@ public class PlayerInteractListener implements Listener {
             }
         }
         if (SkyWarsReloaded.getGameMapMgr().getPlayableArenas(GameType.TEAM).isEmpty()) {
-            SkyWarsReloaded.getIC().show(player, "joinsolomodemenu");
+            if (LuckyBlockHook.isAvailable()) {
+                SkyWarsReloaded.getIC().show(player, "joinsolomodemenu");
+            } else {
+                JoinSingleMenu.showFor(player, false);
+            }
         } else if (SkyWarsReloaded.getGameMapMgr().getPlayableArenas(GameType.SINGLE).isEmpty()) {
             if (!SkyWarsReloaded.getIC().hasViewers("jointeammenu")) {
                 new BukkitRunnable() {

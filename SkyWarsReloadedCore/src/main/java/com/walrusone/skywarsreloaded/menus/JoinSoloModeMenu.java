@@ -1,6 +1,7 @@
 package com.walrusone.skywarsreloaded.menus;
 
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import org.bukkit.Bukkit;
@@ -40,6 +41,10 @@ public class JoinSoloModeMenu {
                 new ItemStack(Material.GOLD_BLOCK, 1),
                 luckyLore,
                 new Messaging.MessageFormatter().format("items.joinsolo-lucky"));
+        boolean luckyAvailable = LuckyBlockHook.isAvailable();
+        if (!luckyAvailable) {
+            lucky = new ItemStack(Material.AIR, 1);
+        }
 
         menu.setItem(SLOT_NORMAL, normal);
         menu.setItem(SLOT_LUCKY, lucky);
@@ -51,6 +56,11 @@ public class JoinSoloModeMenu {
                 return;
             }
             if (event.getSlot() == SLOT_LUCKY) {
+                if (!LuckyBlockHook.isAvailable()) {
+                    Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getErrorSound(), 1, 1);
+                    player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
+                    return;
+                }
                 JoinSingleMenu.showFor(player, true);
                 return;
             }

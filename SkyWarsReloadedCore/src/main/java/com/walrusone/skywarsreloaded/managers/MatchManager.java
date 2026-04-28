@@ -309,6 +309,9 @@ public class MatchManager {
         if (gameMap == null) {
             return false;
         }
+        if (luckyMode && !LuckyBlockHook.isAvailable()) {
+            return false;
+        }
         if (gameMap.getPlayerCount() == 0) {
             return true;
         }

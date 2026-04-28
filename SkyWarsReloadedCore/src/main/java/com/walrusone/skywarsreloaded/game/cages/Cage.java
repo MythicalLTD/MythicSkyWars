@@ -14,7 +14,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +26,11 @@ public abstract class Cage {
     ArrayList<CoordLoc> topCoordOffsets = new ArrayList<>();
     CageType cageType;
 
+    private boolean canScheduleTasks() {
+        SkyWarsReloaded plugin = SkyWarsReloaded.get();
+        return plugin != null && plugin.isEnabled();
+    }
+
     public void createSpawnPlatforms(GameMap gMap) {
         World world = gMap.getCurrentWorld();
         for (List<CoordLoc> coords : gMap.getSpawnLocations().values()) {
@@ -37,22 +41,23 @@ public abstract class Cage {
                 for (CoordLoc loc : bottomCoordOffsets) {
                     world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.GLASS);
                 }
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        for (CoordLoc loc : middleCoordOffsets) {
-                            world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.GLASS);
-                        }
+                Runnable middleLayer = () -> {
+                    for (CoordLoc loc : middleCoordOffsets) {
+                        world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.GLASS);
                     }
-                }.runTaskLater(SkyWarsReloaded.get(), 7L);
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        for (CoordLoc loc : topCoordOffsets) {
-                            world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.GLASS);
-                        }
+                };
+                Runnable topLayer = () -> {
+                    for (CoordLoc loc : topCoordOffsets) {
+                        world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.GLASS);
                     }
-                }.runTaskLater(SkyWarsReloaded.get(), 14L);
+                };
+                if (canScheduleTasks()) {
+                    Bukkit.getScheduler().runTaskLater(SkyWarsReloaded.get(), middleLayer, 7L);
+                    Bukkit.getScheduler().runTaskLater(SkyWarsReloaded.get(), topLayer, 14L);
+                } else {
+                    middleLayer.run();
+                    topLayer.run();
+                }
             }
         }
     }
@@ -126,20 +131,25 @@ public abstract class Cage {
     public void removeSpawnHousing(GameMap gMap) {
         World world = gMap.getCurrentWorld();
         gMap.setAllowFallDamage(false);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                gMap.setAllowFallDamage(true);
-            }
-        }.runTaskLater(SkyWarsReloaded.get(), 100L);
+        Runnable enableFallDamage = () -> gMap.setAllowFallDamage(true);
+        if (canScheduleTasks()) {
+            Bukkit.getScheduler().runTaskLater(SkyWarsReloaded.get(), enableFallDamage, 100L);
+        } else {
+            enableFallDamage.run();
+        }
         if (SkyWarsReloaded.getCfg().debugEnabled()) {
             Util.get().logToFile("SWR[" + gMap.getName() + "] Now removing all player cage");
         }
         for (TeamCard tCard : gMap.getTeamCards()) {
-            Bukkit.getScheduler().runTaskLater(SkyWarsReloaded.get(), () -> {
+            Runnable removeTeamCage = () -> {
                 if (!SkyWarsReloaded.get().isEnabled()) return;
                 removeSpawnHousing(gMap, tCard, true);
-            }, 10L);
+            };
+            if (canScheduleTasks()) {
+                Bukkit.getScheduler().runTaskLater(SkyWarsReloaded.get(), removeTeamCage, 10L);
+            } else {
+                removeTeamCage.run();
+            }
 
         }
     }
@@ -189,9 +199,12 @@ public abstract class Cage {
             }
 
             for (CoordLoc loc : tCard.getSpawns()) {
-                Bukkit.getScheduler().runTask(SkyWarsReloaded.get(), () -> {
-                    removeSpawnHousing(gMap, loc);
-                });
+                Runnable removeSpawn = () -> removeSpawnHousing(gMap, loc);
+                if (canScheduleTasks()) {
+                    Bukkit.getScheduler().runTask(SkyWarsReloaded.get(), removeSpawn);
+                } else {
+                    removeSpawn.run();
+                }
             }
         }
     }

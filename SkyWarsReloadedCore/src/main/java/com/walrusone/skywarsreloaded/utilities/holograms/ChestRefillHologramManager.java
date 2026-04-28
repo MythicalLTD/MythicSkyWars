@@ -596,6 +596,17 @@ public final class ChestRefillHologramManager implements Listener {
             return;
         }
         SkyWarsReloaded.getNMS().playChestAction(block, open);
+        if (block.getState() instanceof Chest) {
+            Chest chest = (Chest) block.getState();
+            InventoryHolder ih = chest.getInventory().getHolder();
+            if (ih instanceof DoubleChest) {
+                DoubleChest dc = (DoubleChest) ih;
+                Chest left = (Chest) dc.getLeftSide();
+                Chest right = (Chest) dc.getRightSide();
+                SkyWarsReloaded.getNMS().playChestAction(left.getBlock(), open);
+                SkyWarsReloaded.getNMS().playChestAction(right.getBlock(), open);
+            }
+        }
     }
 
     private interface HoloBackend {

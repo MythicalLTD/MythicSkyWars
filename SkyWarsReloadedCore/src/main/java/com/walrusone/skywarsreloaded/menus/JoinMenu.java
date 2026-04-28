@@ -4,6 +4,7 @@ import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -61,7 +62,11 @@ public class JoinMenu {
                 return;
             }
             if (event.getSlot() == SkyWarsReloaded.getCfg().getSingleSlot()) {
-                SkyWarsReloaded.getIC().show(player, "joinsolomodemenu");
+                if (LuckyBlockHook.isAvailable()) {
+                    SkyWarsReloaded.getIC().show(player, "joinsolomodemenu");
+                } else {
+                    JoinSingleMenu.showFor(player, false);
+                }
                 return;
             }
 

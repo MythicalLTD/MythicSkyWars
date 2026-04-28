@@ -9,6 +9,7 @@ import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Party;
 import com.walrusone.skywarsreloaded.utilities.SWRServer;
+import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -38,6 +39,12 @@ public class JoinSingleMenu {
     private static final Set<UUID> luckySoloSelection = new HashSet<>();
 
     public static void showFor(Player player, boolean luckyMode) {
+        if (luckyMode && !LuckyBlockHook.isAvailable()) {
+            player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
+            Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getErrorSound(), 1, 1);
+            luckySoloSelection.remove(player.getUniqueId());
+            return;
+        }
         if (luckyMode) {
             luckySoloSelection.add(player.getUniqueId());
         } else {
@@ -104,6 +111,12 @@ public class JoinSingleMenu {
         }
         Party party = Party.getParty(player);
         boolean lucky = wantsLucky(player);
+        if (lucky && !LuckyBlockHook.isAvailable()) {
+            player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
+            Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getErrorSound(), 1, 1);
+            luckySoloSelection.remove(player.getUniqueId());
+            return;
+        }
         if (lucky && party != null) {
             player.sendMessage(new Messaging.MessageFormatter().format("error.lucky-solo-only"));
             return;
