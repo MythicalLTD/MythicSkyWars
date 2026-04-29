@@ -52,8 +52,7 @@ public class PlayerCommandPrepocessListener implements org.bukkit.event.Listener
                     e.getPlayer().setFallDistance(0f);
                     e.getPlayer().teleport(spawn);
                 } else {
-                    e.getPlayer().sendMessage(org.bukkit.ChatColor.RED + "Oh no! It's not possible to teleport to spawn right now. " +
-                            "The skywars lobby spawn has to be set.");
+                    e.getPlayer().sendMessage(new Messaging.MessageFormatter().format("error.nospawn"));
                 }
                 return;
             }

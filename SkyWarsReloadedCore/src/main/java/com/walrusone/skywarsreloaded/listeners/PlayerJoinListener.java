@@ -6,6 +6,7 @@ import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.managers.GameMapManager;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.managers.PlayerStat;
+import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -97,9 +98,7 @@ public class PlayerJoinListener implements Listener {
         }
 
         if (player.hasPermission("sw.admin")) {
-            player.sendMessage(ChatColor.RED +
-                    "Skywars encountered an issue while joining this bungeecord mode server.\n" +
-                    "However, since you have the sw.admin permissions, you will not be kicked to the lobby.");
+            player.sendMessage(new Messaging.MessageFormatter().format("error.bungee-join-failed-admin"));
         } else {
             SkyWarsReloaded.get().sendBungeeMsg(player, "Connect", SkyWarsReloaded.getCfg().getBungeeLobby());
             kickPlayerIfStillOnline(player, 20);

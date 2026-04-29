@@ -25,7 +25,9 @@ public class DebugCmd extends BaseCmd {
         String worldName = args[1];
         GameMap gMap = SkyWarsReloaded.getGameMapMgr().getMap(worldName);
         if (worldName.equalsIgnoreCase("null")) {
-            sender.sendMessage("Is random vote enabled? " + SkyWarsReloaded.getCfg().isRandomVoteEnabled());
+            sender.sendMessage(new Messaging.MessageFormatter()
+                    .setVariable("enabled", Boolean.toString(SkyWarsReloaded.getCfg().isRandomVoteEnabled()))
+                    .format("debug.random-vote-enabled"));
             return true;
         }
 
@@ -34,32 +36,39 @@ public class DebugCmd extends BaseCmd {
             return true;
         }
 
-        sender.sendMessage("-- Debug of arena: " + worldName);
-        sender.sendMessage("Registered: " + gMap.isRegistered());
-        sender.sendMessage("Status: " + gMap.getMatchState().name());
-        sender.sendMessage("Players: " + gMap.getPlayerCount() + "/" + gMap.getMaxPlayers());
-        sender.sendMessage("Playable arenas amount: " + SkyWarsReloaded.getGameMapMgr().getPlayableArenas(GameType.ALL).size());
+        sender.sendMessage(new Messaging.MessageFormatter().setVariable("map", worldName).format("debug.arena-header"));
+        sender.sendMessage(new Messaging.MessageFormatter().setVariable("registered", Boolean.toString(gMap.isRegistered())).format("debug.arena-registered"));
+        sender.sendMessage(new Messaging.MessageFormatter().setVariable("status", gMap.getMatchState().name()).format("debug.arena-status"));
+        sender.sendMessage(new Messaging.MessageFormatter().setVariable("players", Integer.toString(gMap.getPlayerCount())).setVariable("maxplayers", Integer.toString(gMap.getMaxPlayers())).format("debug.arena-players"));
+        sender.sendMessage(new Messaging.MessageFormatter().setVariable("count", Integer.toString(SkyWarsReloaded.getGameMapMgr().getPlayableArenas(GameType.ALL).size())).format("debug.playable-arenas"));
         sender.sendMessage(" ");
         sender.sendMessage(" ");
 
-        sender.sendMessage("-- Debug of teams");
-        sender.sendMessage("Teamcards: " + gMap.getTeamCards().size());
+        sender.sendMessage(new Messaging.MessageFormatter().format("debug.teams-header"));
+        sender.sendMessage(new Messaging.MessageFormatter().setVariable("count", Integer.toString(gMap.getTeamCards().size())).format("debug.teamcards"));
         for (TeamCard card : gMap.getTeamCards()) {
-            sender.sendMessage("#" + card.getPosition() + ": p=" + card.getPlayerCards().size() + ", s=" + card.getSpawns().size());
+            sender.sendMessage(new Messaging.MessageFormatter()
+                    .setVariable("position", Integer.toString(card.getPosition()))
+                    .setVariable("players", Integer.toString(card.getPlayerCards().size()))
+                    .setVariable("spawns", Integer.toString(card.getSpawns().size()))
+                    .format("debug.teamcard-line"));
         }
         sender.sendMessage(" ");
 
-        sender.sendMessage("Spawn teams: " + gMap.getSpawnLocations().size());
+        sender.sendMessage(new Messaging.MessageFormatter().setVariable("count", Integer.toString(gMap.getSpawnLocations().size())).format("debug.spawn-teams"));
         for (TeamCard key : gMap.getSpawnLocations().keySet()) {
             for (CoordLoc loc : gMap.getSpawnLocations().get(key)) {
-                sender.sendMessage("T-" + key.getTeamName() + ": " + loc.getLocationString());
+                sender.sendMessage(new Messaging.MessageFormatter()
+                        .setVariable("team", key.getTeamName())
+                        .setVariable("loc", loc.getLocationString())
+                        .format("debug.spawn-team-line"));
             }
         }
 
         sender.sendMessage(" ");
 
         // List all chests
-        sender.sendMessage("Island chests: " + gMap.getChests().size());
+        sender.sendMessage(new Messaging.MessageFormatter().setVariable("count", Integer.toString(gMap.getChests().size())).format("debug.island-chests"));
         for (CoordLoc loc : gMap.getChests()) {
             sender.sendMessage(loc.getLocationString());
         }
@@ -67,7 +76,7 @@ public class DebugCmd extends BaseCmd {
         sender.sendMessage(" ");
 
         // List all center chests
-        sender.sendMessage("Center chests: " + gMap.getCenterChests().size());
+        sender.sendMessage(new Messaging.MessageFormatter().setVariable("count", Integer.toString(gMap.getCenterChests().size())).format("debug.center-chests"));
         for (CoordLoc loc : gMap.getCenterChests()) {
             sender.sendMessage(loc.getLocationString());
         }
@@ -75,14 +84,14 @@ public class DebugCmd extends BaseCmd {
         sender.sendMessage(" ");
 
         if (sender instanceof Player) {
-            sender.sendMessage("-- Debug of player: " + sender.getName());
+            sender.sendMessage(new Messaging.MessageFormatter().setVariable("player", sender.getName()).format("debug.player-header"));
             GameMap map = MatchManager.get().getPlayerMap(player);
             GameMap dead = MatchManager.get().getPlayerMap(player);
             GameMap spec = MatchManager.get().getPlayerMap(player);
 
-            sender.sendMessage("Are you in-game as player? " + (map == null ? "no" : "yes") + " " + (map != null ? map.getName() : ""));
-            sender.sendMessage("Are you in-game as dead? " + (dead == null ? "no" : "yes") + " " + (dead != null ? dead.getName() : ""));
-            sender.sendMessage("Are you in-game as spec? " + (spec == null ? "no" : "yes") + " " + (spec != null ? spec.getName() : ""));
+            sender.sendMessage(new Messaging.MessageFormatter().setVariable("in", map == null ? "no" : "yes").setVariable("map", map != null ? map.getName() : "").format("debug.player-as-player"));
+            sender.sendMessage(new Messaging.MessageFormatter().setVariable("in", dead == null ? "no" : "yes").setVariable("map", dead != null ? dead.getName() : "").format("debug.player-as-dead"));
+            sender.sendMessage(new Messaging.MessageFormatter().setVariable("in", spec == null ? "no" : "yes").setVariable("map", spec != null ? spec.getName() : "").format("debug.player-as-spec"));
         }
         return true;
     }

@@ -123,6 +123,8 @@ public class SWTabCompleter implements TabCompleter {
                     for (String leaderType : SkyWarsReloaded.get().getLeaderTypes()) {
                         possibilities.add(leaderType.toLowerCase());
                     }
+                } else if (args[0].equalsIgnoreCase("migrateusw") && Util.get().hasPerm("sw", commandSender, "migrateusw")) {
+                    possibilities.add("overwrite");
                 } else if (args[0].equalsIgnoreCase("select") && Util.get().hasPerm("sw", commandSender, "select")) {
                     for (Player p : Bukkit.getOnlinePlayers()) {
                         possibilities.add(p.getName());

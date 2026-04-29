@@ -36,13 +36,13 @@ public class CheckChestTypeCmd extends com.walrusone.skywarsreloaded.commands.Ba
         CoordLoc loc = new CoordLoc(block.getLocation().getBlockX(), block.getLocation().getBlockY(), block.getLocation().getBlockZ());
 
         if (map.getCenterChests().contains(loc)) {
-            player.sendMessage("§aThe chest you are looking at is a §bcenter chest§a!");
+            player.sendMessage(new Messaging.MessageFormatter().format("maps.chest-type-center"));
             return true;
         } else if (map.getChests().contains(loc)) {
-            player.sendMessage("§aThe chest you are looking at is a §bnormal chest§a!");
+            player.sendMessage(new Messaging.MessageFormatter().format("maps.chest-type-normal"));
             return true;
         }
-        player.sendMessage("§cThe chest you are looking at is not registered in this arena!");
+        player.sendMessage(new Messaging.MessageFormatter().format("maps.chest-type-unregistered"));
         return true;
     }
 }

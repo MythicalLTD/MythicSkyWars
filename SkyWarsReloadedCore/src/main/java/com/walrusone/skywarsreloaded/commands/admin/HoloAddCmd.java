@@ -5,7 +5,6 @@ import com.walrusone.skywarsreloaded.commands.BaseCmd;
 import com.walrusone.skywarsreloaded.enums.LeaderType;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -52,7 +51,7 @@ public class HoloAddCmd extends BaseCmd {
                 player.sendMessage(new Messaging.MessageFormatter().setVariable("validtypes", formatJoiner.toString()).format("leaderboard.invalidformat"));
                 return true;
             }
-            player.sendMessage(ChatColor.RED + "Install and enable DecentHolograms to use leaderboard holograms.");
+            player.sendMessage(new Messaging.MessageFormatter().format("error.holograms-plugin-missing"));
             return true;
         }
         player.sendMessage(new Messaging.MessageFormatter().format("error.holograms-not-enabled"));

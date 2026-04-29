@@ -4,7 +4,6 @@ import com.walrusone.skywarsreloaded.commands.BaseCmd;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.GameKit;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Util;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -49,7 +48,7 @@ public class LoreCmd extends BaseCmd {
 
             // Sanity check: line number
             if (loreLineNumber < 1 || loreLineNumber > 16) {
-                player.sendMessage(ChatColor.RED + "The lore number must be between 1 - 16 or \"locked\".");
+                player.sendMessage(new Messaging.MessageFormatter().format("command.kit-loreerror"));
                 return true;
             }
 

@@ -2,9 +2,7 @@ package com.walrusone.skywarsreloaded.commands.maps;
 
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.game.GameMap;
-import com.walrusone.skywarsreloaded.managers.GameMapManager;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -28,16 +26,16 @@ public class RegisterCmd extends com.walrusone.skywarsreloaded.commands.BaseCmd 
                 sender.sendMessage(new Messaging.MessageFormatter().setVariable("mapname", gMap.getDisplayName()).format("maps.registered"));
             } else {
                 if (registeredStatus == 1) {
-                    sender.sendMessage(ChatColor.RED + "Could not register the map " + gMap.getName() + ". The team spawns are unbalanced. Make sure that each team has the same amount of spawns and that they do not override the team size.");
+                    sender.sendMessage(new Messaging.MessageFormatter().setVariable("mapname", gMap.getName()).format("error.map-register-unbalanced-spawns"));
                 }
                 else if (registeredStatus == 2) {
-                    sender.sendMessage(ChatColor.RED + "Could not register the map " + gMap.getName() + ". The arena doesn't have enough spawnpoints, you must have at least 2 set. Use '/swm spawn player'.");
+                    sender.sendMessage(new Messaging.MessageFormatter().setVariable("mapname", gMap.getName()).format("error.map-register-not-enough-spawns"));
                 }
                 else if (registeredStatus == 3) {
-                    sender.sendMessage(ChatColor.RED + "Could not register the map " + gMap.getName() + ". You didn't set the spectator spawn. Use '/swm spawn spec'.");
+                    sender.sendMessage(new Messaging.MessageFormatter().setVariable("mapname", gMap.getName()).format("error.map-register-missing-spec"));
                 }
                 else if (registeredStatus == 4) {
-                    sender.sendMessage(ChatColor.RED + "Could not register the map " + gMap.getName() + ". No waiting lobby spawn has been set. This is required for team games. Use '/swm spawn lobby'.");
+                    sender.sendMessage(new Messaging.MessageFormatter().setVariable("mapname", gMap.getName()).format("error.map-register-missing-lobby"));
                 }
                 else {
                     sender.sendMessage(new Messaging.MessageFormatter().format("error.map-failed-to-register"));

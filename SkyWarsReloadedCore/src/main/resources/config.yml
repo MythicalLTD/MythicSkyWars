@@ -318,6 +318,15 @@ sqldatabase:
   username: username
   password: password
   ssl: true
+migration:
+  ultimateskywars:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: database
+      username: ''
+      password: ''
+      collection: players
 leaderboards:
   length: 10
   leaderboardUpdateInterval: 300

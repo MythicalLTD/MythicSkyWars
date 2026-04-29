@@ -369,8 +369,7 @@ public class LobbyListener implements org.bukkit.event.Listener {
                         player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join"));
                     }
                 } else {
-                    e.getPlayer().sendMessage(org.bukkit.ChatColor.RED + "Oh no! It's not possible to join a game at this time. The server admin hasn't set up the Skywars properly. " +
-                            "The skywars lobby spawn has to be set.");
+                    e.getPlayer().sendMessage(new Messaging.MessageFormatter().format("error.nospawn"));
                     SkyWarsReloaded.get().getLogger().info("It's not possible for people to join games if the skywars lobby spawn hasn't been set. Set it using '/sw setspawn'");
                 }
             }

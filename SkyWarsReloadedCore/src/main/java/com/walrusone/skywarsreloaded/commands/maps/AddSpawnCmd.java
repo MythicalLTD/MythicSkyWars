@@ -53,7 +53,7 @@ public class AddSpawnCmd extends com.walrusone.skywarsreloaded.commands.BaseCmd 
                                 .setVariable("mapname", gMap.getDisplayName())
                                 .format("maps.addSpawn"));
                     } else {
-                        player.sendMessage(ChatColor.RED + "You have team mode enabled! You must specify a team to add this spawn to.");
+                        player.sendMessage(new Messaging.MessageFormatter().format("error.map-spawn-team-required"));
                     }
 
                 } else if ((type.equalsIgnoreCase("spec")) || (type.equalsIgnoreCase("s"))) {
@@ -83,14 +83,14 @@ public class AddSpawnCmd extends com.walrusone.skywarsreloaded.commands.BaseCmd 
                             .format("maps.waitingLobbySpawn"));
 
                 } else {
-                    player.sendMessage(net.md_5.bungee.api.ChatColor.RED + "Type must be: player, spec, eye, deathmatch or lobby");
+                    player.sendMessage(new Messaging.MessageFormatter().format("error.map-spawn-type"));
                 }
                 return true;
             }
             else if (args.length == 3) {
                 if ((type.equalsIgnoreCase("player")) || (type.equalsIgnoreCase("p"))) {
                     if (!Util.get().isInteger(args[2]) || Integer.parseInt(args[2]) <= 0) {
-                        player.sendMessage(ChatColor.RED + "You must enter a valid number greater than 0");
+                        player.sendMessage(new Messaging.MessageFormatter().format("error.map-spawn-team-number"));
                         return true;
                     }
                     if (gMap.getTeamSize() > 1 && SkyWarsReloaded.getCfg().isUseSeparateCages()) {
@@ -109,14 +109,14 @@ public class AddSpawnCmd extends com.walrusone.skywarsreloaded.commands.BaseCmd 
 
                     } else {
                         if (gMap.getTeamSize() == 1) {
-                            player.sendMessage(ChatColor.RED + "You have solo mode enabled! There are no teams to add a spawn to. Use: /swm spawn player");
+                            player.sendMessage(new Messaging.MessageFormatter().format("error.map-spawn-solo-no-team"));
                         } else {
-                            player.sendMessage(ChatColor.RED + "You do not have separate cages enabled! You can only add one spawn per team. Use: /swm spawn player");
+                            player.sendMessage(new Messaging.MessageFormatter().format("error.map-spawn-separate-cages-disabled"));
                         }
                     }
                 }
                 else {
-                    player.sendMessage(ChatColor.RED + "Correct usage: /swm spawn <type> [team]");
+                    player.sendMessage(new Messaging.MessageFormatter().format("error.map-spawn-usage"));
                 }
                 return true;
             }

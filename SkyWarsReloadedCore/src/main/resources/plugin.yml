@@ -70,6 +70,7 @@ permissions:
       sw.allowcommands: true
       sw.spectate: true
       sw.updatetop: true
+      sw.migrateusw: true
   sw.maps:
     description: Allows a player to use all map commands.
     default: op
@@ -185,6 +186,9 @@ permissions:
     default: op
   sw.updatetop:
     description: Allows a player to use the updatetop command.
+    default: op
+  sw.migrateusw:
+    description: Allows importing stats from UltraSkyWars MongoDB.
     default: op
   sw.start:
     description: Allows a player to use the start command.

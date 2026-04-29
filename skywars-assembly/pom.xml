@@ -153,6 +153,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.walrusone</include>
+                                    <include>org.mongodb:mongo-java-driver</include>
                                 </includes>
                             </artifactSet>
                             <finalName>SWR-${revision}</finalName>
@@ -169,6 +170,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.walrusone</include>
+                                    <include>org.mongodb:mongo-java-driver</include>
                                 </includes>
                             </artifactSet>
                             <finalName>SWR-latest</finalName>

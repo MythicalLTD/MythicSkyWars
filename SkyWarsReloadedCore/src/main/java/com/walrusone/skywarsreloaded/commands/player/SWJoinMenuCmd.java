@@ -113,7 +113,7 @@ public class SWJoinMenuCmd extends BaseCmd {
             Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getOpenJoinMenuSound(), 1, 1);
             SkyWarsReloaded.getIC().show(player, "joinmenu");
         } else {
-            player.sendMessage(ChatColor.RED + "No se encontró el menú de selección.");
+            player.sendMessage(new Messaging.MessageFormatter().format("error.joinmenu-not-found"));
         }
     }
 }
