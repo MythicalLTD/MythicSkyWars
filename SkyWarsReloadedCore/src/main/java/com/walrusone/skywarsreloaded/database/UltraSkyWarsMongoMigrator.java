@@ -9,6 +9,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
+import com.walrusone.skywarsreloaded.utilities.LevelManager;
 import com.walrusone.skywarsreloaded.utilities.VaultUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -282,6 +283,7 @@ public final class UltraSkyWarsMongoMigrator {
         stats.deaths = Math.max(0, asInt(playerDoc.get("deaths")));
         stats.coins = Math.max(0, asInt(playerDoc.get("coins")));
         stats.elo = Math.max(0, asInt(playerDoc.get("elo")));
+        stats.level = Math.max(1, asInt(playerDoc.get("level")));
 
         String skywarsJson = asString(playerDoc.get("skywars"));
         if (skywarsJson != null) {
@@ -292,6 +294,13 @@ public final class UltraSkyWarsMongoMigrator {
             stats.souls = Math.max(0, extractJsonInt(skywarsJson, "souls", 0));
             stats.coins = Math.max(stats.coins, extractJsonInt(skywarsJson, "coins", stats.coins));
             stats.elo = Math.max(stats.elo, extractJsonInt(skywarsJson, "elo", stats.elo));
+            stats.level = Math.max(stats.level, extractJsonInt(skywarsJson, "level", stats.level));
+        }
+
+        // SWR e gay si calculeaza xp-ul in functie de level, asa ca mai bine ii dam xp necesar pentru levelul respectiv :))))))))
+        if (stats.level > 1) {
+            int xpForLevel = LevelManager.get().getXpForLevel(stats.level);
+            stats.xp = Math.max(stats.xp, Math.max(0, xpForLevel));
         }
 
         return stats;
@@ -341,5 +350,6 @@ public final class UltraSkyWarsMongoMigrator {
         private int souls;
         private int coins;
         private int elo;
+        private int level;
     }
 }
