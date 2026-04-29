@@ -26,6 +26,13 @@ public class FileWorldManager implements WorldManager {
 
     public boolean loadWorld(String worldName, Environment environment, boolean readOnly) {
 
+        // On Paper 26.1+, worlds are stored in world/dimensions/minecraft/<name>
+        // We need to delete the migrated folder before re-creating to avoid migration conflicts
+        File migratedDir = new File(SkyWarsReloaded.get().getServer().getWorldContainer(), "world/dimensions/minecraft/" + worldName);
+        if (migratedDir.exists()) {
+            deleteWorld(migratedDir);
+        }
+
         WorldCreator worldCreator = new WorldCreator(worldName);
         worldCreator.environment(environment);
         worldCreator.generateStructures(false);

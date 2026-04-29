@@ -345,6 +345,7 @@ public class MatchManager {
 
     public void message(@NotNull final GameMap gameMap, final String message, @Nullable Player skip) {
         World w = gameMap.getCurrentWorld();
+        if (w == null) return;
         List<Player> worldPlayers = w.getPlayers();
         if (worldPlayers != null && !worldPlayers.isEmpty()) {
             if (debug) {

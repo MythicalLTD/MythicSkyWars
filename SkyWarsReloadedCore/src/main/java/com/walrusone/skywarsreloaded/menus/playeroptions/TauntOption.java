@@ -90,7 +90,8 @@ public class TauntOption extends PlayerOption {
                     double speed = storage.getDouble("taunts." + key + ".particleSpeed");
                     int density = storage.getInt("taunts." + key + ".particleDensity");
                     List<String> particles = storage.getStringList("taunts." + key + ".particles");
-                    Material icon = Material.valueOf(storage.getString("taunts." + key + ".icon", "DIAMOND"));
+                    Material icon = Material.matchMaterial(storage.getString("taunts." + key + ".icon", "DIAMOND"));
+                    if (icon == null) icon = Material.DIAMOND;
                     int position = storage.getInt("taunts." + key + ".position");
                     int page = storage.getInt("taunts." + key + ".page");
                     int menuSize = storage.getInt("menuSize");
@@ -99,7 +100,7 @@ public class TauntOption extends PlayerOption {
             }
         }
         Collections.sort(playerOptions);
-        if (playerOptions.size()>=4 && playerOptions.get(3) != null && playerOptions.get(3).getPosition() == 0 || playerOptions.get(3).getPage() == 0) {
+        if (playerOptions.size() >= 4 && playerOptions.get(3) != null && (playerOptions.get(3).getPosition() == 0 || playerOptions.get(3).getPage() == 0)) {
             FileConfiguration storage = YamlConfiguration.loadConfiguration(tauntFile);
             updateFile(tauntFile, storage);
         }

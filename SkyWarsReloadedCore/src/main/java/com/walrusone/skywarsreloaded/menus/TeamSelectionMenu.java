@@ -75,7 +75,9 @@ public class TeamSelectionMenu {
                     byte color = SkyWarsReloaded.getCfg().isUseTeamMaterialBytes() ? tCard.getByte() : (byte) SkyWarsReloaded.getCfg().getStandardTeamMaterialByte();
                     ItemStack item;
                     if (SkyWarsReloaded.getNMS().getVersion() >= 13) {
-                        item = new ItemStack(Material.valueOf(mat.toUpperCase()));
+                        Material material = Material.matchMaterial(mat.toUpperCase());
+                        if (material == null) material = Material.STONE;
+                        item = new ItemStack(material);
                     }
                     else {
                         item = SkyWarsReloaded.getNMS().getColorItem(mat, color);

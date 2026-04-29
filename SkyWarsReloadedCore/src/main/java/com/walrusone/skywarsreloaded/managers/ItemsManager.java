@@ -39,7 +39,9 @@ public class ItemsManager {
         if (data != -1) {
             item = SkyWarsReloaded.getNMS().getColorItem(matWithData, (byte) data);
         } else {
-            item = new ItemStack(Material.valueOf(message.toUpperCase()), 1);
+            Material material = matchMaterialSafe(message);
+            if (material == null) material = Material.BARRIER;
+            item = new ItemStack(material, 1);
         }
 
         ItemStack addItem = SkyWarsReloaded.getNMS().getItemStack(item, lore, message);
@@ -59,7 +61,9 @@ public class ItemsManager {
         if (data != -1) {
             item = SkyWarsReloaded.getNMS().getColorItem(matWithData, (byte) data);
         } else {
-            item = new ItemStack(Material.valueOf(SkyWarsReloaded.getCfg().getMaterial(materialref).toUpperCase()), 1);
+            Material material = matchMaterialSafe(SkyWarsReloaded.getCfg().getMaterial(materialref));
+            if (material == null) material = Material.BARRIER;
+            item = new ItemStack(material, 1);
         }
 
         ItemStack addItem = SkyWarsReloaded.getNMS().getItemStack(item, lore, new Messaging.MessageFormatter().format(message));
@@ -196,5 +200,16 @@ public class ItemsManager {
 
     public ItemStack getItem(String item) {
         return gameItems.get(item).clone();
+    }
+
+    /**
+     * Safely match a material name, handling legacy names (e.g. WOOD_SWORD -> WOODEN_SWORD).
+     * Uses Material.matchMaterial which handles legacy name resolution on supported versions.
+     */
+    private static Material matchMaterialSafe(String name) {
+        if (name == null) return null;
+        String upper = name.toUpperCase().trim();
+        Material mat = Material.matchMaterial(upper);
+        return mat;
     }
 }

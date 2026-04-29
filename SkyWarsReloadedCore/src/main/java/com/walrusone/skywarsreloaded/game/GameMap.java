@@ -1231,12 +1231,30 @@ public class GameMap {
                 public void run() {
                     gMap.loadMap();
                 }
-            }.runTaskLater(SkyWarsReloaded.get(), 10);
+            }.runTaskLater(SkyWarsReloaded.get(), 20);
         }
         if (SkyWarsReloaded.get().isEnabled()) {
             new BukkitRunnable() {
                 @Override
                 public void run() {
+                    // Ensure world is loaded before starting match
+                    if (gMap.getCurrentWorld() == null) {
+                        // Retry after another 40 ticks
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                if (teamSize > 1) {
+                                    setMatchState(MatchState.WAITINGLOBBY);
+                                } else {
+                                    setMatchState(MatchState.WAITINGSTART);
+                                }
+                                gameboard.updateScoreboard();
+                                MatchManager.get().start(gMap);
+                                update();
+                            }
+                        }.runTaskLater(SkyWarsReloaded.get(), 40);
+                        return;
+                    }
                     if (teamSize > 1) {
                         setMatchState(MatchState.WAITINGLOBBY);
                     } else {
@@ -1246,7 +1264,7 @@ public class GameMap {
                     MatchManager.get().start(gMap);
                     update();
                 }
-            }.runTaskLater(SkyWarsReloaded.get(), 50);
+            }.runTaskLater(SkyWarsReloaded.get(), 60);
         }
     }
 
