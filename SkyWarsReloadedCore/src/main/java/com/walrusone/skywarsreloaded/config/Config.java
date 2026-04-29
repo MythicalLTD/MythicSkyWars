@@ -1043,7 +1043,8 @@ public class Config {
     }
 
     public Material getRandMat() {
-        return Material.valueOf(randMat);
+        Material mat = Material.matchMaterial(randMat);
+        return mat != null ? mat : Material.CHEST;
     }
 
     public int getNoKitPos() {
@@ -1051,7 +1052,8 @@ public class Config {
     }
 
     public Material getNoKitMat() {
-        return Material.valueOf(noKitMat);
+        Material mat = Material.matchMaterial(noKitMat);
+        return mat != null ? mat : Material.BARRIER;
     }
 
     public boolean promptForResource() {

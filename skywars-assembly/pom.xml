@@ -134,6 +134,12 @@
             <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.walrusone</groupId>
+            <artifactId>v26_1_R1</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

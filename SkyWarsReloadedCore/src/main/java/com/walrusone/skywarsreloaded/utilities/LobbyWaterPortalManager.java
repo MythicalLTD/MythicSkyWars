@@ -253,7 +253,13 @@ public class LobbyWaterPortalManager {
     }
 
     private static boolean isInWater(Material material) {
-        return material == Material.WATER || material == Material.STATIONARY_WATER;
+        if (material == Material.WATER) return true;
+        // STATIONARY_WATER was removed in 1.13+, check by name for legacy support
+        try {
+            return material.name().equals("STATIONARY_WATER");
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private static String key(String name) {

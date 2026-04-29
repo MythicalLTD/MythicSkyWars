@@ -121,6 +121,7 @@ public abstract class Cage {
     }
 
     private void setBlockColor(CoordLoc loc, int x, int y, int z, World world, MaterialWithByte materialWithByte) {
+        if (world == null) return;
         if (materialWithByte.cByte <= -1) {
             world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(materialWithByte.mat);
         } else {

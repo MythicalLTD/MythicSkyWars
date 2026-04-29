@@ -162,6 +162,15 @@ public class JSONMessage {
      * @param players The players you want to send this to
      */
     public void send(Player... players) {
+        if (!ReflectionHelper.SETUP) {
+            // Fallback for 26.1+ where NMS reflection is unavailable
+            // Use the NMS handler's sendJSON method
+            String json = toString();
+            for (Player player : players) {
+                com.walrusone.skywarsreloaded.SkyWarsReloaded.getNMS().sendJSON(player, json);
+            }
+            return;
+        }
         ReflectionHelper.sendPacket(ReflectionHelper.createTextPacket(toString()), players);
     }
 
@@ -566,9 +575,17 @@ public class JSONMessage {
             version = split[split.length - 1];
 
             try {
-                SETUP = true;
+                // On 26.1+ (and Paper 1.20.5+), CraftBukkit no longer has versioned packages.
+                // NMS reflection won't work — skip setup and rely on Bukkit API / NMS handler.
+                if (version.equals("craftbukkit")) {
+                    SETUP = false;
+                    MAJOR_VER = 26;
+                } else {
+                    SETUP = true;
+                    MAJOR_VER = getVersion();
+                }
 
-                MAJOR_VER = getVersion();
+                if (!SETUP) throw new UnsupportedOperationException("NMS reflection not available on unversioned CraftBukkit");
 
                 craftPlayer = getClass("{obc}.entity.CraftPlayer");
                 Method getHandle = craftPlayer.getMethod("getHandle");
@@ -606,6 +623,9 @@ public class JSONMessage {
                     enumActionbarMessage = getChatMessageType.invoke(null, (byte) 2);
                 }
 
+            } catch (UnsupportedOperationException ignored) {
+                // Expected on 26.1+ where NMS reflection is not available
+                SETUP = false;
             } catch (Exception e) {
                 e.printStackTrace();
                 SETUP = false;
@@ -796,7 +816,7 @@ public class JSONMessage {
 
         static int getVersion() {
             if (!SETUP) {
-                throw new IllegalStateException("ReflectionHelper is not set up!");
+                return MAJOR_VER;
             }
             try {
                 return Integer.parseInt(version.split("_")[1]);

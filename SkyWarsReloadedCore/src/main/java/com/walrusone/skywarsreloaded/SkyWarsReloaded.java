@@ -275,7 +275,18 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
             } catch (Exception e) {
                 e.printStackTrace();
                 getLogger().info("AdvancedSlimePaper not found");
-                int serverFeatureVersion = Integer.parseInt(getServer().getVersion().split("\\.")[1]);
+                int serverFeatureVersion;
+                try {
+                    String bukkitVer = getServer().getBukkitVersion().split("-")[0]; // e.g. "26.1.2" or "1.21.1"
+                    String[] verParts = bukkitVer.split("\\.");
+                    if (verParts[0].equals("1")) {
+                        serverFeatureVersion = Integer.parseInt(verParts[1]); // 1.XX.Y -> XX
+                    } else {
+                        serverFeatureVersion = Integer.parseInt(verParts[0]); // YY.D.H -> YY
+                    }
+                } catch (Exception ex2) {
+                    serverFeatureVersion = Integer.parseInt(getServer().getVersion().split("\\.")[1]);
+                }
                 if (serverFeatureVersion > 19) {
                     getLogger().info("SlimeWorldManager cannot be used on 1.20 or higher. We expected the server to be running AdvancedSlimePaper.");
                     wm = null;
