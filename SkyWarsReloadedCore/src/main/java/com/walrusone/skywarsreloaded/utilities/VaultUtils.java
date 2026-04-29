@@ -5,8 +5,12 @@ import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
+
+import java.lang.reflect.Method;
+import java.util.UUID;
 
 public class VaultUtils {
     private static VaultUtils instance;
@@ -87,6 +91,25 @@ public class VaultUtils {
         return econ != null;
     }
 
+    public boolean setBalance(UUID uuid, String playerName, double amount) {
+        if (econ == null) return false;
+        amount = Math.max(0D, amount);
+        try {
+            double current = getBalance(uuid, playerName);
+            double delta = amount - current;
+            if (Math.abs(delta) < 0.000001D) {
+                return true;
+            }
+            if (delta > 0D) {
+                return deposit(uuid, playerName, delta);
+            }
+            return withdraw(uuid, playerName, -delta);
+        } catch (Exception e) {
+            this.handleException(e);
+            return false;
+        }
+    }
+
     // PRIVATE UTILS
 
     private void handleException(Exception e) {
@@ -94,6 +117,75 @@ public class VaultUtils {
         else SkyWarsReloaded.get().getLogger().severe(
                 "An exception was thrown while attempting to deposit eco: " + e.getMessage() +
                         ". Please enable debugMode in the config file before reporting this issue!");
+    }
+
+    private double getBalance(UUID uuid, String playerName) throws Exception {
+        OfflinePlayer offline = uuid == null ? null : Bukkit.getOfflinePlayer(uuid);
+        Double byOffline = invokeDouble("getBalance", new Class<?>[]{OfflinePlayer.class}, new Object[]{offline});
+        if (byOffline != null) {
+            return byOffline;
+        }
+        if (playerName != null && !playerName.trim().isEmpty()) {
+            Double byName = invokeDouble("getBalance", new Class<?>[]{String.class}, new Object[]{playerName});
+            if (byName != null) {
+                return byName;
+            }
+        }
+        return 0D;
+    }
+
+    private boolean deposit(UUID uuid, String playerName, double amount) throws Exception {
+        OfflinePlayer offline = uuid == null ? null : Bukkit.getOfflinePlayer(uuid);
+        Boolean byOffline = invokeTransaction("depositPlayer", new Class<?>[]{OfflinePlayer.class, double.class}, new Object[]{offline, amount});
+        if (byOffline != null) {
+            return byOffline;
+        }
+        if (playerName != null && !playerName.trim().isEmpty()) {
+            Boolean byName = invokeTransaction("depositPlayer", new Class<?>[]{String.class, double.class}, new Object[]{playerName, amount});
+            if (byName != null) {
+                return byName;
+            }
+        }
+        return false;
+    }
+
+    private boolean withdraw(UUID uuid, String playerName, double amount) throws Exception {
+        OfflinePlayer offline = uuid == null ? null : Bukkit.getOfflinePlayer(uuid);
+        Boolean byOffline = invokeTransaction("withdrawPlayer", new Class<?>[]{OfflinePlayer.class, double.class}, new Object[]{offline, amount});
+        if (byOffline != null) {
+            return byOffline;
+        }
+        if (playerName != null && !playerName.trim().isEmpty()) {
+            Boolean byName = invokeTransaction("withdrawPlayer", new Class<?>[]{String.class, double.class}, new Object[]{playerName, amount});
+            if (byName != null) {
+                return byName;
+            }
+        }
+        return false;
+    }
+
+    private Double invokeDouble(String methodName, Class<?>[] paramTypes, Object[] args) {
+        try {
+            Method method = econ.getClass().getMethod(methodName, paramTypes);
+            Object result = method.invoke(econ, args);
+            if (result instanceof Number) {
+                return ((Number) result).doubleValue();
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private Boolean invokeTransaction(String methodName, Class<?>[] paramTypes, Object[] args) {
+        try {
+            Method method = econ.getClass().getMethod(methodName, paramTypes);
+            Object result = method.invoke(econ, args);
+            if (result instanceof EconomyResponse) {
+                return ((EconomyResponse) result).transactionSuccess();
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
 }

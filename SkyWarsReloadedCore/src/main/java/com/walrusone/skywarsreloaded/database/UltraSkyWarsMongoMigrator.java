@@ -9,6 +9,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
+import com.walrusone.skywarsreloaded.utilities.VaultUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -19,8 +20,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class UltraSkyWarsMongoMigrator {
+    private static final Pattern INT_FIELD_PATTERN = Pattern.compile("\"([^\"]+)\"\\s*:\\s*(-?\\d+)");
 
     private UltraSkyWarsMongoMigrator() {
     }
@@ -118,18 +122,22 @@ public final class UltraSkyWarsMongoMigrator {
             name = uuidText;
         }
 
-        int wins = asInt(playerDoc.get("wins"));
-        int kills = asInt(playerDoc.get("kills"));
-        int deaths = asInt(playerDoc.get("deaths"));
+        MigratedStats stats = readStats(playerDoc);
 
         boolean sqlEnabled = SkyWarsReloaded.get().getConfig().getBoolean("sqldatabase.enabled");
+        boolean changed;
         if (sqlEnabled) {
-            return migrateToSql(uuidText, name, wins, kills, deaths, overwrite);
+            changed = migrateToSql(uuidText, name, stats, overwrite);
+        } else {
+            changed = migrateToYaml(uuidText, name, stats, overwrite);
         }
-        return migrateToYaml(uuidText, name, wins, kills, deaths, overwrite);
+        if (changed && SkyWarsReloaded.getCfg().economyEnabled() && VaultUtils.get().isEconomyAvailable()) {
+            VaultUtils.get().setBalance(uuid, name, Math.max(0D, stats.coins));
+        }
+        return changed;
     }
 
-    private static boolean migrateToSql(String uuid, String name, int wins, int kills, int deaths, boolean overwrite) throws SQLException {
+    private static boolean migrateToSql(String uuid, String name, MigratedStats stats, boolean overwrite) throws SQLException {
         Database database = SkyWarsReloaded.getDb();
         if (database == null || database.checkConnection()) {
             throw new SQLException("SkyWarsReloaded SQL database is not available.");
@@ -147,13 +155,15 @@ public final class UltraSkyWarsMongoMigrator {
             PreparedStatement update = null;
             try {
                 update = connection.prepareStatement(
-                        "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `kills` = ?, `deaths` = ? WHERE `uuid` = ?;"
+                        "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `kills` = ?, `deaths` = ?, `xp` = ?, `souls` = ? WHERE `uuid` = ?;"
                 );
                 update.setString(1, name);
-                update.setInt(2, Math.max(0, wins));
-                update.setInt(3, Math.max(0, kills));
-                update.setInt(4, Math.max(0, deaths));
-                update.setString(5, uuid);
+                update.setInt(2, stats.wins);
+                update.setInt(3, stats.kills);
+                update.setInt(4, stats.deaths);
+                update.setInt(5, stats.xp);
+                update.setInt(6, stats.souls);
+                update.setString(7, uuid);
                 update.executeUpdate();
             } finally {
                 if (update != null) {
@@ -167,13 +177,15 @@ public final class UltraSkyWarsMongoMigrator {
         try {
             insert = connection.prepareStatement(
                     "INSERT INTO `sw_player` (`player_id`, `uuid`, `player_name`, `wins`, `losses`, `kills`, `deaths`, `xp`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt`, `souls`, `soulwell_usages`, `soulwell_legendaries`, `soulwell_rares`, `soulwell_souls_gathered`, `soulwell_souls_purchased`) " +
-                            "VALUES (NULL, ?, ?, ?, 0, ?, ?, 0, 'none', 'none', 'none', 'none', 'none', 'none', 0, 0, 0, 0, 0, 0);"
+                            "VALUES (NULL, ?, ?, ?, 0, ?, ?, ?, 'none', 'none', 'none', 'none', 'none', 'none', ?, 0, 0, 0, 0, 0);"
             );
             insert.setString(1, uuid);
             insert.setString(2, name);
-            insert.setInt(3, Math.max(0, wins));
-            insert.setInt(4, Math.max(0, kills));
-            insert.setInt(5, Math.max(0, deaths));
+            insert.setInt(3, stats.wins);
+            insert.setInt(4, stats.kills);
+            insert.setInt(5, stats.deaths);
+            insert.setInt(6, stats.xp);
+            insert.setInt(7, stats.souls);
             insert.executeUpdate();
             return true;
         } finally {
@@ -201,7 +213,7 @@ public final class UltraSkyWarsMongoMigrator {
         }
     }
 
-    private static boolean migrateToYaml(String uuid, String name, int wins, int kills, int deaths, boolean overwrite) throws Exception {
+    private static boolean migrateToYaml(String uuid, String name, MigratedStats stats, boolean overwrite) throws Exception {
         File playerDataDirectory = new File(SkyWarsReloaded.get().getDataFolder(), "player_data");
         if (!playerDataDirectory.exists() && !playerDataDirectory.mkdirs()) {
             throw new IllegalStateException("Unable to create player_data directory.");
@@ -218,15 +230,13 @@ public final class UltraSkyWarsMongoMigrator {
         FileConfiguration fc = YamlConfiguration.loadConfiguration(playerFile);
         fc.set("uuid", uuid);
         fc.set("player_name", name);
-        fc.set("wins", Math.max(0, wins));
-        fc.set("kills", Math.max(0, kills));
-        fc.set("deaths", Math.max(0, deaths));
+        fc.set("wins", stats.wins);
+        fc.set("kills", stats.kills);
+        fc.set("deaths", stats.deaths);
         if (!fc.contains("losses")) {
             fc.set("losses", 0);
         }
-        if (!fc.contains("xp")) {
-            fc.set("xp", 0);
-        }
+        fc.set("xp", stats.xp);
         if (!fc.contains("pareffect")) {
             fc.set("pareffect", "none");
         }
@@ -245,9 +255,7 @@ public final class UltraSkyWarsMongoMigrator {
         if (!fc.contains("taunt")) {
             fc.set("taunt", "none");
         }
-        if (!fc.contains("souls")) {
-            fc.set("souls", 0);
-        }
+        fc.set("souls", stats.souls);
         if (!fc.contains("soulwell_usages")) {
             fc.set("soulwell_usages", 0);
         }
@@ -265,6 +273,42 @@ public final class UltraSkyWarsMongoMigrator {
         }
         fc.save(playerFile);
         return true;
+    }
+
+    private static MigratedStats readStats(DBObject playerDoc) {
+        MigratedStats stats = new MigratedStats();
+        stats.wins = Math.max(0, asInt(playerDoc.get("wins")));
+        stats.kills = Math.max(0, asInt(playerDoc.get("kills")));
+        stats.deaths = Math.max(0, asInt(playerDoc.get("deaths")));
+        stats.coins = Math.max(0, asInt(playerDoc.get("coins")));
+        stats.elo = Math.max(0, asInt(playerDoc.get("elo")));
+
+        String skywarsJson = asString(playerDoc.get("skywars"));
+        if (skywarsJson != null) {
+            stats.wins = Math.max(stats.wins, extractJsonInt(skywarsJson, "wins", stats.wins));
+            stats.kills = Math.max(stats.kills, extractJsonInt(skywarsJson, "kills", stats.kills));
+            stats.deaths = Math.max(stats.deaths, extractJsonInt(skywarsJson, "deaths", stats.deaths));
+            stats.xp = Math.max(0, extractJsonInt(skywarsJson, "xp", 0));
+            stats.souls = Math.max(0, extractJsonInt(skywarsJson, "souls", 0));
+            stats.coins = Math.max(stats.coins, extractJsonInt(skywarsJson, "coins", stats.coins));
+            stats.elo = Math.max(stats.elo, extractJsonInt(skywarsJson, "elo", stats.elo));
+        }
+
+        return stats;
+    }
+
+    private static int extractJsonInt(String json, String field, int fallback) {
+        Matcher matcher = INT_FIELD_PATTERN.matcher(json);
+        while (matcher.find()) {
+            if (field.equals(matcher.group(1))) {
+                try {
+                    return Integer.parseInt(matcher.group(2));
+                } catch (NumberFormatException ignored) {
+                    return fallback;
+                }
+            }
+        }
+        return fallback;
     }
 
     private static String asString(Object val) {
@@ -287,5 +331,15 @@ public final class UltraSkyWarsMongoMigrator {
         } catch (NumberFormatException ignored) {
             return 0;
         }
+    }
+
+    private static final class MigratedStats {
+        private int wins;
+        private int kills;
+        private int deaths;
+        private int xp;
+        private int souls;
+        private int coins;
+        private int elo;
     }
 }
