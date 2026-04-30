@@ -105,11 +105,11 @@ public abstract class MatchEvent {
 
         for (org.bukkit.entity.Player player : gMap.getAlivePlayers()) {
             if (com.walrusone.skywarsreloaded.SkyWarsReloaded.getCfg().titlesEnabled()) {
-                Util.get().sendTitle(player, 2, 20, 2, ChatColor.translateAlternateColorCodes('&', title),
-                        ChatColor.translateAlternateColorCodes('&', subtitle));
+                Util.get().sendTitle(player, 2, 20, 2, colorize(title),
+                        colorize(subtitle));
             }
         }
-        MatchManager.get().message(gMap, ChatColor.translateAlternateColorCodes('&', startMessage));
+        MatchManager.get().message(gMap, colorize(startMessage));
     }
 
     public void announceTimer() {
@@ -133,7 +133,7 @@ public abstract class MatchEvent {
             }
             time = remainingTime + " " + (remainingTime > 1 ? new Messaging.MessageFormatter().format("timer.seconds") : new Messaging.MessageFormatter().format("timer.second"));
         }
-        MatchManager.get().message(gMap, new Messaging.MessageFormatter().setVariable("event", title).setVariable("time", time).format("event.announce"));
+        MatchManager.get().message(gMap, new Messaging.MessageFormatter().setVariable("event", getTitle()).setVariable("time", time).format("event.announce"));
     }
 
     public boolean announceEnabled() {
@@ -213,7 +213,7 @@ public abstract class MatchEvent {
     }
 
     public String getTitle() {
-        return ChatColor.translateAlternateColorCodes('&', title);
+        return colorize(title);
     }
 
     public void setTitle(String title) {
@@ -286,5 +286,12 @@ public abstract class MatchEvent {
 
     public void setMaxOverride(@Nullable Integer max) {
         maxOverride = max;
+    }
+
+    private String colorize(@Nullable String text) {
+        if (text == null) {
+            return "";
+        }
+        return ChatColor.translateAlternateColorCodes('&', text);
     }
 }

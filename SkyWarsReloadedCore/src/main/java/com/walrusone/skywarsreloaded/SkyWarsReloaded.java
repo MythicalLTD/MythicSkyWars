@@ -333,6 +333,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
         this.getServer().getPluginManager().registerEvents(new PlayerQuitListener(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
+        this.getServer().getPluginManager().registerEvents(new SummonedMobListener(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
         this.getServer().getPluginManager().registerEvents(new LobbyListener(), this);
         this.getServer().getPluginManager().registerEvents(new LobbyWaterPortalListener(), this);
