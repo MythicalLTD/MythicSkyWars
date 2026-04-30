@@ -70,6 +70,7 @@ teams:
   standardTeamMaterialByte: 4
   useSeparateCages: true
   changeTablistNames: false
+  balanceUnselectedPlayersAcrossTeams: true
 chat:
   useTeamChat: true
   enableFormatter: true

@@ -71,6 +71,7 @@ teams:
   standardTeamMaterialByte: 4
   useSeparateCages: true
   changeTablistNames: false
+  balanceUnselectedPlayersAcrossTeams: true
 chat:
   enableFormatter: true
   limitGameChatToGame: true

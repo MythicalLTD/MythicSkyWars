@@ -192,6 +192,7 @@ public class Config {
     private boolean useSeparateCages;
     private boolean changeTablistNames;
     private boolean useTeamNumberInMenu;
+    private boolean balanceUnselectedPlayersAcrossTeams;
 
     private int timeAfterMatch;
     private boolean fireworksEnabled;
@@ -417,6 +418,7 @@ public class Config {
             }
             useSeparateCages =          SkyWarsReloaded.get().getConfig().getBoolean("teams.useSeparateCages");
             changeTablistNames =        SkyWarsReloaded.get().getConfig().getBoolean("teams.changeTablistNames");
+            balanceUnselectedPlayersAcrossTeams = SkyWarsReloaded.get().getConfig().getBoolean("teams.balanceUnselectedPlayersAcrossTeams", true);
 
             maxPartySize =              SkyWarsReloaded.get().getConfig().getInt("parties.maxPartySize");
             partyEnabled =              SkyWarsReloaded.get().getConfig().getBoolean("parties.enabled");
@@ -732,6 +734,7 @@ public class Config {
         SkyWarsReloaded.get().getConfig().set("teams.useTeamMaterialBytes", useTeamMaterialBytes);
         SkyWarsReloaded.get().getConfig().set("teams.useSeparateCages", useSeparateCages);
         SkyWarsReloaded.get().getConfig().set("teams.changeTablistNames", changeTablistNames);
+        SkyWarsReloaded.get().getConfig().set("teams.balanceUnselectedPlayersAcrossTeams", balanceUnselectedPlayersAcrossTeams);
 
         SkyWarsReloaded.get().getConfig().set("parties.maxPartySize", maxPartySize);
         SkyWarsReloaded.get().getConfig().set("parties.enabled", partyEnabled);
@@ -1633,6 +1636,7 @@ public class Config {
         return changeTablistNames;
     }
     public boolean isUseTeamNumberInMenu() { return useTeamNumberInMenu; }
+    public boolean isBalanceUnselectedPlayersAcrossTeams() { return balanceUnselectedPlayersAcrossTeams; }
 
 
     public boolean isUseSlimeWorldManager() { return useSlimeWorldManager; }

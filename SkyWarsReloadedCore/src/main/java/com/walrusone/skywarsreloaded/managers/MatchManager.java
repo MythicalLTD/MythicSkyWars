@@ -606,43 +606,11 @@ public class MatchManager {
                     if (queuedPlayers >= gameMap.getMinTeams() || (gameMap.getForceStart() && queuedPlayers > 0)) {
                         if (gameMap.getTimer() <= 0) {
 
-                            // Team assigning
-                            /*
-                                TODO: this is broken - lowest should start at max per team and reduce
-                                        only if it's actually lower.. there is no check for that rn. Also,
-                                        given this setup it requires that there is already a lone player in
-                                        the team before being able to add a nwe one.
-                                    - - -
-                                    Suggested setup:
-                                        - build a list of unassigned players (aka your new minions xD),
-                                        - build a ordered list of teams ranked from smallest to biggest
-                                        - iterate once over to find the lowest number of players in a team,
-                                        - then iterate over the teams again and take the last player in the list..
-                                            (to avoid shifting many players in memory or use a queue object)
-                                        - place each player into a team: then start back at the beginning when
-                                            the existing players in a team is higher than previously recorded lowest
-                                            and increase previous lowest to += 1
-                            */
-                            for (UUID waitingUuid : ImmutableList.copyOf(gameMap.getWaitingPlayers())) {
-                                Player player = Bukkit.getPlayer(waitingUuid);
-                                if (player == null || gameMap.getTeamCard(player) != null) {
-                                    continue;
-                                }
-                                if (gameMap.getTeamCard(player) == null) {
-                                    List<TeamCard> cards = gameMap.getTeamCards();
-                                    Collections.shuffle(cards);
-                                    int lowest = 0;
-                                    for (TeamCard card : cards) {
-                                        // If team has a "lone" player AND
-                                        if (card.getEmptySlots() > 0 && card.getPlayersSize() <= lowest) {
-                                            // Add player to team
-                                            card.sendReservation(player, PlayerStat.getPlayerStats(player));
-                                            break;
-                                        }
-                                        // TODO: broken AF, no check before setting lowest
-                                        lowest = card.getPlayersSize();
-                                    }
-                                }
+                            // Team assigning for players that did not choose a team manually.
+                            if (SkyWarsReloaded.getCfg().isBalanceUnselectedPlayersAcrossTeams()) {
+                                assignUnselectedWaitingPlayersBalanced(gameMap);
+                            } else {
+                                assignUnselectedWaitingPlayersRandom(gameMap);
                             }
 
                             // Remove all players from waiting lobby state and set the game to waiting start (in cages mode)
@@ -671,6 +639,41 @@ public class MatchManager {
                 }
             }
         }.runTaskTimer(SkyWarsReloaded.get(), 0L, 20L);
+    }
+
+    private void assignUnselectedWaitingPlayersBalanced(GameMap gameMap) {
+        for (UUID waitingUuid : ImmutableList.copyOf(gameMap.getWaitingPlayers())) {
+            Player player = Bukkit.getPlayer(waitingUuid);
+            if (player == null || gameMap.getTeamCard(player) != null) {
+                continue;
+            }
+
+            TeamCard targetTeam = gameMap.getTeamCards().stream()
+                    .filter(card -> card.getEmptySlots() > 0)
+                    .min(Comparator.comparingInt(TeamCard::getPlayersSize))
+                    .orElse(null);
+            if (targetTeam != null) {
+                targetTeam.sendReservation(player, PlayerStat.getPlayerStats(player));
+            }
+        }
+    }
+
+    private void assignUnselectedWaitingPlayersRandom(GameMap gameMap) {
+        for (UUID waitingUuid : ImmutableList.copyOf(gameMap.getWaitingPlayers())) {
+            Player player = Bukkit.getPlayer(waitingUuid);
+            if (player == null || gameMap.getTeamCard(player) != null) {
+                continue;
+            }
+
+            List<TeamCard> cards = new ArrayList<>(gameMap.getTeamCards());
+            Collections.shuffle(cards);
+            for (TeamCard card : cards) {
+                if (card.getEmptySlots() > 0) {
+                    card.sendReservation(player, PlayerStat.getPlayerStats(player));
+                    break;
+                }
+            }
+        }
     }
 
     public void forceStart(Player player) {

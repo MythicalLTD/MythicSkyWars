@@ -200,6 +200,8 @@ teams:
   useSeparateCages: true
   # Whether you want to change the color of the players in the tablist, based on what team they are in
   changeTablistNames: false
+  # Whether you want to balance the unselected players across the teams
+  balanceUnselectedPlayersAcrossTeams: true
 
 #################
 # Chat Settings #
