@@ -9,8 +9,8 @@ import com.walrusone.skywarsreloaded.enums.PlayerRemoveReason;
 import com.walrusone.skywarsreloaded.game.Crate;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.game.TeamCard;
+import com.walrusone.skywarsreloaded.managers.ChestRefillVisualManager;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
-import com.walrusone.skywarsreloaded.managers.PlayerStat;
 import com.walrusone.skywarsreloaded.menus.playeroptions.StatsMenu;
 import com.walrusone.skywarsreloaded.menus.gameoptions.KitSelectionMenu;
 import com.walrusone.skywarsreloaded.menus.gameoptions.VotingMenu;
@@ -39,7 +39,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -341,6 +340,12 @@ public class PlayerInteractListener implements Listener {
                 }
                 if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                     Block block = event.getClickedBlock();
+                    if (block == null) {
+                        return;
+                    }
+                    if (block != null && (block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST)) {
+                        ChestRefillVisualManager.get().onChestInteract(gameMap, block);
+                    }
                     if (block.getType().equals(Material.ENDER_CHEST)) {
                         for (GameMap gMap : SkyWarsReloaded.getGameMapMgr().getPlayableArenas(GameType.ALL)) {
                             for (Crate crate : gMap.getCrates()) {

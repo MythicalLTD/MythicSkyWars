@@ -25,8 +25,6 @@ import com.walrusone.skywarsreloaded.utilities.VaultUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -853,9 +851,7 @@ public class MatchManager {
                         int refillInterval = SkyWarsReloaded.getCfg().getChestRefillIntervalSeconds();
                         if (refillInterval > 0 && gameMap.getTimer() > 0 && gameMap.getTimer() % refillInterval == 0) {
                             gameMap.getChestOption().completeOption();
-                            if (SkyWarsReloaded.getCfg().isChestRefillKeepChestOpen()) {
-                                showRefilledChestOpenAnimation(gameMap);
-                            }
+                            ChestRefillVisualManager.get().onRefill(gameMap);
                         }
                     }
                 }
@@ -1519,43 +1515,6 @@ public class MatchManager {
             time = v1 + " " + ((v1 > 1) ? new Messaging.MessageFormatter().format("timer.seconds") : new Messaging.MessageFormatter().format("timer.second"));
         }
         this.message(gameMap, new Messaging.MessageFormatter().setVariable("time", time).format("timer.wait-timer"), null);
-    }
-
-    private void showRefilledChestOpenAnimation(GameMap gameMap) {
-        World world = gameMap.getCurrentWorld();
-        if (world == null) {
-            return;
-        }
-        for (CoordLoc c : gameMap.getChests()) {
-            animateChestAt(world, c);
-        }
-        for (CoordLoc c : gameMap.getCenterChests()) {
-            animateChestAt(world, c);
-        }
-    }
-
-    private void animateChestAt(World world, CoordLoc c) {
-        if (c == null) {
-            return;
-        }
-        org.bukkit.block.Block block = world.getBlockAt(c.getX(), c.getY(), c.getZ());
-        Material type = block.getType();
-        if (type != Material.CHEST && type != Material.TRAPPED_CHEST) {
-            return;
-        }
-        SkyWarsReloaded.getNMS().playChestAction(block, true);
-        if (block.getState() instanceof Chest) {
-            org.bukkit.inventory.InventoryHolder ih = ((Chest) block.getState()).getInventory().getHolder();
-            if (ih instanceof DoubleChest) {
-                Chest left = (Chest) ((DoubleChest) ih).getLeftSide();
-                Chest right = (Chest) ((DoubleChest) ih).getRightSide();
-                SkyWarsReloaded.getNMS().playChestAction(left.getBlock(), true);
-                SkyWarsReloaded.getNMS().playChestAction(right.getBlock(), true);
-            }
-        }
-        Bukkit.getScheduler().runTaskLater(SkyWarsReloaded.get(), () -> {
-            SkyWarsReloaded.getNMS().playChestAction(block, false);
-        }, 20L);
     }
 
     private static final class RejoinState {
