@@ -12,7 +12,9 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -21,6 +23,13 @@ import java.util.logging.Level;
  * Existing values for valid keys are never overwritten.
  */
 public final class ConfigMerge {
+    /**
+     * Keys written by runtime code (e.g. /sw setspawn) that may be absent from bundled templates.
+     * Never prune these.
+     */
+    private static final Set<String> RUNTIME_MANAGED_ROOT_KEYS = new HashSet<String>() {{
+        add("spawn");
+    }};
 
     private ConfigMerge() {
     }
@@ -105,6 +114,9 @@ public final class ConfigMerge {
         // Remove deepest paths first so child values are removed before parent sections.
         keys.sort((a, b) -> Integer.compare(b.split("\\.").length, a.split("\\.").length));
         for (String key : keys) {
+            if (isRuntimeManagedKey(key)) {
+                continue;
+            }
             if (!pathExistsOnSource(defaults, key)) {
                 target.set(key, null);
                 removed++;
@@ -136,5 +148,17 @@ public final class ConfigMerge {
         } catch (ReflectiveOperationException e) {
             return source.contains(key);
         }
+    }
+
+    private static boolean isRuntimeManagedKey(String key) {
+        if (key == null || key.trim().isEmpty()) {
+            return false;
+        }
+        String root = key;
+        int dot = key.indexOf('.');
+        if (dot >= 0) {
+            root = key.substring(0, dot);
+        }
+        return RUNTIME_MANAGED_ROOT_KEYS.contains(root);
     }
 }

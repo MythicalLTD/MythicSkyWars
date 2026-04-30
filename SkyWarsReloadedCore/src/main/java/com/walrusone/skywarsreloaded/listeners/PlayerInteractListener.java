@@ -125,7 +125,7 @@ public class PlayerInteractListener implements Listener {
         InventoryView v = player.getOpenInventory();
         if (v != null && v.getTopInventory() != null && v.getTopInventory().getType() != InventoryType.CRAFTING) return;
 
-        final GameMap gameMap = MatchManager.get().getPlayerMap(player);
+        final GameMap gameMap = MatchManager.get().getPlayerMapSafe(player);
         if (gameMap == null) {
             if ((event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK)
                     && event.getClickedBlock() != null
@@ -434,7 +434,7 @@ public class PlayerInteractListener implements Listener {
     @EventHandler
     public void onInventoryClick(final InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player) {
-            GameMap gMap = MatchManager.get().getPlayerMap((Player) event.getWhoClicked());
+            GameMap gMap = MatchManager.get().getPlayerMapSafe((Player) event.getWhoClicked());
             if (gMap == null) {
                 ItemStack item;
                 ItemStack item2;
@@ -560,7 +560,7 @@ public class PlayerInteractListener implements Listener {
 
     @EventHandler
     public void onPlayerDropItem(final PlayerDropItemEvent event) {
-        final GameMap gameMap = MatchManager.get().getPlayerMap(event.getPlayer());
+        final GameMap gameMap = MatchManager.get().getPlayerMapSafe(event.getPlayer());
         if (gameMap == null) {
             return;
         }
@@ -574,7 +574,7 @@ public class PlayerInteractListener implements Listener {
         Player player = e.getPlayer();
         Location blockLoc = e.getBlock().getLocation();
 
-        GameMap playerPlayingMap = MatchManager.get().getPlayerMap(player);
+        GameMap playerPlayingMap = MatchManager.get().getPlayerMapSafe(player);
         if (playerPlayingMap == null) {
             if (e.getBlock().getType().equals(Material.CHEST) || e.getBlock().getType().equals(Material.TRAPPED_CHEST) || e.getBlock().getType().equals(Material.DIAMOND_BLOCK) || e.getBlock().getType().equals(Material.EMERALD_BLOCK)) {
                 GameMap map = SkyWarsReloaded.getGameMapMgr().getMap(player.getWorld().getName());
@@ -662,7 +662,7 @@ public class PlayerInteractListener implements Listener {
 
     @EventHandler
     public void onBlockPlaced(BlockPlaceEvent e) {
-        GameMap gameMap = MatchManager.get().getPlayerMap(e.getPlayer());
+        GameMap gameMap = MatchManager.get().getPlayerMapSafe(e.getPlayer());
         if (gameMap != null && gameMap.getMatchState() == MatchState.PLAYING
                 && e.getPlayer().getGameMode() != GameMode.SURVIVAL
                 && !MatchManager.get().isSpectating(e.getPlayer())) {

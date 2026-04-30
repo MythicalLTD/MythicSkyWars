@@ -45,7 +45,7 @@ public class PlayerCommandPrepocessListener implements org.bukkit.event.Listener
         }
 
         if (splited[0].equalsIgnoreCase("/spawn")) {
-            if (MatchManager.get().getPlayerMap(e.getPlayer()) == null && Util.get().isSpawnWorld(e.getPlayer().getWorld())) {
+            if (MatchManager.get().getPlayerMapSafe(e.getPlayer()) == null && Util.get().isSpawnWorld(e.getPlayer().getWorld())) {
                 e.setCancelled(true);
                 Location spawn = SkyWarsReloaded.getCfg().getSpawn();
                 if (spawn != null) {
@@ -58,7 +58,7 @@ public class PlayerCommandPrepocessListener implements org.bukkit.event.Listener
             }
         }
 
-        if (MatchManager.get().getPlayerMap(e.getPlayer()) != null) {
+        if (MatchManager.get().getPlayerMapSafe(e.getPlayer()) != null) {
             if (e.getPlayer().hasPermission("sw.allowcommands")) {
                 return;
             }

@@ -36,6 +36,8 @@ public class PlayerJoinListener implements Listener {
                 if (SkyWarsReloaded.getCfg().getSpawn() != null && SkyWarsReloaded.getCfg().teleportOnJoin()) {
                     player.teleport(SkyWarsReloaded.getCfg().getSpawn());
                 }
+                // Self-heal stale arena tracking immediately on join so lobby items/portal/protection work.
+                MatchManager.get().getPlayerMapSafe(player);
             }
         }.runTaskLater(SkyWarsReloaded.get(), 1);
 

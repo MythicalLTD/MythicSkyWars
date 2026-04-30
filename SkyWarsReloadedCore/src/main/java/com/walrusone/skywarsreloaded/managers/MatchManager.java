@@ -400,6 +400,7 @@ public class MatchManager {
             //Location newSpawn = new Location(world, spawn.getX() + 0.5, spawn.getY() + 0.25, spawn.getZ() + 0.5);
         }
 
+        spawn = resolveSafeTeleportLocation(gameMap, spawn, "arena-spawn");
         player.teleport(spawn, TeleportCause.END_PORTAL);
 
 
@@ -1148,6 +1149,31 @@ public class MatchManager {
         return null;
     }
 
+    /**
+     * Returns the player's map and auto-cleans stale membership links.
+     * A stale link means SWR still tracks the player in a map, while the player is in lobby world.
+     */
+    public GameMap getPlayerMapSafe(final Player player) {
+        GameMap map = getPlayerMap(player);
+        if (player == null || map == null) {
+            return map;
+        }
+        if (!Util.get().isSpawnWorld(player.getWorld())) {
+            return map;
+        }
+        // In lobby world but still tracked in arena state -> stale; remove from that map.
+        MatchState state = map.getMatchState();
+        if (state == MatchState.WAITINGLOBBY || state == MatchState.WAITINGSTART || state == MatchState.PLAYING || state == MatchState.ENDING) {
+            map.removePlayer(player.getUniqueId());
+            if (SkyWarsReloaded.getCfg().debugEnabled()) {
+                SkyWarsReloaded.get().getLogger().warning("Cleaned stale arena membership for " + player.getName()
+                        + " from map " + map.getName() + " while in lobby world.");
+            }
+            return null;
+        }
+        return map;
+    }
+
     public GameMap getDeadPlayerMap(final Player v0) {
         if (v0 != null) {
             for (final GameMap gameMap : SkyWarsReloaded.getGameMapMgr().getMapsCopy()) {
@@ -1346,6 +1372,7 @@ public class MatchManager {
                 pCard.getSpawn().getX() + 0.5,
                 pCard.getSpawn().getY() + 1,
                 pCard.getSpawn().getZ() + 0.5);
+        spawn = resolveSafeTeleportLocation(map, spawn, "rejoin");
         player.teleport(spawn, TeleportCause.PLUGIN);
         player.setGameMode(GameMode.SURVIVAL);
         player.setAllowFlight(false);
@@ -1381,6 +1408,78 @@ public class MatchManager {
             clone[i] = items[i] == null ? null : items[i].clone();
         }
         return clone;
+    }
+
+    private Location resolveSafeTeleportLocation(GameMap map, Location preferred, String reason) {
+        if (preferred == null || preferred.getWorld() == null) {
+            return preferred;
+        }
+        if (isSafeStandingLocation(preferred)) {
+            return preferred;
+        }
+
+        World world = preferred.getWorld();
+        int baseX = preferred.getBlockX();
+        int baseZ = preferred.getBlockZ();
+        int maxY = world.getMaxHeight() - 2;
+
+        for (int radius = 0; radius <= 6; radius++) {
+            for (int dx = -radius; dx <= radius; dx++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    int x = baseX + dx;
+                    int z = baseZ + dz;
+                    int groundY = world.getHighestBlockYAt(x, z);
+                    if (groundY < 1 || groundY >= maxY) {
+                        continue;
+                    }
+                    Location candidate = new Location(world, x + 0.5, groundY + 1, z + 0.5, preferred.getYaw(), preferred.getPitch());
+                    if (isSafeStandingLocation(candidate)) {
+                        if (debug) {
+                            Util.get().logToFile(getDebugName(map) + ChatColor.YELLOW
+                                    + "Unsafe spawn detected (" + reason + "), moving player to safe location: "
+                                    + candidate.getBlockX() + "," + candidate.getBlockY() + "," + candidate.getBlockZ());
+                        }
+                        return candidate;
+                    }
+                }
+            }
+        }
+
+        // Last-resort fallback: use map waiting lobby spawn if it exists and is safe.
+        CoordLoc waitingLobby = map == null ? null : map.getWaitingLobbySpawn();
+        if (waitingLobby != null && world.equals(map.getCurrentWorld())) {
+            Location lobbyFallback = new Location(world, waitingLobby.getX() + 0.5, waitingLobby.getY() + 1, waitingLobby.getZ() + 0.5, preferred.getYaw(), preferred.getPitch());
+            if (isSafeStandingLocation(lobbyFallback)) {
+                if (debug) {
+                    Util.get().logToFile(getDebugName(map) + ChatColor.YELLOW + "Unsafe spawn detected (" + reason + "), using waiting lobby fallback.");
+                }
+                return lobbyFallback;
+            }
+        }
+
+        return preferred;
+    }
+
+    private boolean isSafeStandingLocation(Location location) {
+        if (location == null || location.getWorld() == null) {
+            return false;
+        }
+        World world = location.getWorld();
+        int y = location.getBlockY();
+        if (y <= 1 || y >= world.getMaxHeight() - 1) {
+            return false;
+        }
+
+        Material feet = world.getBlockAt(location.getBlockX(), y, location.getBlockZ()).getType();
+        Material head = world.getBlockAt(location.getBlockX(), y + 1, location.getBlockZ()).getType();
+        Material ground = world.getBlockAt(location.getBlockX(), y - 1, location.getBlockZ()).getType();
+
+        return !isSolidOrLiquid(feet) && !isSolidOrLiquid(head) && ground.isSolid() && !ground.isTransparent();
+    }
+
+    private boolean isSolidOrLiquid(Material material) {
+        return material != null && (material.isSolid() || material == Material.WATER || material == Material.STATIONARY_WATER
+                || material == Material.LAVA || material == Material.STATIONARY_LAVA);
     }
 
     private int getGameTime() {

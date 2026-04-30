@@ -60,7 +60,7 @@ public class LobbyListener implements org.bukkit.event.Listener {
         if (player == null) {
             return false;
         }
-        GameMap map = MatchManager.get().getPlayerMap(player);
+        GameMap map = MatchManager.get().getPlayerMapSafe(player);
         return map != null && map.getMatchState() != com.walrusone.skywarsreloaded.enums.MatchState.ENDING;
     }
 
