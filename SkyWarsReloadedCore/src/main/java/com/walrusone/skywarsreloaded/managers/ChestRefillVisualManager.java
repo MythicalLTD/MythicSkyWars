@@ -164,7 +164,7 @@ public final class ChestRefillVisualManager {
         String mapName = gameMap.getName();
         activeMaps.put(mapName, gameMap);
         BukkitTask existing = refreshTasksByMap.get(mapName);
-        if (existing != null && !existing.isCancelled()) {
+        if (existing != null) {
             return;
         }
         BukkitTask task = Bukkit.getScheduler().runTaskTimer(SkyWarsReloaded.get(), () -> tickMap(mapName), 20L, 20L);

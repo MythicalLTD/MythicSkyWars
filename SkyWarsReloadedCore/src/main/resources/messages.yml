@@ -606,7 +606,7 @@ scoreboards:
       - ' &b{winner3}'
       - ''
       - '&6&lStats:'
-      - ' &e{kills}'
+      - ' &bKills: &e{kills}'
       - ''
       - '&cRestarting in: &b{restarttime}'
       - ''
