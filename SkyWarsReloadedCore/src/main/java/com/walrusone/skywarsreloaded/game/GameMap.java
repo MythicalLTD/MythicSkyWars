@@ -2287,6 +2287,10 @@ public class GameMap {
         return waitingPlayers;
     }
 
+    public boolean isJoinQueued(UUID uuid) {
+        return joinQueue != null && joinQueue.containsPlayer(uuid);
+    }
+
     public int getPlayerKills(Player p) {
         return playerKills.getOrDefault(p, 0);
     }

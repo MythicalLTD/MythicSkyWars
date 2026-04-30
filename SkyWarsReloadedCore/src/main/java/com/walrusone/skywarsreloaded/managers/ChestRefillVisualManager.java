@@ -82,6 +82,7 @@ public final class ChestRefillVisualManager {
             return;
         }
 
+        Set<String> processedHoloIds = new HashSet<>();
         for (String key : keys) {
             Block block = getBlockFromKey(world, key);
             if (block == null) {
@@ -91,7 +92,12 @@ public final class ChestRefillVisualManager {
                 SkyWarsReloaded.getNMS().playChestAction(block, false);
             }
             if (SkyWarsReloaded.getCfg().isChestRefillShowHologram()) {
-                showRefilledHolo(gameMap, block);
+                Block holoAnchor = getHoloAnchorBlock(block);
+                String holoId = "swr_refill_" + gameMap.getName() + "_" + toKey(holoAnchor).replace(':', '_');
+                if (!processedHoloIds.add(holoId)) {
+                    continue;
+                }
+                removeHolo(gameMap, holoAnchor);
             }
         }
         keys.clear();
@@ -121,47 +127,35 @@ public final class ChestRefillVisualManager {
         if (!Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
             return;
         }
-        String key = toKey(block);
-        String id = "swr_refill_" + gameMap.getName() + "_" + key.replace(':', '_');
+        Block holoAnchor = getHoloAnchorBlock(block);
+        String id = getCanonicalHoloId(gameMap, holoAnchor);
+        cleanupDuplicateChestHolograms(gameMap, block, id);
         String line = ChatColor.YELLOW + "Refill in: " + ChatColor.GOLD + formatTime(remainingSeconds);
-        Location holoLoc = block.getLocation().add(0.5D, 1.15D, 0.5D);
+        Location holoLoc = holoAnchor.getLocation().add(0.5D, 1.15D, 0.5D);
         try {
             eu.decentsoftware.holograms.api.holograms.Hologram existing = eu.decentsoftware.holograms.api.DHAPI.getHologram(id);
             if (existing != null) {
-                existing.delete();
+                clearHologramLines(existing);
+                eu.decentsoftware.holograms.api.DHAPI.addHologramLine(existing, line);
+                return;
             }
             eu.decentsoftware.holograms.api.DHAPI.createHologram(id, holoLoc, false, Collections.singletonList(line));
         } catch (Throwable ignored) {
         }
     }
 
-    private void showRefilledHolo(GameMap gameMap, Block block) {
+    private void removeHolo(GameMap gameMap, Block block) {
         if (!Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
             return;
         }
-        String key = toKey(block);
-        String id = "swr_refill_" + gameMap.getName() + "_" + key.replace(':', '_');
-        Location holoLoc = block.getLocation().add(0.5D, 1.15D, 0.5D);
+        Block holoAnchor = getHoloAnchorBlock(block);
+        String id = getCanonicalHoloId(gameMap, holoAnchor);
+        cleanupDuplicateChestHolograms(gameMap, block, id);
         try {
             eu.decentsoftware.holograms.api.holograms.Hologram existing = eu.decentsoftware.holograms.api.DHAPI.getHologram(id);
             if (existing != null) {
                 existing.delete();
             }
-            eu.decentsoftware.holograms.api.DHAPI.createHologram(
-                    id,
-                    holoLoc,
-                    false,
-                    Arrays.asList(ChatColor.GREEN + "Refilled!")
-            );
-            Bukkit.getScheduler().runTaskLater(SkyWarsReloaded.get(), () -> {
-                try {
-                    eu.decentsoftware.holograms.api.holograms.Hologram holo = eu.decentsoftware.holograms.api.DHAPI.getHologram(id);
-                    if (holo != null) {
-                        holo.delete();
-                    }
-                } catch (Throwable ignored) {
-                }
-            }, 40L);
         } catch (Throwable ignored) {
         }
     }
@@ -197,6 +191,7 @@ public final class ChestRefillVisualManager {
         if (remaining <= 0 && refillInterval > 0) {
             remaining = refillInterval;
         }
+        Set<String> processedHoloIds = new HashSet<>();
         for (String key : new HashSet<>(keys)) {
             Block block = getBlockFromKey(world, key);
             if (block == null) {
@@ -210,7 +205,86 @@ public final class ChestRefillVisualManager {
                 SkyWarsReloaded.getNMS().playChestAction(block, true);
             }
             if (SkyWarsReloaded.getCfg().isChestRefillShowHologram() && refillInterval > 0) {
+                Block holoAnchor = getHoloAnchorBlock(block);
+                String holoId = "swr_refill_" + gameMap.getName() + "_" + toKey(holoAnchor).replace(':', '_');
+                if (!processedHoloIds.add(holoId)) {
+                    continue;
+                }
                 spawnOrReplaceCountdownHolo(gameMap, block, remaining);
+            }
+        }
+    }
+
+    private Block getHoloAnchorBlock(Block block) {
+        if (!(block.getState() instanceof Chest)) {
+            return block;
+        }
+        InventoryHolder holder = ((Chest) block.getState()).getInventory().getHolder();
+        if (!(holder instanceof DoubleChest)) {
+            return block;
+        }
+        Chest left = (Chest) ((DoubleChest) holder).getLeftSide();
+        Chest right = (Chest) ((DoubleChest) holder).getRightSide();
+        Block leftBlock = left.getBlock();
+        Block rightBlock = right.getBlock();
+        if (leftBlock.getX() < rightBlock.getX()) {
+            return leftBlock;
+        }
+        if (leftBlock.getX() > rightBlock.getX()) {
+            return rightBlock;
+        }
+        if (leftBlock.getZ() <= rightBlock.getZ()) {
+            return leftBlock;
+        }
+        return rightBlock;
+    }
+
+    private void clearHologramLines(eu.decentsoftware.holograms.api.holograms.Hologram hologram) {
+        if (hologram == null) {
+            return;
+        }
+        while (true) {
+            try {
+                if (eu.decentsoftware.holograms.api.DHAPI.removeHologramLine(hologram, 0) == null) {
+                    break;
+                }
+            } catch (Throwable ignored) {
+                break;
+            }
+        }
+    }
+
+    private String getCanonicalHoloId(GameMap gameMap, Block anchorBlock) {
+        return "swr_refill_" + gameMap.getName() + "_" + toKey(anchorBlock).replace(':', '_');
+    }
+
+    private void cleanupDuplicateChestHolograms(GameMap gameMap, Block block, String canonicalId) {
+        String mapPrefix = "swr_refill_" + gameMap.getName() + "_";
+        Set<String> candidateIds = new HashSet<>();
+        candidateIds.add(mapPrefix + toKey(block).replace(':', '_'));
+        Block anchor = getHoloAnchorBlock(block);
+        candidateIds.add(mapPrefix + toKey(anchor).replace(':', '_'));
+
+        if (block.getState() instanceof Chest) {
+            InventoryHolder holder = ((Chest) block.getState()).getInventory().getHolder();
+            if (holder instanceof DoubleChest) {
+                Chest left = (Chest) ((DoubleChest) holder).getLeftSide();
+                Chest right = (Chest) ((DoubleChest) holder).getRightSide();
+                candidateIds.add(mapPrefix + toKey(left.getBlock()).replace(':', '_'));
+                candidateIds.add(mapPrefix + toKey(right.getBlock()).replace(':', '_'));
+            }
+        }
+
+        for (String id : candidateIds) {
+            if (id.equals(canonicalId)) {
+                continue;
+            }
+            try {
+                eu.decentsoftware.holograms.api.holograms.Hologram h = eu.decentsoftware.holograms.api.DHAPI.getHologram(id);
+                if (h != null) {
+                    h.delete();
+                }
+            } catch (Throwable ignored) {
             }
         }
     }

@@ -1160,6 +1160,11 @@ public class MatchManager {
         if (!Util.get().isSpawnWorld(player.getWorld())) {
             return map;
         }
+        UUID playerId = player.getUniqueId();
+        if (map.getWaitingPlayers().contains(playerId) || map.isJoinQueued(playerId)) {
+            // Player is in transition to arena from lobby world; do not wipe reservation.
+            return map;
+        }
         // In lobby world but still tracked in arena state -> stale; remove from that map.
         MatchState state = map.getMatchState();
         if (state == MatchState.WAITINGLOBBY || state == MatchState.WAITINGSTART || state == MatchState.PLAYING || state == MatchState.ENDING) {

@@ -220,14 +220,14 @@ public class DataStorage {
                     }
                 } else {
                     try {
-                        File dataDirectory = SkyWarsReloaded.get().getDataFolder();
-                        File playerDataDirectory = new File(dataDirectory, "player_data");
+                        File playerDataDirectory = getPrimaryPlayerDataDirectory();
 
                         if (!playerDataDirectory.exists() && !playerDataDirectory.mkdirs()) {
                             SkyWarsReloaded.get().getLogger().info("Encountered an error while creating data directory!");
                         }
 
                         File playerFile = new File(playerDataDirectory, pData.getId() + ".yml");
+                        migrateFromSiblingDataDirsIfNeeded(pData, playerFile);
                         migrateLegacyNameFileIfNeeded(playerDataDirectory, pData, playerFile);
                         mergeLegacyNameFileIfUuidLooksBlank(playerDataDirectory, pData, playerFile);
 
@@ -358,6 +358,68 @@ public class DataStorage {
             SkyWarsReloaded.get().getLogger().info("Merged legacy stats file " + legacyNameFile.getName() + " into " + uuidFile.getName());
         } catch (Exception ex) {
             SkyWarsReloaded.get().getLogger().warning("Failed to merge legacy stats file for " + pData.getId() + ": " + ex.getMessage());
+        }
+    }
+
+    private File getPrimaryPlayerDataDirectory() {
+        File dataDirectory = SkyWarsReloaded.get().getDataFolder();
+        return new File(dataDirectory, "player_data");
+    }
+
+    private void migrateFromSiblingDataDirsIfNeeded(PlayerStat pData, File targetUuidFile) {
+        boolean targetBlank = false;
+        if (targetUuidFile.exists()) {
+            FileConfiguration targetCfg = YamlConfiguration.loadConfiguration(targetUuidFile);
+            if (!looksLikeBlankStats(targetCfg)) {
+                return;
+            }
+            targetBlank = true;
+        }
+        String uuidFileName = pData.getId() + ".yml";
+        String playerName = pData.getPlayerName();
+        File dataFolder = SkyWarsReloaded.get().getDataFolder();
+        File pluginsDir = dataFolder.getParentFile();
+        if (pluginsDir == null || !pluginsDir.exists()) {
+            return;
+        }
+
+        String[] legacyPluginDirNames = new String[] {"SkyWars", "Skywars", "SkyWarsReloaded"};
+        for (String dirName : legacyPluginDirNames) {
+            File legacyDir = new File(new File(pluginsDir, dirName), "player_data");
+            if (!legacyDir.exists() || legacyDir.equals(targetUuidFile.getParentFile())) {
+                continue;
+            }
+
+            File legacyUuidFile = new File(legacyDir, uuidFileName);
+            if (legacyUuidFile.exists() && copyFileReplacingBlank(legacyUuidFile, targetUuidFile, targetBlank)) {
+                SkyWarsReloaded.get().getLogger().info("Recovered legacy stats from " + legacyUuidFile.getAbsolutePath());
+                return;
+            }
+
+            if (playerName != null && !playerName.trim().isEmpty()) {
+                File legacyNameFile = new File(legacyDir, playerName + ".yml");
+                if (legacyNameFile.exists() && copyFileReplacingBlank(legacyNameFile, targetUuidFile, targetBlank)) {
+                    SkyWarsReloaded.get().getLogger().info("Recovered legacy name-based stats from " + legacyNameFile.getAbsolutePath());
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean copyFileReplacingBlank(File source, File target, boolean allowReplaceExisting) {
+        if (!source.exists()) {
+            return false;
+        }
+        if (target.exists() && !allowReplaceExisting) {
+            return false;
+        }
+        try {
+            java.nio.file.Files.createDirectories(target.getParentFile().toPath());
+            java.nio.file.Files.copy(source.toPath(), target.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (Exception ex) {
+            SkyWarsReloaded.get().getLogger().warning("Failed to recover legacy stats file " + source.getAbsolutePath() + ": " + ex.getMessage());
+            return false;
         }
     }
 

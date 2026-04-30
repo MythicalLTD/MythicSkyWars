@@ -24,6 +24,7 @@ public class GameQueue {
         if (SkyWarsReloaded.get().isEnabled()) {
             final PlayerCard pCard = queue.poll();
             if (pCard == null) return;
+            if (pCard.getUUID() == null) return;
             if (SkyWarsReloaded.getCfg().debugEnabled()) {
                 SkyWarsReloaded.get().getLogger().info("#GameQueue:sendToGame: pCard uuid " + pCard.getUUID());
             }
@@ -49,5 +50,17 @@ public class GameQueue {
             runnableQueue = null;
             queue.clear();
         }
+    }
+
+    public boolean containsPlayer(java.util.UUID uuid) {
+        if (uuid == null) {
+            return false;
+        }
+        for (PlayerCard card : queue) {
+            if (card != null && uuid.equals(card.getUUID())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
