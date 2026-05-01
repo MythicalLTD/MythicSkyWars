@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 public final class UltraSkyWarsMongoMigrator {
     private static final Pattern INT_FIELD_PATTERN = Pattern.compile("\"([^\"]+)\"\\s*:\\s*(-?\\d+)");
+    private static final Pattern STRING_FIELD_PATTERN = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"([^\"]*)\"");
 
     private UltraSkyWarsMongoMigrator() {
     }
@@ -118,12 +119,14 @@ public final class UltraSkyWarsMongoMigrator {
         }
 
         String uuidText = uuid.toString();
-        String name = asString(playerDoc.get("name"));
-        if (name == null || name.trim().isEmpty()) {
-            name = uuidText;
-        }
+        String skywarsJson = asString(playerDoc.get("skywars"));
+        String name = choosePreferredName(
+                asString(playerDoc.get("name")),
+                extractJsonString(skywarsJson, "name", null),
+                null
+        );
 
-        MigratedStats stats = readStats(playerDoc);
+        MigratedStats stats = readStats(playerDoc, skywarsJson);
 
         boolean sqlEnabled = SkyWarsReloaded.get().getConfig().getBoolean("sqldatabase.enabled");
         boolean changed;
@@ -153,6 +156,8 @@ public final class UltraSkyWarsMongoMigrator {
             if (!overwrite) {
                 return false;
             }
+            String existingName = getExistingPlayerNameSql(connection, uuid);
+            name = choosePreferredName(name, existingName, uuid);
             PreparedStatement update = null;
             try {
                 update = connection.prepareStatement(
@@ -176,6 +181,7 @@ public final class UltraSkyWarsMongoMigrator {
 
         PreparedStatement insert = null;
         try {
+            name = choosePreferredName(name, null, uuid);
             insert = connection.prepareStatement(
                     "INSERT INTO `sw_player` (`player_id`, `uuid`, `player_name`, `wins`, `losses`, `kills`, `deaths`, `xp`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt`, `souls`, `soulwell_usages`, `soulwell_legendaries`, `soulwell_rares`, `soulwell_souls_gathered`, `soulwell_souls_purchased`) " +
                             "VALUES (NULL, ?, ?, ?, 0, ?, ?, ?, 'none', 'none', 'none', 'none', 'none', 'none', ?, 0, 0, 0, 0, 0);"
@@ -229,6 +235,8 @@ public final class UltraSkyWarsMongoMigrator {
         }
 
         FileConfiguration fc = YamlConfiguration.loadConfiguration(playerFile);
+        String existingName = asString(fc.getString("player_name"));
+        name = choosePreferredName(name, existingName, uuid);
         fc.set("uuid", uuid);
         fc.set("player_name", name);
         fc.set("wins", stats.wins);
@@ -276,7 +284,7 @@ public final class UltraSkyWarsMongoMigrator {
         return true;
     }
 
-    private static MigratedStats readStats(DBObject playerDoc) {
+    private static MigratedStats readStats(DBObject playerDoc, String skywarsJson) {
         MigratedStats stats = new MigratedStats();
         stats.wins = Math.max(0, asInt(playerDoc.get("wins")));
         stats.kills = Math.max(0, asInt(playerDoc.get("kills")));
@@ -285,7 +293,6 @@ public final class UltraSkyWarsMongoMigrator {
         stats.elo = Math.max(0, asInt(playerDoc.get("elo")));
         stats.level = Math.max(1, asInt(playerDoc.get("level")));
 
-        String skywarsJson = asString(playerDoc.get("skywars"));
         if (skywarsJson != null) {
             stats.wins = Math.max(stats.wins, extractJsonInt(skywarsJson, "wins", stats.wins));
             stats.kills = Math.max(stats.kills, extractJsonInt(skywarsJson, "kills", stats.kills));
@@ -320,6 +327,24 @@ public final class UltraSkyWarsMongoMigrator {
         return fallback;
     }
 
+    private static String extractJsonString(String json, String field, String fallback) {
+        if (json == null) {
+            return fallback;
+        }
+        Matcher matcher = STRING_FIELD_PATTERN.matcher(json);
+        while (matcher.find()) {
+            if (field.equals(matcher.group(1))) {
+                String value = matcher.group(2);
+                if (value == null) {
+                    return fallback;
+                }
+                String trimmed = value.trim();
+                return trimmed.isEmpty() ? fallback : trimmed;
+            }
+        }
+        return fallback;
+    }
+
     private static String asString(Object val) {
         if (val == null) {
             return null;
@@ -339,6 +364,56 @@ public final class UltraSkyWarsMongoMigrator {
             return Integer.parseInt(String.valueOf(val));
         } catch (NumberFormatException ignored) {
             return 0;
+        }
+    }
+
+    private static String choosePreferredName(String primary, String secondary, String fallback) {
+        String p = sanitizeName(primary, fallback);
+        if (p != null) {
+            return p;
+        }
+        String s = sanitizeName(secondary, fallback);
+        if (s != null) {
+            return s;
+        }
+        if (fallback == null || fallback.trim().isEmpty()) {
+            return null;
+        }
+        return fallback;
+    }
+
+    private static String sanitizeName(String value, String uuidFallback) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+        if (uuidFallback != null && !uuidFallback.trim().isEmpty() && trimmed.equalsIgnoreCase(uuidFallback.trim())) {
+            return null;
+        }
+        return trimmed;
+    }
+
+    private static String getExistingPlayerNameSql(Connection connection, String uuid) throws SQLException {
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            statement = connection.prepareStatement("SELECT `player_name` FROM `sw_player` WHERE `uuid` = ? LIMIT 1;");
+            statement.setString(1, uuid);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getString("player_name");
+            }
+            return null;
+        } finally {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+            if (statement != null) {
+                statement.close();
+            }
         }
     }
 
