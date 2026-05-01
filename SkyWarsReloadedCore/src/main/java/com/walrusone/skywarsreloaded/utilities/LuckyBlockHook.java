@@ -3,6 +3,7 @@ package com.walrusone.skywarsreloaded.utilities;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.Vote;
 import com.walrusone.skywarsreloaded.game.GameMap;
+import com.walrusone.skywarsreloaded.managers.ChestStorageLayout;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import org.bukkit.Bukkit;
@@ -214,7 +215,7 @@ public final class LuckyBlockHook {
             if (kindCount == 0) {
                 SkyWarsReloaded.get().getLogger().warning(
                         "Lucky handItems: useConsoleGiveCommands is true but all amounts are 0 (luckyAmount, unluckyAmount, funExtraAmountPerType). "
-                                + "plugins/" + SkyWarsReloaded.get().getName() + "/luckyblocks.yml");
+                                + ChestStorageLayout.resolvedFileForMessaging(SkyWarsReloaded.get(), "luckyblocks.yml").getAbsolutePath());
             } else if (!map.getAlivePlayers().isEmpty()) {
                 SkyWarsReloaded.get().getLogger().info(
                         "Lucky handItems: NTD console give (" + kindCount + " color line(s)) for "
@@ -267,7 +268,7 @@ public final class LuckyBlockHook {
         if (templateCount == 0) {
             SkyWarsReloaded.get().getLogger().warning(
                     "Lucky handItems: API stacks disabled or failed (set useConsoleGiveCommands: true or fix types). "
-                            + "plugins/" + SkyWarsReloaded.get().getName() + "/luckyblocks.yml");
+                            + ChestStorageLayout.resolvedFileForMessaging(SkyWarsReloaded.get(), "luckyblocks.yml").getAbsolutePath());
         } else if (!map.getAlivePlayers().isEmpty()) {
             SkyWarsReloaded.get().getLogger().info(
                     "Lucky handItems: " + templateCount + " stack type(s) for " + map.getAlivePlayers().size()
@@ -1199,12 +1200,10 @@ public final class LuckyBlockHook {
      * Reloads {@code luckyblocks.yml} from disk and merges defaults from the jar so new keys work without deleting the server file.
      */
     public static void reloadLuckyBlocksYaml() {
-        File file = new File(SkyWarsReloaded.get().getDataFolder(), "luckyblocks.yml");
-        if (!file.exists()) {
-            SkyWarsReloaded.get().saveResource("luckyblocks.yml", false);
-        }
+        File file = ChestStorageLayout.resolveDataFile(SkyWarsReloaded.get(), "luckyblocks.yml", true);
         YamlConfiguration user = YamlConfiguration.loadConfiguration(file);
-        InputStream defStream = SkyWarsReloaded.get().getResource("luckyblocks.yml");
+        InputStream defStream = SkyWarsReloaded.get()
+                .getResource(ChestStorageLayout.layoutRelativePath("luckyblocks.yml"));
         if (defStream != null) {
             try {
                 YamlConfiguration def = YamlConfiguration.loadConfiguration(

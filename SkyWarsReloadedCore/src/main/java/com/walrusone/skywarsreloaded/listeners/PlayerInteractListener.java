@@ -442,8 +442,11 @@ public class PlayerInteractListener implements Listener {
                     }
                 }
             }
-        } else if (inView.getTitle().contains("chest.yml")) {
-            SkyWarsReloaded.getCM().save(inView.getTitle());
+        } else {
+            String lootTitle = ChatColor.stripColor(inView.getTitle());
+            if (lootTitle != null && lootTitle.contains(".yml")) {
+                SkyWarsReloaded.getCM().persistChestEditorInventory(inView.getTitle());
+            }
         }
 
     }

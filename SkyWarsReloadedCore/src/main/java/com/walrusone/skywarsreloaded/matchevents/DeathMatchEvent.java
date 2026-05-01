@@ -5,7 +5,6 @@ import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import com.walrusone.skywarsreloaded.utilities.Util;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -92,8 +91,7 @@ public class DeathMatchEvent extends MatchEvent {
                     gMap.clearDeathMatchWaiters();
                     for (final Player player : gMap.getAlivePlayers()) {
                         if (SkyWarsReloaded.getCfg().titlesEnabled()) {
-                            Util.get().sendTitle(player, 2, 20, 2, ChatColor.translateAlternateColorCodes('&', endMessage),
-                                    ChatColor.translateAlternateColorCodes('&', ""));
+                            Util.get().sendTitle(player, 2, 20, 2, colorize(endMessage), "");
                         }
                     }
                     endEvent(false);

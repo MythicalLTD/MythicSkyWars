@@ -3,9 +3,7 @@ package com.walrusone.skywarsreloaded.matchevents;
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
-import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.utilities.Util;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -135,7 +133,7 @@ public class MobSpawnEvent extends MatchEvent {
             }
             mobsSpawned.clear();
             if (gMap.getMatchState() == MatchState.PLAYING) {
-                MatchManager.get().message(gMap, ChatColor.translateAlternateColorCodes('&', endMessage));
+                messageMapIfPresent(endMessage);
             }
             if ((repeatable) || (force)) {
                 resetStartTime();

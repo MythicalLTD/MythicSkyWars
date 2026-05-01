@@ -32,7 +32,7 @@ command:
   no-kit: '&cCouldn''t find a kit with the name {kit}'
   stats-cleared: '&cYou cleared {player}''s stats!'
   must-be-online: '&cThat player is not online!'
-  reload: '&aSuccessfully reloaded &bSkyWarsReloaded&a. &7Lucky mode / NTD: edit &eluckyblocks.yml &7in the plugin folder.'
+  reload: '&aSuccessfully reloaded &bSkyWarsReloaded&a. &7Luck / NTD: &echests/lucky/luckyblocks.yml&7. Loot tiers: &echests/normal &7· &ebasic &7· &eop&7.'
   player-not-found: '&cCouldn''t find a player with that name!'
   spawnset: '&aThe Skywars lobby spawn has successfully been set to your location!'
   setstat: '&a{player}''s {stat} was set to {amount}!'

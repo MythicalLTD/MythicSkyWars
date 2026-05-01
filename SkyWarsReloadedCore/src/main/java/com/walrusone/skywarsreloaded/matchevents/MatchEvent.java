@@ -296,10 +296,19 @@ public abstract class MatchEvent {
         maxOverride = max;
     }
 
-    private String colorize(@Nullable String text) {
+    protected String colorize(@Nullable String text) {
         if (text == null) {
             return "";
         }
         return ChatColor.translateAlternateColorCodes('&', text);
+    }
+
+    /** Broadcasts to the game map; skips null/blank messages to avoid empty chat lines and NPEs from Bukkit. */
+    protected void messageMapIfPresent(@Nullable String text) {
+        String msg = colorize(text);
+        if (msg.isEmpty()) {
+            return;
+        }
+        MatchManager.get().message(gMap, msg);
     }
 }

@@ -531,7 +531,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
         LuckyBlockHook.setup();
         if (LuckyBlockHook.isAvailable()) {
             getLogger().info("Lucky blocks: edit hand items, tiers, and NTD options in "
-                    + new File(getDataFolder(), "luckyblocks.yml").getAbsolutePath());
+                    + ChestStorageLayout.resolvedFileForMessaging(this, "luckyblocks.yml").getAbsolutePath());
         }
         im = new ItemsManager();
         pom = new PlayerOptionsManager();

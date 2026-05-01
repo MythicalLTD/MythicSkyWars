@@ -161,15 +161,27 @@ public final class UltraSkyWarsMongoMigrator {
             PreparedStatement update = null;
             try {
                 update = connection.prepareStatement(
-                        "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `kills` = ?, `deaths` = ?, `xp` = ?, `souls` = ? WHERE `uuid` = ?;"
+                        "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `losses` = ?, `kills` = ?, `deaths` = ?, `xp` = ?, `pareffect` = ?, `proeffect` = ?, `glasscolor` = ?, `killsound` = ?, `winsound` = ?, `taunt` = ?, `souls` = ?, `soulwell_usages` = ?, `soulwell_legendaries` = ?, `soulwell_rares` = ?, `soulwell_souls_gathered` = ?, `soulwell_souls_purchased` = ? WHERE `uuid` = ?;"
                 );
                 update.setString(1, name);
                 update.setInt(2, stats.wins);
-                update.setInt(3, stats.kills);
-                update.setInt(4, stats.deaths);
-                update.setInt(5, stats.xp);
-                update.setInt(6, stats.souls);
-                update.setString(7, uuid);
+                update.setInt(3, stats.losses);
+                update.setInt(4, stats.kills);
+                update.setInt(5, stats.deaths);
+                update.setInt(6, stats.xp);
+                update.setString(7, stats.particleEffect);
+                update.setString(8, stats.projectileEffect);
+                update.setString(9, stats.glassColor);
+                update.setString(10, stats.killSound);
+                update.setString(11, stats.winSound);
+                update.setString(12, stats.taunt);
+                update.setInt(13, stats.souls);
+                update.setInt(14, stats.soulWellUsages);
+                update.setInt(15, stats.soulWellLegendaries);
+                update.setInt(16, stats.soulWellRares);
+                update.setInt(17, stats.soulWellSoulsGathered);
+                update.setInt(18, stats.soulWellSoulsPurchased);
+                update.setString(19, uuid);
                 update.executeUpdate();
             } finally {
                 if (update != null) {
@@ -184,15 +196,27 @@ public final class UltraSkyWarsMongoMigrator {
             name = choosePreferredName(name, null, uuid);
             insert = connection.prepareStatement(
                     "INSERT INTO `sw_player` (`player_id`, `uuid`, `player_name`, `wins`, `losses`, `kills`, `deaths`, `xp`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt`, `souls`, `soulwell_usages`, `soulwell_legendaries`, `soulwell_rares`, `soulwell_souls_gathered`, `soulwell_souls_purchased`) " +
-                            "VALUES (NULL, ?, ?, ?, 0, ?, ?, ?, 'none', 'none', 'none', 'none', 'none', 'none', ?, 0, 0, 0, 0, 0);"
+                            "VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             );
             insert.setString(1, uuid);
             insert.setString(2, name);
             insert.setInt(3, stats.wins);
-            insert.setInt(4, stats.kills);
-            insert.setInt(5, stats.deaths);
-            insert.setInt(6, stats.xp);
-            insert.setInt(7, stats.souls);
+            insert.setInt(4, stats.losses);
+            insert.setInt(5, stats.kills);
+            insert.setInt(6, stats.deaths);
+            insert.setInt(7, stats.xp);
+            insert.setString(8, stats.particleEffect);
+            insert.setString(9, stats.projectileEffect);
+            insert.setString(10, stats.glassColor);
+            insert.setString(11, stats.killSound);
+            insert.setString(12, stats.winSound);
+            insert.setString(13, stats.taunt);
+            insert.setInt(14, stats.souls);
+            insert.setInt(15, stats.soulWellUsages);
+            insert.setInt(16, stats.soulWellLegendaries);
+            insert.setInt(17, stats.soulWellRares);
+            insert.setInt(18, stats.soulWellSoulsGathered);
+            insert.setInt(19, stats.soulWellSoulsPurchased);
             insert.executeUpdate();
             return true;
         } finally {
@@ -240,46 +264,22 @@ public final class UltraSkyWarsMongoMigrator {
         fc.set("uuid", uuid);
         fc.set("player_name", name);
         fc.set("wins", stats.wins);
+        fc.set("losses", stats.losses);
         fc.set("kills", stats.kills);
         fc.set("deaths", stats.deaths);
-        if (!fc.contains("losses")) {
-            fc.set("losses", 0);
-        }
         fc.set("xp", stats.xp);
-        if (!fc.contains("pareffect")) {
-            fc.set("pareffect", "none");
-        }
-        if (!fc.contains("proeffect")) {
-            fc.set("proeffect", "none");
-        }
-        if (!fc.contains("glasscolor")) {
-            fc.set("glasscolor", "none");
-        }
-        if (!fc.contains("killsound")) {
-            fc.set("killsound", "none");
-        }
-        if (!fc.contains("winsound")) {
-            fc.set("winsound", "none");
-        }
-        if (!fc.contains("taunt")) {
-            fc.set("taunt", "none");
-        }
+        fc.set("pareffect", stats.particleEffect);
+        fc.set("proeffect", stats.projectileEffect);
+        fc.set("glasscolor", stats.glassColor);
+        fc.set("killsound", stats.killSound);
+        fc.set("winsound", stats.winSound);
+        fc.set("taunt", stats.taunt);
         fc.set("souls", stats.souls);
-        if (!fc.contains("soulwell_usages")) {
-            fc.set("soulwell_usages", 0);
-        }
-        if (!fc.contains("soulwell_legendaries")) {
-            fc.set("soulwell_legendaries", 0);
-        }
-        if (!fc.contains("soulwell_rares")) {
-            fc.set("soulwell_rares", 0);
-        }
-        if (!fc.contains("soulwell_souls_gathered")) {
-            fc.set("soulwell_souls_gathered", 0);
-        }
-        if (!fc.contains("soulwell_souls_purchased")) {
-            fc.set("soulwell_souls_purchased", 0);
-        }
+        fc.set("soulwell_usages", stats.soulWellUsages);
+        fc.set("soulwell_legendaries", stats.soulWellLegendaries);
+        fc.set("soulwell_rares", stats.soulWellRares);
+        fc.set("soulwell_souls_gathered", stats.soulWellSoulsGathered);
+        fc.set("soulwell_souls_purchased", stats.soulWellSoulsPurchased);
         fc.save(playerFile);
         return true;
     }
@@ -287,22 +287,56 @@ public final class UltraSkyWarsMongoMigrator {
     private static MigratedStats readStats(DBObject playerDoc, String skywarsJson) {
         MigratedStats stats = new MigratedStats();
         stats.wins = Math.max(0, asInt(playerDoc.get("wins")));
+        stats.losses = Math.max(0, asInt(playerDoc.get("losses")));
         stats.kills = Math.max(0, asInt(playerDoc.get("kills")));
         stats.deaths = Math.max(0, asInt(playerDoc.get("deaths")));
+        stats.souls = Math.max(0, asInt(playerDoc.get("souls")));
+        stats.soulWellUsages = Math.max(0, asInt(playerDoc.get("soulwell_usages")));
+        stats.soulWellLegendaries = Math.max(0, asInt(playerDoc.get("soulwell_legendaries")));
+        stats.soulWellRares = Math.max(0, asInt(playerDoc.get("soulwell_rares")));
+        stats.soulWellSoulsGathered = Math.max(0, asInt(playerDoc.get("soulwell_souls_gathered")));
+        stats.soulWellSoulsPurchased = Math.max(0, asInt(playerDoc.get("soulwell_souls_purchased")));
+        stats.particleEffect = asString(playerDoc.get("pareffect"));
+        stats.projectileEffect = asString(playerDoc.get("proeffect"));
+        stats.glassColor = asString(playerDoc.get("glasscolor"));
+        stats.killSound = asString(playerDoc.get("killsound"));
+        stats.winSound = asString(playerDoc.get("winsound"));
+        stats.taunt = asString(playerDoc.get("taunt"));
         stats.coins = Math.max(0, asInt(playerDoc.get("coins")));
         stats.elo = Math.max(0, asInt(playerDoc.get("elo")));
         stats.level = Math.max(1, asInt(playerDoc.get("level")));
 
         if (skywarsJson != null) {
             stats.wins = Math.max(stats.wins, extractJsonInt(skywarsJson, "wins", stats.wins));
+            stats.losses = Math.max(stats.losses, extractJsonInt(skywarsJson, "losses", stats.losses));
             stats.kills = Math.max(stats.kills, extractJsonInt(skywarsJson, "kills", stats.kills));
             stats.deaths = Math.max(stats.deaths, extractJsonInt(skywarsJson, "deaths", stats.deaths));
             stats.xp = Math.max(0, extractJsonInt(skywarsJson, "xp", 0));
-            stats.souls = Math.max(0, extractJsonInt(skywarsJson, "souls", 0));
+            stats.souls = Math.max(stats.souls, extractJsonInt(skywarsJson, "souls", 0));
+            stats.soulWellUsages = Math.max(stats.soulWellUsages, extractJsonInt(skywarsJson, "soulwell_usages", stats.soulWellUsages));
+            stats.soulWellLegendaries = Math.max(stats.soulWellLegendaries, extractJsonInt(skywarsJson, "soulwell_legendaries", stats.soulWellLegendaries));
+            stats.soulWellRares = Math.max(stats.soulWellRares, extractJsonInt(skywarsJson, "soulwell_rares", stats.soulWellRares));
+            stats.soulWellSoulsGathered = Math.max(stats.soulWellSoulsGathered, extractJsonInt(skywarsJson, "soulwell_souls_gathered", stats.soulWellSoulsGathered));
+            stats.soulWellSoulsPurchased = Math.max(stats.soulWellSoulsPurchased, extractJsonInt(skywarsJson, "soulwell_souls_purchased", stats.soulWellSoulsPurchased));
+            // USW-style keys
+            stats.soulWellLegendaries = Math.max(stats.soulWellLegendaries, extractJsonInt(skywarsJson, "soulWellHead", stats.soulWellLegendaries));
+            stats.soulWellRares = Math.max(stats.soulWellRares, extractJsonInt(skywarsJson, "soulWellExtra", stats.soulWellRares));
+            stats.soulWellUsages = Math.max(stats.soulWellUsages, extractJsonInt(skywarsJson, "soulWellMax", stats.soulWellUsages));
             stats.coins = Math.max(stats.coins, extractJsonInt(skywarsJson, "coins", stats.coins));
             stats.elo = Math.max(stats.elo, extractJsonInt(skywarsJson, "elo", stats.elo));
             stats.level = Math.max(stats.level, extractJsonInt(skywarsJson, "level", stats.level));
+            stats.taunt = coalesceOptionString(stats.taunt, extractJsonInt(skywarsJson, "taunt", 0));
+            stats.killSound = coalesceOptionString(stats.killSound, extractJsonInt(skywarsJson, "killSound", 0));
+            stats.winSound = coalesceOptionString(stats.winSound, extractJsonInt(skywarsJson, "winEffect", 0));
+            stats.glassColor = coalesceOptionString(stats.glassColor, extractJsonInt(skywarsJson, "glass", 0));
         }
+
+        if (stats.particleEffect == null) stats.particleEffect = "none";
+        if (stats.projectileEffect == null) stats.projectileEffect = "none";
+        if (stats.glassColor == null) stats.glassColor = "none";
+        if (stats.killSound == null) stats.killSound = "none";
+        if (stats.winSound == null) stats.winSound = "none";
+        if (stats.taunt == null) stats.taunt = "none";
 
         // SWR e gay si calculeaza xp-ul in functie de level, asa ca mai bine ii dam xp necesar pentru levelul respectiv :))))))))
         if (stats.level > 1) {
@@ -417,12 +451,36 @@ public final class UltraSkyWarsMongoMigrator {
         }
     }
 
+    private static String coalesceOptionString(String currentValue, int optionId) {
+        String current = asString(currentValue);
+        if (current != null && !"none".equalsIgnoreCase(current)) {
+            return current;
+        }
+        // USW stores locked/unselected as 0 or 999999.
+        if (optionId <= 0 || optionId == 999999) {
+            return "none";
+        }
+        return String.valueOf(optionId);
+    }
+
     private static final class MigratedStats {
         private int wins;
+        private int losses;
         private int kills;
         private int deaths;
         private int xp;
         private int souls;
+        private int soulWellUsages;
+        private int soulWellLegendaries;
+        private int soulWellRares;
+        private int soulWellSoulsGathered;
+        private int soulWellSoulsPurchased;
+        private String particleEffect;
+        private String projectileEffect;
+        private String glassColor;
+        private String killSound;
+        private String winSound;
+        private String taunt;
         private int coins;
         private int elo;
         private int level;

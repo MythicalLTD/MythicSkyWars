@@ -67,11 +67,7 @@ public class ChestManager {
 
     public void load(Map<Integer, Inventory> itemList, String fileName) {
         itemList.clear();
-        File chestFile = new File(SkyWarsReloaded.get().getDataFolder(), fileName);
-
-        if (!chestFile.exists()) {
-            SkyWarsReloaded.get().saveResource(fileName, false);
-        }
+        File chestFile = ChestStorageLayout.resolveDataFile(SkyWarsReloaded.get(), fileName, true);
 
         if (chestFile.exists()) {
             FileConfiguration storage = YamlConfiguration.loadConfiguration(chestFile);
@@ -93,7 +89,21 @@ public class ChestManager {
         }
     }
 
+    /**
+     * When an admin closes a chest-loot GUI, persists if the inventory title refers to any known loot YAML
+     * ({@code chest.yml}, {@code opchest.yml}, centre variants, {@code crates.yml}, …).
+     */
+    public void persistChestEditorInventory(String inventoryTitle) {
+        if (inventoryTitle == null || inventoryTitle.isEmpty()) {
+            return;
+        }
+        save(inventoryTitle);
+    }
+
     public void save(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            return;
+        }
         String parts[] = title.split(" ", 2);
         ChestType ct = getChestType(ChatColor.stripColor(parts[0]));
         if (ct != null) {
@@ -104,11 +114,7 @@ public class ChestManager {
 
     private void save(Map<Integer, Inventory> chestList, ChestType ct) {
         String fileName = getFileName(ct);
-        File chestFile = new File(SkyWarsReloaded.get().getDataFolder(), fileName);
-
-        if (!chestFile.exists()) {
-            SkyWarsReloaded.get().saveResource(fileName, false);
-        }
+        File chestFile = ChestStorageLayout.resolveDataFile(SkyWarsReloaded.get(), fileName, true);
 
         if (chestFile.exists()) {
             try {

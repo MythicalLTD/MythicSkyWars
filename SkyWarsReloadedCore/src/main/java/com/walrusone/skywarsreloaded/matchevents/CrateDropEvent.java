@@ -4,7 +4,6 @@ import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.game.TeamCard;
-import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -87,7 +86,7 @@ public class CrateDropEvent extends MatchEvent {
             }
 
             if (gMap.getMatchState() == MatchState.PLAYING) {
-                MatchManager.get().message(gMap, org.bukkit.ChatColor.translateAlternateColorCodes('&', endMessage));
+                messageMapIfPresent(endMessage);
             }
             gMap.removeCrates();
             if ((repeatable) || (force)) {

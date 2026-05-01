@@ -1485,7 +1485,7 @@ public class Config {
     }
 
     /**
-     * Lucky block tuning lives in {@code plugins/SkyWarsReloaded/luckyblocks.yml} (not {@code config.yml}).
+     * Lucky block tuning lives in {@code plugins/SkyWarsReloaded/chests/lucky/luckyblocks.yml} (not {@code config.yml}).
      */
     public boolean isLuckyBlockReplaceCenterChests() {
         return LuckyBlockHook.isReplaceCenterChests();
