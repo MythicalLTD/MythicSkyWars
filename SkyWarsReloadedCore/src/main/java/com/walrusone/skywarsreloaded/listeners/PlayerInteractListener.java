@@ -10,6 +10,7 @@ import com.walrusone.skywarsreloaded.game.Crate;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.game.TeamCard;
 import com.walrusone.skywarsreloaded.managers.ChestRefillVisualManager;
+import com.walrusone.skywarsreloaded.managers.LobbyBypassManager;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.menus.playeroptions.StatsMenu;
 import com.walrusone.skywarsreloaded.menus.gameoptions.KitSelectionMenu;
@@ -18,6 +19,7 @@ import com.walrusone.skywarsreloaded.menus.gameoptions.objects.CoordLoc;
 import com.walrusone.skywarsreloaded.menus.playeroptions.OptionsSelectionMenu;
 import com.walrusone.skywarsreloaded.menus.soulwell.SoulWellMenu;
 import com.walrusone.skywarsreloaded.menus.JoinSingleMenu;
+import com.walrusone.skywarsreloaded.menus.ArenaSetupMenu;
 import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Party;
@@ -126,6 +128,14 @@ public class PlayerInteractListener implements Listener {
 
         final GameMap gameMap = MatchManager.get().getPlayerMapSafe(player);
         if (gameMap == null) {
+            GameMap editorMap = SkyWarsReloaded.getGameMapMgr().getMap(player.getWorld().getName());
+            if (editorMap != null && editorMap.isEditing() && event.hasItem()
+                    && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
+                    && ArenaSetupMenu.isTool(event.getItem())) {
+                event.setCancelled(true);
+                ArenaSetupMenu.open(player, editorMap);
+                return;
+            }
             if ((event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK)
                     && event.getClickedBlock() != null
                     && SkyWarsReloaded.getSoulWellManager() != null
@@ -164,6 +174,9 @@ public class PlayerInteractListener implements Listener {
                 }
             }
             if (Util.get().isSpawnWorld(player.getWorld())) {
+                if (LobbyBypassManager.hasBypass(player)) {
+                    return;
+                }
                 if (SkyWarsReloaded.getCfg().protectLobby()) {
                     boolean isBlockBuildClick = event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_BLOCK;
                     if (player.hasPermission("sw.alterlobby") && isBlockBuildClick) {
@@ -441,6 +454,10 @@ public class PlayerInteractListener implements Listener {
         if (event.getWhoClicked() instanceof Player) {
             GameMap gMap = MatchManager.get().getPlayerMapSafe((Player) event.getWhoClicked());
             if (gMap == null) {
+                Player clicker = (Player) event.getWhoClicked();
+                if (Util.get().isSpawnWorld(clicker.getWorld()) && LobbyBypassManager.hasBypass(clicker)) {
+                    return;
+                }
                 ItemStack item;
                 ItemStack item2;
                 if (event.getClick().equals(ClickType.NUMBER_KEY)) {
@@ -456,13 +473,21 @@ public class PlayerInteractListener implements Listener {
                         || item.equals(SkyWarsReloaded.getIM().getItem("rejoinitem"))
                         || item.equals(SkyWarsReloaded.getIM().getItem("joinselect"))
                         || item.equals(SkyWarsReloaded.getIM().getItem("backlobbyitem"))
-                        || item.equals(SkyWarsReloaded.getIM().getItem("spectateselect")))
+                        || item.equals(SkyWarsReloaded.getIM().getItem("spectateselect"))
+                        || ArenaSetupMenu.isTool(item))
                         || item2 != null && (item2.equals(SkyWarsReloaded.getIM().getItem("optionselect"))
                         || item2.equals(SkyWarsReloaded.getIM().getItem("statsitem"))
                         || item2.equals(SkyWarsReloaded.getIM().getItem("rejoinitem"))
                         || item2.equals(SkyWarsReloaded.getIM().getItem("joinselect"))
                         || item2.equals(SkyWarsReloaded.getIM().getItem("backlobbyitem"))
-                        || item2.equals(SkyWarsReloaded.getIM().getItem("spectateselect")))) {
+                        || item2.equals(SkyWarsReloaded.getIM().getItem("spectateselect"))
+                        || ArenaSetupMenu.isTool(item2))) {
+                    event.setCancelled(true);
+                }
+                String title = event.getView().getTitle();
+                GameMap editorMap = SkyWarsReloaded.getGameMapMgr().getMap(event.getWhoClicked().getWorld().getName());
+                if (editorMap != null && editorMap.isEditing()
+                        && ArenaSetupMenu.handleClick((Player) event.getWhoClicked(), editorMap, title, event.getRawSlot(), event.getClick())) {
                     event.setCancelled(true);
                 }
             } else {
@@ -589,6 +614,8 @@ public class PlayerInteractListener implements Listener {
                 if (map.isEditing()) {
                     if (e.getBlock().getType().equals(Material.CHEST) || e.getBlock().getType().equals(Material.TRAPPED_CHEST)) {
                         Chest chest = (Chest) e.getBlock().getState();
+                        final Location brokenLoc = e.getBlock().getLocation();
+                        final World world = e.getBlock().getWorld();
 
                         // Remove from map
                         map.removeChest(chest);
@@ -599,7 +626,6 @@ public class PlayerInteractListener implements Listener {
                             Chest right = (Chest) dc.getRightSide();
                             Location locLeft = left.getLocation();
                             Location locRight = right.getLocation();
-                            World world = e.getBlock().getWorld();
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {
@@ -608,6 +634,19 @@ public class PlayerInteractListener implements Listener {
                                 }
                             }.runTaskLater(SkyWarsReloaded.get(), 2L);
                         }
+                        // Force-clean nearby chest blocks to avoid invisible/ghost leftovers
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                forceClearEditorChestBlocks(world, brokenLoc);
+                            }
+                        }.runTaskLater(SkyWarsReloaded.get(), 1L);
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                forceClearEditorChestBlocks(world, brokenLoc);
+                            }
+                        }.runTaskLater(SkyWarsReloaded.get(), 6L);
                         player.sendMessage(new Messaging.MessageFormatter().setVariable("mapname", map.getDisplayName()).format("maps.removeChest"));
                     } else if (e.getBlock().getType().equals(Material.DIAMOND_BLOCK)) {
                         // Remove all spawns matching location and collect which ones were removed
@@ -687,6 +726,9 @@ public class PlayerInteractListener implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
+                if (!(loc.getBlock().getState() instanceof Chest)) {
+                    return;
+                }
                 worldMap.addChest((Chest) loc.getBlock().getState(), worldMap.getChestPlacementType());
                 if (worldMap.getChestPlacementType() == ChestPlacementType.NORMAL) {
                     player.sendMessage(new Messaging.MessageFormatter()
@@ -718,4 +760,26 @@ public class PlayerInteractListener implements Listener {
         }
     }
 
+    private void forceClearEditorChestBlocks(World world, Location center) {
+        if (world == null || center == null) {
+            return;
+        }
+        int x = center.getBlockX();
+        int y = center.getBlockY();
+        int z = center.getBlockZ();
+        int[][] offsets = new int[][]{
+                {0, 0, 0},
+                {1, 0, 0},
+                {-1, 0, 0},
+                {0, 0, 1},
+                {0, 0, -1}
+        };
+        for (int[] off : offsets) {
+            Block b = world.getBlockAt(x + off[0], y + off[1], z + off[2]);
+            Material type = b.getType();
+            if (type == Material.CHEST || type == Material.TRAPPED_CHEST) {
+                b.setType(Material.AIR);
+            }
+        }
+    }
 }

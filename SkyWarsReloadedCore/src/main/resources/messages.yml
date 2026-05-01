@@ -50,6 +50,8 @@ command:
     "xp", "souls", "pareffect", "proeffect", "glasscolor", "killsound", or "winsound"'
   hologram-removed: '&cThe nearest hologram has been removed!'
   hologram-created: '&aYou successfully created a &b%type% %format% &ahologram!'
+  bypass-lobby-slots-enabled: '&aLobby slot bypass enabled. You can now move items and build/place in lobby.'
+  bypass-lobby-slots-disabled: '&eLobby slot bypass disabled.'
   lobbywaterportal:
     unavailable: '&cLobby water portal manager is not available.'
     usage-header: '&6Lobby water portal commands:'
@@ -102,6 +104,82 @@ event:
   crateInv: '&7SkyWars Crate'
 maps:
   noArenas: '&cThere currently are no arenas. Create one using ''/swm create <name>'''
+  editor:
+    tool-given: '&aUse the blaze rod to open the arena setup menu.'
+    left-without-saving: '&eLeft editor for arena {mapname} without saving changes.'
+    team-spawn-added: '&aAdded team spawn for team &e#{team}&a.'
+    chest-mode-set: '&aChest mode set to {mode}&a.'
+    chest-mode-center: '&6CENTER'
+    chest-mode-normal: '&6NORMAL'
+    friendly-fire-state: '&aFriendly fire is now {state}&a.'
+    hologram:
+      line: '&aSETUP &7({type}&7)'
+      type:
+        chest-normal: '&eCHEST: NORMAL'
+        chest-center: '&eCHEST: CENTER'
+        chest-unregistered: '&cCHEST: NOT SETUP'
+        spawn: '&bSPAWN T{team}#{spawn}'
+        world-spawn: '&dWORLD SPAWN'
+        spectator-spawn: '&5SPECTATOR SPAWN'
+    no-spawn-at-location: '&cNo player/team spawn exists at your current location.'
+    no-deathmatch-spawn-at-location: '&cNo deathmatch spawn exists at your current location.'
+    spectate-spawn-cleared: '&aSpectate spawn cleared for this arena.'
+    waiting-spawn-cleared: '&aWaiting lobby spawn cleared for this arena.'
+    waiting-spawn-disabled-solo: '&eWaiting lobby spawn is disabled for solo arenas.'
+    min-players-unavailable: '&eAdd player spawns first before changing minimum players.'
+    all-chests-normalized: '&aRegistered every chest on this map as NORMAL. Total chests: &e{count}&a.'
+    state:
+      enabled: '&aenabled'
+      disabled: '&cdisabled'
+    item:
+      add-player-spawn:
+        name: '&bAdd Player Spawn'
+        lore: '&7Left click: set here | Right click: remove'
+      chest-mode:
+        name: '&bChest Mode'
+        lore-current: '&7Current: {mode}'
+        lore-toggle: '&7Click to toggle chest placement mode'
+      add-deathmatch-spawn:
+        name: '&bAdd Deathmatch Spawn'
+        lore: '&7Set deathmatch spawn at your location'
+      set-look-direction:
+        name: '&bSet Look Direction'
+        lore: '&7Set default chest look direction from your location'
+      set-spectate-spawn:
+        name: '&bSet Spectate Spawn'
+        lore: '&7Left click: set here | Right click: remove'
+      friendly-fire:
+        name: '&bFriendly Fire'
+        lore-current: '&7Friendly Fire: {state}'
+        lore-toggle: '&7Click to toggle friendly fire'
+      set-waiting-spawn:
+        name: '&bSet Waiting Lobby Spawn'
+        lore: '&7Left click: set here | Right click: remove'
+      team-size:
+        name: '&bTeam Size'
+        lore-current: '&7Team Size: &6{size}'
+        lore-left: '&7Left click: increase'
+        lore-right: '&7Right click: decrease'
+      min-players:
+        name: '&bMinimum Players'
+        lore-current: '&7Min Players: &6{count}'
+        lore-left: '&7Left click: increase'
+        lore-right: '&7Right click: decrease'
+      normalize-chests:
+        name: '&bSet All Chests To NORMAL'
+        lore: '&7Scans the whole map and registers all chests as NORMAL'
+      open-arena-manager:
+        name: '&bOpen Arena Manager'
+        lore: '&7Open advanced arena settings'
+      remove-deathmatch-spawn:
+        name: '&cRemove Deathmatch Spawn'
+        lore: '&7Remove deathmatch spawn at your current location'
+      save-exit:
+        name: '&aSave & Exit Editor'
+        lore: '&7Save current map edits and leave editor'
+      exit-no-save:
+        name: '&cExit Without Saving'
+        lore: '&7Leave editor without saving changes'
   waitingLobbySpawn: '&aThe waiting lobby spawn of map {mapname} has been set to your
     location!'
   setLookDirection: '&aThe look direction spawn of map {mapname} has been set to your
@@ -319,6 +397,7 @@ spectate:
   playeritemlore: '&7Click to teleport to {player}'
   stayinarena: '&cLet''s say within the arena, would ya!'
 menu:
+  arena-setup-title: '&8Arena Setup: {map}'
   joinsolo-mode-menu-title: '&8Solo Queue Mode'
   joinsolo-mode-normal-lore1: '&7Classic solo SkyWars'
   joinsolo-mode-normal-lore2: '&aClick to open arenas'
@@ -703,6 +782,7 @@ helpList:
       at your eye location'
     holoremove: '&a/sw holoremove &e- &2Removes the closest hologram leaderboard'
     lobby: '&a/sw lobby &e- &2Teleport to Skywars lobby'
+    bypasslobbyslots: '&a/sw bypassLobbySlots &e- &2Toggle lobby slot/build bypass for yourself'
     lobbywaterportal: '&a/sw lobbywaterportal &e- &2Manage lobby water auto-join portals'
     lobbywaterportla: '&a/sw lobbywaterportal &e- &2Manage lobby water auto-join portals'
     soulwell: '&a/sw soulwell &e(setwell|holo|info|clear) &e- &2Set Soul Well block/hologram'
@@ -726,6 +806,7 @@ helpList:
     register: '&a/swmap register &e[mapname] &e- &2Registers a map named &e[mapname]'
     unregister: '&a/swmap unregister &e[mapname] &e- &2Unregisters a map named &e[mapname]'
     save: '&a/swmap save &e[mapname] &e- &2Saves a open map named &e[mapname]'
+    leave: '&a/swmap leave &e- &2Leaves map editor mode (save and exit)'
     arenas: '&a/swmap arenas &e- &2Opens the Arenas GUI'
     spawn: '&a/swmap spawn &e[type] &e- &2Sets a spawn point for a arena. Type can
       be player, spec, or deathmatch'

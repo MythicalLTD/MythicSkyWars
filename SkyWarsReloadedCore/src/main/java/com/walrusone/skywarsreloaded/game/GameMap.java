@@ -13,6 +13,7 @@ import com.walrusone.skywarsreloaded.events.SkyWarsJoinEvent;
 import com.walrusone.skywarsreloaded.events.SkyWarsMatchStateChangeEvent;
 import com.walrusone.skywarsreloaded.game.cages.*;
 import com.walrusone.skywarsreloaded.game.signs.SWRSign;
+import com.walrusone.skywarsreloaded.managers.ArenaSetupHologramManager;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.managers.PlayerStat;
 import com.walrusone.skywarsreloaded.managers.worlds.ASWMWorldManager;
@@ -21,6 +22,7 @@ import com.walrusone.skywarsreloaded.managers.worlds.WorldManager;
 import com.walrusone.skywarsreloaded.managers.worlds.WorldManagerType;
 import com.walrusone.skywarsreloaded.matchevents.*;
 import com.walrusone.skywarsreloaded.menus.ArenaMenu;
+import com.walrusone.skywarsreloaded.menus.ArenaSetupMenu;
 import com.walrusone.skywarsreloaded.menus.TeamSelectionMenu;
 import com.walrusone.skywarsreloaded.menus.TeamSpectateMenu;
 import com.walrusone.skywarsreloaded.menus.gameoptions.*;
@@ -305,6 +307,9 @@ public class GameMap {
             player.setGameMode(GameMode.CREATIVE);
             player.setAllowFlight(true);
             player.setFlying(true);
+            ArenaSetupMenu.giveTool(player);
+            player.sendMessage(new Messaging.MessageFormatter().format("maps.editor.tool-given"));
+            ArenaSetupHologramManager.get().requestFullRefresh(gMap);
         }, 20);
     }
 
@@ -745,7 +750,7 @@ public class GameMap {
         fc.set("minplayers", minPlayers);
         fc.set("creator", designedBy);
         fc.set("registered", registered);
-        fc.set("spectateSpawn", spectateSpawn.getLocationString());
+        fc.set("spectateSpawn", spectateSpawn == null ? null : spectateSpawn.getLocationString());
         fc.set("cage", cage.getType().toString().toLowerCase());
         fc.set("teamSize", teamSize);
         fc.set("environment", environment);
@@ -758,9 +763,7 @@ public class GameMap {
 
         fc.set("enableCustomJoinMenuItem", customJoinMenuIcon);
 
-        if (waitingLobbySpawn != null) {
-            fc.set("waitingLobbySpawn", waitingLobbySpawn.getLocationString());
-        }
+        fc.set("waitingLobbySpawn", waitingLobbySpawn == null ? null : waitingLobbySpawn.getLocationString());
 
         if (teamSize == 1) {
             List<String> spawns = new ArrayList<>();
@@ -1606,6 +1609,9 @@ public class GameMap {
 
     public void setEditing(boolean editingIn) {
         inEditing = editingIn;
+        if (!editingIn) {
+            ArenaSetupHologramManager.get().clear(this);
+        }
     }
 
     public World getCurrentWorld() {
@@ -1701,6 +1707,7 @@ public class GameMap {
         if (saveFile) {
             saveArenaData();
         }
+        refreshEditorSetupHolograms();
         return createdTeamCard;
     }
 
@@ -1717,6 +1724,7 @@ public class GameMap {
         spawnLocs.add(coordLoc);
         spawnLocations.put(teamCard, spawnLocs);
         teamCard.getSpawns().add(coordLoc);
+        refreshEditorSetupHolograms();
 
     }
 
@@ -1852,6 +1860,7 @@ public class GameMap {
             }
             // Save all after changes
             saveArenaData();
+            refreshEditorSetupHolograms();
         }
         return toRemove;
         /*} else {
@@ -1890,6 +1899,7 @@ public class GameMap {
     public void addDeathMatchSpawn(Location loc) {
         addDeathMatchSpawn(new CoordLoc(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
         saveArenaData();
+        refreshEditorSetupHolograms();
     }
 
     private void addDeathMatchSpawn(CoordLoc loc) {
@@ -1901,6 +1911,7 @@ public class GameMap {
         CoordLoc remove = new CoordLoc(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
         boolean result = deathMatchSpawns.remove(remove);
         saveArenaData();
+        refreshEditorSetupHolograms();
         return result;
     }
 
@@ -1939,6 +1950,7 @@ public class GameMap {
         list.add(loc);
         if (save) {
             saveArenaData();
+            refreshEditorSetupHolograms();
         }
     }
 
@@ -1953,14 +1965,58 @@ public class GameMap {
             chests.remove(locLeft);
             centerChests.remove(locLeft);
             chests.remove(locRight);
-            centerChests.remove(locLeft);
+            centerChests.remove(locRight);
         } else {
             CoordLoc loc = new CoordLoc(chest.getX(), chest.getY(), chest.getZ());
             chests.remove(loc);
             centerChests.remove(loc);
         }
         saveArenaData();
+        refreshEditorSetupHolograms();
 
+    }
+
+    public int registerAllMapChestsAsNormal() {
+        World world = getCurrentWorld();
+        if (world == null) {
+            return 0;
+        }
+
+        int mapSize = SkyWarsReloaded.getCfg().getMaxMapSize();
+        int max = mapSize / 2;
+        int min = -mapSize / 2;
+        Chunk cMin = world.getBlockAt(min, 0, min).getChunk();
+        Chunk cMax = world.getBlockAt(max, 0, max).getChunk();
+
+        Set<CoordLoc> detectedChests = new LinkedHashSet<>();
+        for (int cx = cMin.getX(); cx < cMax.getX(); cx++) {
+            for (int cz = cMin.getZ(); cz < cMax.getZ(); cz++) {
+                Chunk currentChunk = world.getChunkAt(cx, cz);
+                currentChunk.load(true);
+                for (BlockState blockState : currentChunk.getTileEntities()) {
+                    if (blockState instanceof Chest) {
+                        Chest chest = (Chest) blockState;
+                        InventoryHolder ih = chest.getInventory().getHolder();
+                        if (ih instanceof DoubleChest) {
+                            DoubleChest dc = (DoubleChest) ih;
+                            Chest left = (Chest) dc.getLeftSide();
+                            Chest right = (Chest) dc.getRightSide();
+                            detectedChests.add(new CoordLoc(left.getX(), left.getY(), left.getZ()));
+                            detectedChests.add(new CoordLoc(right.getX(), right.getY(), right.getZ()));
+                        } else {
+                            detectedChests.add(new CoordLoc(chest.getX(), chest.getY(), chest.getZ()));
+                        }
+                    }
+                }
+            }
+        }
+
+        chests.clear();
+        centerChests.clear();
+        chests.addAll(detectedChests);
+        saveArenaData();
+        refreshEditorSetupHolograms();
+        return chests.size();
     }
 
     public CoordLoc getSpectateSpawn() {
@@ -1970,9 +2026,20 @@ public class GameMap {
     public void setSpectateSpawn(Location location) {
         spectateSpawn = new CoordLoc(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         saveArenaData();
+        refreshEditorSetupHolograms();
+    }
+
+    public void clearSpectateSpawn() {
+        spectateSpawn = null;
+        saveArenaData();
+        refreshEditorSetupHolograms();
     }
 
     public void saveMap(CommandSender toMsg) {
+        exitEditMode(toMsg, true);
+    }
+
+    public void exitEditMode(CommandSender toMsg, boolean saveChanges) {
         boolean success = false;
         Location respawn = SkyWarsReloaded.getCfg().getSpawn();
         World editWorld = SkyWarsReloaded.get().getServer().getWorld(name);
@@ -1980,18 +2047,22 @@ public class GameMap {
             for (Player player : editWorld.getPlayers()) {
                 player.teleport(respawn, TeleportCause.PLUGIN);
             }
-            SkyWarsReloaded.getWM().unloadWorld(name, true);
-            File dataDirectory = new File(SkyWarsReloaded.get().getDataFolder(), "maps");
-            File target = new File(dataDirectory, name);
-            SkyWarsReloaded.getWM().deleteWorld(target);
             File source = new File(SkyWarsReloaded.get().getServer().getWorldContainer().getAbsolutePath(), name);
-            SkyWarsReloaded.getWM().copyWorld(source, target);
-            if (toMsg != null) {
-                toMsg.sendMessage(new Messaging.MessageFormatter().setVariable("mapname", name).format("maps.saved"));
-                toMsg.sendMessage(new Messaging.MessageFormatter().format("maps.register-reminder"));
+            SkyWarsReloaded.getWM().unloadWorld(name, saveChanges);
+            if (saveChanges) {
+                File dataDirectory = new File(SkyWarsReloaded.get().getDataFolder(), "maps");
+                File target = new File(dataDirectory, name);
+                SkyWarsReloaded.getWM().deleteWorld(target);
+                SkyWarsReloaded.getWM().copyWorld(source, target);
+                if (toMsg != null) {
+                    toMsg.sendMessage(new Messaging.MessageFormatter().setVariable("mapname", name).format("maps.saved"));
+                    toMsg.sendMessage(new Messaging.MessageFormatter().format("maps.register-reminder"));
+                }
+                saveArenaData();
+            } else if (toMsg != null) {
+                toMsg.sendMessage(new Messaging.MessageFormatter().setVariable("mapname", name).format("maps.editor.left-without-saving"));
             }
             SkyWarsReloaded.getWM().deleteWorld(source);
-            saveArenaData();
             inEditing = false;
             success = true;
         }
@@ -2269,6 +2340,19 @@ public class GameMap {
     public void setWaitingLobbySpawn(Location location) {
         waitingLobbySpawn = new CoordLoc(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         saveArenaData();
+        refreshEditorSetupHolograms();
+    }
+
+    public void clearWaitingLobbySpawn() {
+        waitingLobbySpawn = null;
+        saveArenaData();
+        refreshEditorSetupHolograms();
+    }
+
+    private void refreshEditorSetupHolograms() {
+        if (isEditing()) {
+            ArenaSetupHologramManager.get().requestRefresh(this);
+        }
     }
 
     public void addWaitingPlayer(Player player) {

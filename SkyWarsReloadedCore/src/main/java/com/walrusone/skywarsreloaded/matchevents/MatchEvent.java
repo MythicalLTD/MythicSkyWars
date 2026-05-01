@@ -213,7 +213,15 @@ public abstract class MatchEvent {
     }
 
     public String getTitle() {
-        return colorize(title);
+        String coloredTitle = colorize(title);
+        if (!coloredTitle.trim().isEmpty()) {
+            return coloredTitle;
+        }
+        String fallback = colorize(eventName);
+        if (!fallback.trim().isEmpty()) {
+            return fallback;
+        }
+        return "Event";
     }
 
     public void setTitle(String title) {

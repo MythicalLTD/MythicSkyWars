@@ -4,6 +4,7 @@ import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.GameType;
 import com.walrusone.skywarsreloaded.enums.LeaderType;
 import com.walrusone.skywarsreloaded.game.GameMap;
+import com.walrusone.skywarsreloaded.managers.LobbyBypassManager;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Party;
@@ -181,7 +182,7 @@ public class LobbyListener implements org.bukkit.event.Listener {
             return;
         }
         if ((SkyWarsReloaded.getCfg().protectLobby()) && (Util.get().isSpawnWorld(player.getWorld())) &&
-                (!SkyWarsReloaded.getIC().has(player))) {
+                (!SkyWarsReloaded.getIC().has(player)) && !LobbyBypassManager.hasBypass(player)) {
             e.setCancelled(true);
         }
     }
@@ -192,6 +193,9 @@ public class LobbyListener implements org.bukkit.event.Listener {
             return;
         }
         if ((SkyWarsReloaded.getCfg().protectLobby()) && (Util.get().isSpawnWorld(e.getPlayer().getWorld()))) {
+            if (LobbyBypassManager.hasBypass(e.getPlayer())) {
+                return;
+            }
             e.setCancelled(true);
         }
     }

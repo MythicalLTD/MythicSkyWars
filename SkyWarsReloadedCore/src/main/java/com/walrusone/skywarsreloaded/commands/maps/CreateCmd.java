@@ -2,7 +2,9 @@ package com.walrusone.skywarsreloaded.commands.maps;
 
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.game.GameMap;
+import com.walrusone.skywarsreloaded.menus.ArenaSetupMenu;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
+import com.walrusone.skywarsreloaded.utilities.Util;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -55,10 +57,13 @@ public class CreateCmd extends com.walrusone.skywarsreloaded.commands.BaseCmd {
                 gMap.setEditing(true);
                 resultWorld.setAutoSave(true);
                 resultWorld.getBlockAt(0, 75, 0).setType(Material.STONE);
+                Util.get().clear(player);
                 player.setGameMode(GameMode.CREATIVE);
                 player.teleport(new org.bukkit.Location(resultWorld, 0.0D, 76.0D, 0.0D), PlayerTeleportEvent.TeleportCause.PLUGIN);
                 player.setAllowFlight(true);
                 player.setFlying(true);
+                ArenaSetupMenu.giveTool(player);
+                player.sendMessage(new Messaging.MessageFormatter().format("maps.editor.tool-given"));
             }
             return true;
         }
