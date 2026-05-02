@@ -70,6 +70,20 @@ public class JoinTeamMenu {
         }
     }
 
+    private static void placeNavButtons(ArrayList<Inventory> inventories) {
+        if (inventories.size() <= 1) return;
+        for (int i = 0; i < inventories.size(); i++) {
+            Inventory inv = inventories.get(i);
+            int size = inv.getSize();
+            if (i > 0) {
+                inv.setItem(size - 9, MythicSkywars.getIM().getItem("prevPageItem"));
+            }
+            if (i < inventories.size() - 1) {
+                inv.setItem(size - 1, MythicSkywars.getIM().getItem("nextPageItem"));
+            }
+        }
+    }
+
     private static void performAutojoinTeam(Player player) {
         if (!player.hasPermission("sw.join")) {
             player.sendMessage(new Messaging.MessageFormatter().format("error.nopermission"));
@@ -363,6 +377,7 @@ public class JoinTeamMenu {
                     }
                 }
                 placeAutojoinTeamButton(invs1);
+                placeNavButtons(invs1);
             }
         };
 

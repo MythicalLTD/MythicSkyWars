@@ -7,13 +7,12 @@ import systems.mythical.mythicskywars.enums.MatchState;
 import systems.mythical.mythicskywars.game.GameMap;
 import systems.mythical.mythicskywars.game.PlayerCard;
 import systems.mythical.mythicskywars.game.TeamCard;
-import systems.mythical.mythicskywars.managers.GameMapManager;
 import systems.mythical.mythicskywars.managers.MatchManager;
 import systems.mythical.mythicskywars.managers.PlayerStat;
+import systems.mythical.mythicskywars.menus.ArenaSetupMenu;
 import systems.mythical.mythicskywars.utilities.LevelManager;
 import systems.mythical.mythicskywars.utilities.PrestigeManager;
 import systems.mythical.mythicskywars.utilities.Messaging;
-import systems.mythical.mythicskywars.utilities.Util;
 import systems.mythical.mythicskywars.utilities.VaultUtils;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.milkbowl.vault.chat.Chat;
@@ -75,7 +74,7 @@ public class ChatListener implements Listener {
                             gMap.update();
                         }
                     }.runTask(MythicSkywars.get());
-                    MythicSkywars.getIC().show(player, gMap.getArenaKey());
+                    ArenaSetupMenu.open(player, gMap);
                 } else if (gMap != null && setting.equalsIgnoreCase("creator")) {
                     gMap.setCreator(variable);
                     player.sendMessage(new Messaging.MessageFormatter()
@@ -88,7 +87,7 @@ public class ChatListener implements Listener {
                             gMap.update();
                         }
                     }.runTask(MythicSkywars.get());
-                    MythicSkywars.getIC().show(player, gMap.getArenaKey());
+                    ArenaSetupMenu.open(player, gMap);
                 }
                 ChatListener.toChange.remove(uuid);
             } else {

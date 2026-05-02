@@ -104,6 +104,22 @@ public class JoinSingleMenu {
         }
     }
 
+    private static void placeNavButtons(ArrayList<Inventory> inventories) {
+        if (inventories.size() <= 1) return;
+        for (int i = 0; i < inventories.size(); i++) {
+            Inventory inv = inventories.get(i);
+            int size = inv.getSize();
+            // Previous button (first slot of bottom row) - skip for first page
+            if (i > 0) {
+                inv.setItem(size - 9, MythicSkywars.getIM().getItem("prevPageItem"));
+            }
+            // Next button (last slot of bottom row) - skip for last page
+            if (i < inventories.size() - 1) {
+                inv.setItem(size - 1, MythicSkywars.getIM().getItem("nextPageItem"));
+            }
+        }
+    }
+
     private static void performAutojoinSolo(Player player) {
         if (!player.hasPermission("sw.join")) {
             player.sendMessage(new Messaging.MessageFormatter().format("error.nopermission"));
@@ -403,6 +419,7 @@ public class JoinSingleMenu {
                     }
                 }
                 placeAutojoinSoloButton(invs1);
+                placeNavButtons(invs1);
             }
         };
 
