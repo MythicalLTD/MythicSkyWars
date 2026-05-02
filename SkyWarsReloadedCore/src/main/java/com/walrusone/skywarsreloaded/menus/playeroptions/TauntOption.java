@@ -50,18 +50,45 @@ public class TauntOption extends PlayerOption {
 
     private static void saveTauntFile(String filename) {
         SkyWarsReloaded.get().saveResource(filename, false);
+        File cosmeticsDir = new File(SkyWarsReloaded.get().getDataFolder(), "cosmetics");
+        if (!cosmeticsDir.exists()) {
+            cosmeticsDir.mkdirs();
+        }
         File sf = new File(SkyWarsReloaded.get().getDataFolder(), filename);
         if (sf.exists()) {
-            boolean result = sf.renameTo(new File(SkyWarsReloaded.get().getDataFolder(), "taunts.yml"));
+            boolean result = sf.renameTo(new File(cosmeticsDir, "taunts.yml"));
             if (!result) {
                 SkyWarsReloaded.get().getLogger().info("Failed to rename Taunts File");
+            } else {
+                SkyWarsReloaded.get().getLogger().info("Migrated taunts to cosmetics folder");
             }
         }
     }
 
     public static void loadPlayerOptions() {
         playerOptions.clear();
-        File tauntFile = new File(SkyWarsReloaded.get().getDataFolder(), "taunts.yml");
+        File cosmeticsDir = new File(SkyWarsReloaded.get().getDataFolder(), "cosmetics");
+        if (!cosmeticsDir.exists()) {
+            cosmeticsDir.mkdirs();
+        }
+        File tauntFile = new File(cosmeticsDir, "taunts.yml");
+        
+        // Backward compatibility: migrate from old location
+        File oldTauntFile = new File(SkyWarsReloaded.get().getDataFolder(), "taunts.yml");
+        if (!tauntFile.exists() && oldTauntFile.exists()) {
+            SkyWarsReloaded.get().getLogger().info("Migrating taunts.yml to cosmetics folder...");
+            if (oldTauntFile.renameTo(tauntFile)) {
+                SkyWarsReloaded.get().getLogger().info("Successfully migrated taunts.yml");
+            } else {
+                SkyWarsReloaded.get().getLogger().warning("Failed to migrate taunts.yml");
+            }
+        }
+        
+        // Clean up old version-specific files if they exist
+        File oldTaunts18 = new File(SkyWarsReloaded.get().getDataFolder(), "taunts18.yml");
+        File oldTaunts112 = new File(SkyWarsReloaded.get().getDataFolder(), "taunts112.yml");
+        if (oldTaunts18.exists()) oldTaunts18.delete();
+        if (oldTaunts112.exists()) oldTaunts112.delete();
 
         if (!tauntFile.exists()) {
             if (SkyWarsReloaded.getNMS().getVersion() < 9) {
@@ -70,6 +97,12 @@ public class TauntOption extends PlayerOption {
                 saveTauntFile("taunts112.yml");
             } else {
                 SkyWarsReloaded.get().saveResource("taunts.yml", false);
+                File sf = new File(SkyWarsReloaded.get().getDataFolder(), "taunts.yml");
+                if (sf.exists()) {
+                    if (sf.renameTo(tauntFile)) {
+                        SkyWarsReloaded.get().getLogger().info("Migrated taunts.yml to cosmetics folder");
+                    }
+                }
             }
         }
 

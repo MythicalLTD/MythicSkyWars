@@ -31,20 +31,44 @@ public class GlassColorOption extends PlayerOption {
 
     public static void loadPlayerOptions() {
         playerOptions.clear();
-        File glassFile = new File(SkyWarsReloaded.get().getDataFolder(), "glasscolors.yml");
+        File cosmeticsDir = new File(SkyWarsReloaded.get().getDataFolder(), "cosmetics");
+        if (!cosmeticsDir.exists()) {
+            cosmeticsDir.mkdirs();
+        }
+        File glassFile = new File(cosmeticsDir, "glasscolors.yml");
+        
+        // Backward compatibility: migrate from old location
+        File oldGlassFile = new File(SkyWarsReloaded.get().getDataFolder(), "glasscolors.yml");
+        if (!glassFile.exists() && oldGlassFile.exists()) {
+            SkyWarsReloaded.get().getLogger().info("Migrating glasscolors.yml to cosmetics folder...");
+            if (oldGlassFile.renameTo(glassFile)) {
+                SkyWarsReloaded.get().getLogger().info("Successfully migrated glasscolors.yml");
+            } else {
+                SkyWarsReloaded.get().getLogger().warning("Failed to migrate glasscolors.yml");
+            }
+        }
+        
+        // Clean up old version-specific files if they exist
+        File oldGlasscolors18 = new File(SkyWarsReloaded.get().getDataFolder(), "glasscolors18.yml");
+        if (oldGlasscolors18.exists()) oldGlasscolors18.delete();
 
         if (!glassFile.exists()) {
             if (SkyWarsReloaded.getNMS().getVersion() < 9) {
                 SkyWarsReloaded.get().saveResource("glasscolors18.yml", false);
                 File sf = new File(SkyWarsReloaded.get().getDataFolder(), "glasscolors18.yml");
                 if (sf.exists()) {
-                    boolean result = sf.renameTo(new File(SkyWarsReloaded.get().getDataFolder(), "glasscolors.yml"));
-                    if (!result) {
-                        SkyWarsReloaded.get().getLogger().info("Failed to rename 1.8 Glasscolors File");
+                    if (sf.renameTo(glassFile)) {
+                        SkyWarsReloaded.get().getLogger().info("Migrated glasscolors18.yml to cosmetics folder");
                     }
                 }
             } else {
                 SkyWarsReloaded.get().saveResource("glasscolors.yml", false);
+                File sf = new File(SkyWarsReloaded.get().getDataFolder(), "glasscolors.yml");
+                if (sf.exists()) {
+                    if (sf.renameTo(glassFile)) {
+                        SkyWarsReloaded.get().getLogger().info("Migrated glasscolors.yml to cosmetics folder");
+                    }
+                }
             }
         }
 

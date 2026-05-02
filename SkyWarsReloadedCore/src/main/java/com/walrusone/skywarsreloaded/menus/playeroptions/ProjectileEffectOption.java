@@ -37,10 +37,31 @@ public class ProjectileEffectOption extends PlayerOption {
 
     public static void loadPlayerOptions() {
         playerOptions.clear();
-        File particleFile = new File(SkyWarsReloaded.get().getDataFolder(), "projectileeffects.yml");
+        File cosmeticsDir = new File(SkyWarsReloaded.get().getDataFolder(), "cosmetics");
+        if (!cosmeticsDir.exists()) {
+            cosmeticsDir.mkdirs();
+        }
+        File particleFile = new File(cosmeticsDir, "projectileeffects.yml");
+        
+        // Backward compatibility: migrate from old location
+        File oldParticleFile = new File(SkyWarsReloaded.get().getDataFolder(), "projectileeffects.yml");
+        if (!particleFile.exists() && oldParticleFile.exists()) {
+            SkyWarsReloaded.get().getLogger().info("Migrating projectileeffects.yml to cosmetics folder...");
+            if (oldParticleFile.renameTo(particleFile)) {
+                SkyWarsReloaded.get().getLogger().info("Successfully migrated projectileeffects.yml");
+            } else {
+                SkyWarsReloaded.get().getLogger().warning("Failed to migrate projectileeffects.yml");
+            }
+        }
 
         if (!particleFile.exists()) {
             SkyWarsReloaded.get().saveResource("projectileeffects.yml", false);
+            File sf = new File(SkyWarsReloaded.get().getDataFolder(), "projectileeffects.yml");
+            if (sf.exists()) {
+                if (sf.renameTo(particleFile)) {
+                    SkyWarsReloaded.get().getLogger().info("Migrated projectileeffects.yml to cosmetics folder");
+                }
+            }
         }
 
         if (particleFile.exists()) {

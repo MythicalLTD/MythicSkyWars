@@ -42,18 +42,45 @@ public class WinSoundOption extends PlayerOption {
 
     private static void saveWinFile(String filename) {
         SkyWarsReloaded.get().saveResource(filename, false);
+        File cosmeticsDir = new File(SkyWarsReloaded.get().getDataFolder(), "cosmetics");
+        if (!cosmeticsDir.exists()) {
+            cosmeticsDir.mkdirs();
+        }
         File sf = new File(SkyWarsReloaded.get().getDataFolder(), filename);
         if (sf.exists()) {
-            boolean result = sf.renameTo(new File(SkyWarsReloaded.get().getDataFolder(), "winsounds.yml"));
+            boolean result = sf.renameTo(new File(cosmeticsDir, "winsounds.yml"));
             if (!result) {
                 SkyWarsReloaded.get().getLogger().info("Failed to rename Winsounds File");
+            } else {
+                SkyWarsReloaded.get().getLogger().info("Migrated winsounds to cosmetics folder");
             }
         }
     }
 
     public static void loadPlayerOptions() {
         playerOptions.clear();
-        File soundFile = new File(SkyWarsReloaded.get().getDataFolder(), "winsounds.yml");
+        File cosmeticsDir = new File(SkyWarsReloaded.get().getDataFolder(), "cosmetics");
+        if (!cosmeticsDir.exists()) {
+            cosmeticsDir.mkdirs();
+        }
+        File soundFile = new File(cosmeticsDir, "winsounds.yml");
+        
+        // Backward compatibility: migrate from old location
+        File oldSoundFile = new File(SkyWarsReloaded.get().getDataFolder(), "winsounds.yml");
+        if (!soundFile.exists() && oldSoundFile.exists()) {
+            SkyWarsReloaded.get().getLogger().info("Migrating winsounds.yml to cosmetics folder...");
+            if (oldSoundFile.renameTo(soundFile)) {
+                SkyWarsReloaded.get().getLogger().info("Successfully migrated winsounds.yml");
+            } else {
+                SkyWarsReloaded.get().getLogger().warning("Failed to migrate winsounds.yml");
+            }
+        }
+        
+        // Clean up old version-specific files if they exist
+        File oldWinsounds18 = new File(SkyWarsReloaded.get().getDataFolder(), "winsounds18.yml");
+        File oldWinsounds112 = new File(SkyWarsReloaded.get().getDataFolder(), "winsounds112.yml");
+        if (oldWinsounds18.exists()) oldWinsounds18.delete();
+        if (oldWinsounds112.exists()) oldWinsounds112.delete();
 
         if (!soundFile.exists()) {
             if (SkyWarsReloaded.getNMS().getVersion() < 9) {
@@ -62,6 +89,12 @@ public class WinSoundOption extends PlayerOption {
                 saveWinFile("winsounds112.yml");
             } else {
                 SkyWarsReloaded.get().saveResource("winsounds.yml", false);
+                File sf = new File(SkyWarsReloaded.get().getDataFolder(), "winsounds.yml");
+                if (sf.exists()) {
+                    if (sf.renameTo(new File(cosmeticsDir, "winsounds.yml"))) {
+                        SkyWarsReloaded.get().getLogger().info("Migrated winsounds.yml to cosmetics folder");
+                    }
+                }
             }
         }
 

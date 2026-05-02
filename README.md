@@ -18,7 +18,6 @@ We will continue to maintain this version until further notice, and community co
 
 **Optional Plugins**: *Skywars can use the following plugins but does not require them for the basic functions*
 
-* Skywars-Extention
 * Vault
 * DecentHolograms
 * PlaceholderAPI

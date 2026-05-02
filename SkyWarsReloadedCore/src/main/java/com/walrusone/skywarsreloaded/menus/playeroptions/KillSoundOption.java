@@ -42,18 +42,45 @@ public class KillSoundOption extends PlayerOption {
 
     private static void saveKillFile(String filename) {
         SkyWarsReloaded.get().saveResource(filename, false);
+        File cosmeticsDir = new File(SkyWarsReloaded.get().getDataFolder(), "cosmetics");
+        if (!cosmeticsDir.exists()) {
+            cosmeticsDir.mkdirs();
+        }
         File sf = new File(SkyWarsReloaded.get().getDataFolder(), filename);
         if (sf.exists()) {
-            boolean result = sf.renameTo(new File(SkyWarsReloaded.get().getDataFolder(), "killsounds.yml"));
+            boolean result = sf.renameTo(new File(cosmeticsDir, "killsounds.yml"));
             if (!result) {
                 SkyWarsReloaded.get().getLogger().info("Failed to rename Killsounds File");
+            } else {
+                SkyWarsReloaded.get().getLogger().info("Migrated killsounds to cosmetics folder");
             }
         }
     }
 
     public static void loadPlayerOptions() {
         playerOptions.clear();
-        File soundFile = new File(SkyWarsReloaded.get().getDataFolder(), "killsounds.yml");
+        File cosmeticsDir = new File(SkyWarsReloaded.get().getDataFolder(), "cosmetics");
+        if (!cosmeticsDir.exists()) {
+            cosmeticsDir.mkdirs();
+        }
+        File soundFile = new File(cosmeticsDir, "killsounds.yml");
+        
+        // Backward compatibility: migrate from old location
+        File oldSoundFile = new File(SkyWarsReloaded.get().getDataFolder(), "killsounds.yml");
+        if (!soundFile.exists() && oldSoundFile.exists()) {
+            SkyWarsReloaded.get().getLogger().info("Migrating killsounds.yml to cosmetics folder...");
+            if (oldSoundFile.renameTo(soundFile)) {
+                SkyWarsReloaded.get().getLogger().info("Successfully migrated killsounds.yml");
+            } else {
+                SkyWarsReloaded.get().getLogger().warning("Failed to migrate killsounds.yml");
+            }
+        }
+        
+        // Clean up old version-specific files if they exist
+        File oldKillsounds18 = new File(SkyWarsReloaded.get().getDataFolder(), "killsounds18.yml");
+        File oldKillsounds112 = new File(SkyWarsReloaded.get().getDataFolder(), "killsounds112.yml");
+        if (oldKillsounds18.exists()) oldKillsounds18.delete();
+        if (oldKillsounds112.exists()) oldKillsounds112.delete();
 
         if (!soundFile.exists()) {
             if (SkyWarsReloaded.getNMS().getVersion() < 9) {
@@ -62,6 +89,12 @@ public class KillSoundOption extends PlayerOption {
                 saveKillFile("killsounds112.yml");
             } else {
                 SkyWarsReloaded.get().saveResource("killsounds.yml", false);
+                File sf = new File(SkyWarsReloaded.get().getDataFolder(), "killsounds.yml");
+                if (sf.exists()) {
+                    if (sf.renameTo(new File(cosmeticsDir, "killsounds.yml"))) {
+                        SkyWarsReloaded.get().getLogger().info("Migrated killsounds.yml to cosmetics folder");
+                    }
+                }
             }
         }
 
