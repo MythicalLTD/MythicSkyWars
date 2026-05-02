@@ -166,6 +166,11 @@ game:
     strength: 1
     # Jump modifier level
     jump: 1
+  # Auto-generated waiting lobby for team maps (no need to set /swm spawn lobby)
+  teamWaitingLobby:
+    height: 200
+    radius: 15
+    wallHeight: 4
 
 
 ##################

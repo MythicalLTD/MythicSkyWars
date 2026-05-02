@@ -98,7 +98,7 @@ public final class ArenaSetupMenu {
                 new Messaging.MessageFormatter().setVariable("state", gMap.allowFriendlyFire() ? msg("maps.editor.state.enabled") : msg("maps.editor.state.disabled")).format("maps.editor.item.friendly-fire.lore-current"),
                 msg("maps.editor.item.friendly-fire.lore-toggle")
         ), msg("maps.editor.item.friendly-fire.name")));
-        inv.setItem(16, MythicSkywars.getNMS().getItemStack(new ItemStack(MythicSkywars.getNMS().getMaterial("ENDER_PORTAL_FRAME")), Lists.newArrayList(msg("maps.editor.item.set-waiting-spawn.lore")), msg("maps.editor.item.set-waiting-spawn.name")));
+        inv.setItem(16, new ItemStack(Material.AIR)); // Waiting lobby is now auto-generated
 
         inv.setItem(19, MythicSkywars.getNMS().getItemStack(new ItemStack(Material.NETHER_STAR), Lists.newArrayList(
                 ChatColor.GRAY + "Get the Team Spawner tool",
@@ -231,17 +231,8 @@ public final class ArenaSetupMenu {
                 reopen(player, gMap);
                 return true;
             case 16:
-                if (gMap.getTeamSize() <= 1) {
-                    player.sendMessage(msg("maps.editor.waiting-spawn-disabled-solo"));
-                    return true;
-                }
-                if (clickType == ClickType.RIGHT) {
-                    gMap.clearWaitingLobbySpawn();
-                    player.sendMessage(msg("maps.editor.waiting-spawn-cleared"));
-                } else {
-                    gMap.setWaitingLobbySpawn(player.getLocation());
-                    player.sendMessage(new Messaging.MessageFormatter().setVariable("mapname", gMap.getDisplayName()).format("maps.waitingLobbySpawn"));
-                }
+                // Waiting lobby is now auto-generated, no manual setup needed
+                player.sendMessage(ChatColor.GREEN + "Waiting lobby is auto-generated for team maps! No setup needed.");
                 return true;
             case 20:
                 if (clickType == ClickType.RIGHT) {

@@ -61,6 +61,14 @@ game:
     speed:
     strength:
     jump: 
+  # Auto-generated waiting lobby for team maps (no need to set /swm spawn lobby)
+  teamWaitingLobby:
+    # Y height of the platform (should be above the highest point of your maps)
+    height: 200
+    # Radius of the barrier floor (15 = 31x31 platform)
+    radius: 15
+    # Height of the invisible walls around the edge
+    wallHeight: 4
 teams:
   usePlayerNames: true
   usePlayerGlassColors: true

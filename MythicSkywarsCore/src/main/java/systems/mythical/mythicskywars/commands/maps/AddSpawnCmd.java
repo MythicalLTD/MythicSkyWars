@@ -77,10 +77,8 @@ public class AddSpawnCmd extends systems.mythical.mythicskywars.commands.BaseCmd
                             .format("maps.setLookDirection"));
 
                 } else if (type.equalsIgnoreCase("lobby") || type.equalsIgnoreCase("waiting")) {
-                    gMap.setWaitingLobbySpawn(player.getLocation());
-                    player.sendMessage(new Messaging.MessageFormatter()
-                            .setVariable("mapname", gMap.getDisplayName())
-                            .format("maps.waitingLobbySpawn"));
+                    // Waiting lobby is now auto-generated for team maps
+                    player.sendMessage(org.bukkit.ChatColor.GREEN + "[SkyWars] Waiting lobby is auto-generated for team maps. No manual setup needed!");
 
                 } else {
                     player.sendMessage(new Messaging.MessageFormatter().format("error.map-spawn-type"));

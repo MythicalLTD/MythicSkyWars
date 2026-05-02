@@ -994,11 +994,10 @@ public class GameMap {
                     return 3;
                 }
                 if (waitingLobbySpawn == null && teamSize > 1) {
-                    // Auto-generate a waiting lobby high above the map
-                    MythicSkywars.get().getLogger().info("Map " + name + " has no waiting lobby spawn. Generating platform at Y=200...");
-                    waitingLobbySpawn = new CoordLoc(0, 200, 0);
+                    // Auto-generate waiting lobby above the map
+                    int lobbyY = MythicSkywars.get().getConfig().getInt("game.teamWaitingLobby.height", 200);
+                    waitingLobbySpawn = new CoordLoc(0, lobbyY, 0);
                     generateWaitingLobbyIfNeeded();
-                    MythicSkywars.get().getLogger().info("Generated waiting lobby for map " + name + " at 0, 200, 0 (above the arena)");
                 }
 
                 registered = true;
@@ -2346,27 +2345,42 @@ public class GameMap {
     }
 
     /**
-     * If this is a team map with an auto-generated waiting lobby,
-     * place a high-up barrier platform so players can see the map below.
-     * Center block is diamond, rest is barrier (invisible).
+     * Generates the team waiting lobby platform above the map.
+     * Reads size/wall height from config (game.teamWaitingLobby).
+     * Barrier floor with diamond center, barrier walls to prevent jumping off.
      */
     private void generateWaitingLobbyIfNeeded() {
         if (teamSize <= 1 || waitingLobbySpawn == null) return;
-        if (waitingLobbySpawn.getX() != 0 || waitingLobbySpawn.getZ() != 0) return;
-        // Only for auto-generated spawns at high Y
-        if (waitingLobbySpawn.getY() < 190) return;
         World w = getCurrentWorld();
         if (w == null) return;
         int floorY = waitingLobbySpawn.getY() - 1;
-        if (w.getBlockAt(0, floorY, 0).getType() == Material.DIAMOND_BLOCK) return;
-        // 7x7 barrier floor with diamond center — players can see through it
-        for (int x = -3; x <= 3; x++) {
-            for (int z = -3; z <= 3; z++) {
-                if (x == 0 && z == 0) {
+        if (w.getBlockAt(waitingLobbySpawn.getX(), floorY, waitingLobbySpawn.getZ()).getType() == Material.DIAMOND_BLOCK) return;
+
+        int radius = MythicSkywars.get().getConfig().getInt("game.teamWaitingLobby.radius", 15);
+        int wallHeight = MythicSkywars.get().getConfig().getInt("game.teamWaitingLobby.wallHeight", 4);
+        int cx = waitingLobbySpawn.getX();
+        int cz = waitingLobbySpawn.getZ();
+
+        // Floor: barrier everywhere, diamond in center
+        for (int x = cx - radius; x <= cx + radius; x++) {
+            for (int z = cz - radius; z <= cz + radius; z++) {
+                if (x == cx && z == cz) {
                     w.getBlockAt(x, floorY, z).setType(Material.DIAMOND_BLOCK);
                 } else {
                     w.getBlockAt(x, floorY, z).setType(Material.BARRIER);
                 }
+            }
+        }
+
+        // Barrier walls around the edge
+        for (int y = floorY + 1; y <= floorY + wallHeight; y++) {
+            for (int x = cx - (radius + 1); x <= cx + (radius + 1); x++) {
+                w.getBlockAt(x, y, cz - (radius + 1)).setType(Material.BARRIER);
+                w.getBlockAt(x, y, cz + (radius + 1)).setType(Material.BARRIER);
+            }
+            for (int z = cz - (radius + 1); z <= cz + (radius + 1); z++) {
+                w.getBlockAt(cx - (radius + 1), y, z).setType(Material.BARRIER);
+                w.getBlockAt(cx + (radius + 1), y, z).setType(Material.BARRIER);
             }
         }
     }
@@ -2376,14 +2390,30 @@ public class GameMap {
      */
     public void removeWaitingLobbyPlatform() {
         if (teamSize <= 1 || waitingLobbySpawn == null) return;
-        if (waitingLobbySpawn.getX() != 0 || waitingLobbySpawn.getZ() != 0) return;
-        if (waitingLobbySpawn.getY() < 190) return;
         World w = getCurrentWorld();
         if (w == null) return;
         int floorY = waitingLobbySpawn.getY() - 1;
-        for (int x = -3; x <= 3; x++) {
-            for (int z = -3; z <= 3; z++) {
+        int radius = MythicSkywars.get().getConfig().getInt("game.teamWaitingLobby.radius", 15);
+        int wallHeight = MythicSkywars.get().getConfig().getInt("game.teamWaitingLobby.wallHeight", 4);
+        int cx = waitingLobbySpawn.getX();
+        int cz = waitingLobbySpawn.getZ();
+
+        // Remove floor
+        for (int x = cx - radius; x <= cx + radius; x++) {
+            for (int z = cz - radius; z <= cz + radius; z++) {
                 w.getBlockAt(x, floorY, z).setType(Material.AIR);
+            }
+        }
+
+        // Remove walls
+        for (int y = floorY + 1; y <= floorY + wallHeight; y++) {
+            for (int x = cx - (radius + 1); x <= cx + (radius + 1); x++) {
+                w.getBlockAt(x, y, cz - (radius + 1)).setType(Material.AIR);
+                w.getBlockAt(x, y, cz + (radius + 1)).setType(Material.AIR);
+            }
+            for (int z = cz - (radius + 1); z <= cz + (radius + 1); z++) {
+                w.getBlockAt(cx - (radius + 1), y, z).setType(Material.AIR);
+                w.getBlockAt(cx + (radius + 1), y, z).setType(Material.AIR);
             }
         }
     }

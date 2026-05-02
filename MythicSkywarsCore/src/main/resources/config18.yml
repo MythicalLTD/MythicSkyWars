@@ -61,6 +61,11 @@ game:
     speed:
     strength:
     jump: 
+  # Auto-generated waiting lobby for team maps (no need to set /swm spawn lobby)
+  teamWaitingLobby:
+    height: 200
+    radius: 15
+    wallHeight: 4
 teams:
   useTeamChat: true
   usePlayerNames: true
