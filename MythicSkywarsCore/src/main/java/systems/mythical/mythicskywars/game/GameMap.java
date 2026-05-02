@@ -2063,6 +2063,10 @@ public class GameMap {
         if (editWorld != null) {
             for (Player player : editWorld.getPlayers()) {
                 player.teleport(respawn, TeleportCause.PLUGIN);
+                PlayerStat.resetScoreboard(player);
+                if (MythicSkywars.getCfg().lobbyBoardEnabled() && !MythicSkywars.getCfg().bungeeMode()) {
+                    PlayerStat.updateScoreboard(player, "lobbyboard");
+                }
             }
             File source = MythicSkywars.getWM().getWorldFolder(name);
             MythicSkywars.getWM().unloadWorld(name, saveChanges);

@@ -1,1 +1,0 @@
-FIX the bug where when you go to an area edit than back to lobby you don#t have a scoreboard
