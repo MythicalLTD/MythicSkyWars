@@ -322,6 +322,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         this.getServer().getPluginManager().registerEvents(new LobbyWaterPortalListener(), this);
         this.getServer().getPluginManager().registerEvents(new SoulWellListener(), this);
         this.getServer().getPluginManager().registerEvents(new systems.mythical.mythicskywars.perks.PerkListener(), this);
+        this.getServer().getPluginManager().registerEvents(new MapSearchListener(), this);
         this.getServer().getPluginManager().registerEvents(new SpectateListener(), this);
         this.getServer().getPluginManager().registerEvents(new ChatListener(), this);
         this.getServer().getPluginManager().registerEvents(new ProjectileSpleefListener(), this);

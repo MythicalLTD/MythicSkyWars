@@ -105,10 +105,17 @@ public class JoinSingleMenu {
     }
 
     private static void placeNavButtons(ArrayList<Inventory> inventories) {
-        if (inventories.size() <= 1) return;
         for (int i = 0; i < inventories.size(); i++) {
             Inventory inv = inventories.get(i);
             int size = inv.getSize();
+            // Always place exit button
+            inv.setItem(size - 5, MythicSkywars.getIM().getItem("exitMenuItem"));
+            // Search button (slot size - 7, two left of exit)
+            ItemStack searchItem = MythicSkywars.getNMS().getItemStack(
+                    new ItemStack(searchIconMaterial(), 1),
+                    java.util.Collections.singletonList(ChatColor.GRAY + "Type a map name to filter"),
+                    ChatColor.GREEN + "Search");
+            inv.setItem(size - 7, searchItem);
             // Previous button (first slot of bottom row) - skip for first page
             if (i > 0) {
                 inv.setItem(size - 9, MythicSkywars.getIM().getItem("prevPageItem"));
@@ -117,6 +124,14 @@ public class JoinSingleMenu {
             if (i < inventories.size() - 1) {
                 inv.setItem(size - 1, MythicSkywars.getIM().getItem("nextPageItem"));
             }
+        }
+    }
+
+    private static Material searchIconMaterial() {
+        try {
+            return Material.valueOf("NAME_TAG");
+        } catch (IllegalArgumentException e) {
+            return Material.PAPER;
         }
     }
 
@@ -410,9 +425,10 @@ public class JoinSingleMenu {
                     int i = 0;
                     for (Inventory inv : invs1) {
                         if (i >= specs.size()) {
-                            specs.add(Bukkit.createInventory(null, menuSize, new Messaging.MessageFormatter().format("menu.spectatesinglegame-menu-title")));
+                            specs.add(Bukkit.createInventory(null, menuSize + 9, new Messaging.MessageFormatter().format("menu.spectatesinglegame-menu-title")));
                         }
-                        for (int slot = 0; slot < menuSize; slot++) {
+                        // Copy all slots including bottom nav row
+                        for (int slot = 0; slot < inv.getSize(); slot++) {
                             specs.get(i).setItem(slot, inv.getItem(slot));
                         }
                         i++;
@@ -433,6 +449,14 @@ public class JoinSingleMenu {
             String name = event.getName();
             if (name.equalsIgnoreCase(MythicSkywars.getNMS().getItemName(MythicSkywars.getIM().getItem("exitMenuItem")))) {
                 player.closeInventory();
+                return;
+            }
+
+            // Search button clicked
+            if (ChatColor.stripColor(name).equalsIgnoreCase("Search")) {
+                player.closeInventory();
+                player.sendMessage(ChatColor.GREEN + "[SkyWars] " + ChatColor.GRAY + "Type a map name to search (or 'cancel' to cancel):");
+                MapSearchListener.startSearch(player, "solo");
                 return;
             }
 

@@ -71,16 +71,29 @@ public class JoinTeamMenu {
     }
 
     private static void placeNavButtons(ArrayList<Inventory> inventories) {
-        if (inventories.size() <= 1) return;
         for (int i = 0; i < inventories.size(); i++) {
             Inventory inv = inventories.get(i);
             int size = inv.getSize();
+            inv.setItem(size - 5, MythicSkywars.getIM().getItem("exitMenuItem"));
+            ItemStack searchItem = MythicSkywars.getNMS().getItemStack(
+                    new ItemStack(searchIconMaterial(), 1),
+                    java.util.Collections.singletonList(org.bukkit.ChatColor.GRAY + "Type a map name to filter"),
+                    org.bukkit.ChatColor.GREEN + "Search");
+            inv.setItem(size - 7, searchItem);
             if (i > 0) {
                 inv.setItem(size - 9, MythicSkywars.getIM().getItem("prevPageItem"));
             }
             if (i < inventories.size() - 1) {
                 inv.setItem(size - 1, MythicSkywars.getIM().getItem("nextPageItem"));
             }
+        }
+    }
+
+    private static Material searchIconMaterial() {
+        try {
+            return Material.valueOf("NAME_TAG");
+        } catch (IllegalArgumentException e) {
+            return Material.PAPER;
         }
     }
 
@@ -369,10 +382,12 @@ public class JoinTeamMenu {
                     ArrayList<Inventory> specs = MythicSkywars.getIC().getMenu("spectateteammenu").getInventories();
                     int i = 0;
                     for (Inventory inv : invs1) {
-                        if (specs.get(i) == null) {
-                            specs.add(Bukkit.createInventory(null, menuSize, new Messaging.MessageFormatter().format("menu.spectateteammenu-menu-title")));
+                        if (i >= specs.size()) {
+                            specs.add(Bukkit.createInventory(null, menuSize + 9, new Messaging.MessageFormatter().format("menu.spectateteamgame-menu-title")));
                         }
-                        specs.get(0).setContents(inv.getContents());
+                        for (int slot = 0; slot < inv.getSize(); slot++) {
+                            specs.get(i).setItem(slot, inv.getItem(slot));
+                        }
                         i++;
                     }
                 }
@@ -391,6 +406,14 @@ public class JoinTeamMenu {
             String name = event.getName();
             if (name.equalsIgnoreCase(MythicSkywars.getNMS().getItemName(MythicSkywars.getIM().getItem("exitMenuItem")))) {
                 player.closeInventory();
+                return;
+            }
+
+            // Search button clicked
+            if (org.bukkit.ChatColor.stripColor(name).equalsIgnoreCase("Search")) {
+                player.closeInventory();
+                player.sendMessage(org.bukkit.ChatColor.GREEN + "[SkyWars] " + org.bukkit.ChatColor.GRAY + "Type a map name to search (or 'cancel' to cancel):");
+                MapSearchListener.startSearch(player, "team");
                 return;
             }
 
