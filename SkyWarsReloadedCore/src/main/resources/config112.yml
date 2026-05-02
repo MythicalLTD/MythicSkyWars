@@ -544,3 +544,13 @@ disable-commands-spectate:
 #     pos1Set: false
 #     pos2Set: false
 #     luckyMode: false
+# Update checker - checks GitHub Releases for new versions
+updater:
+  enabled: true
+  # Check for pre-release/nightly builds too (recommended to stay up to date)
+  checkForBetaVersions: true
+  # Automatically download new versions (applied on next server restart)
+  autoUpdate: true
+  # GitHub repository
+  github-owner: 'MythicalLTD'
+  github-repo: 'MythicSkyWars'

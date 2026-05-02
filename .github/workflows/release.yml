@@ -1,0 +1,111 @@
+name: Release Build
+
+on:
+  release:
+    types: [ published ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 8
+
+      - name: Set up JDK 16
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 16
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25-ea
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Configure Maven Toolchains
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/toolchains.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <toolchains>
+            <toolchain>
+              <type>jdk</type>
+              <provides><version>1.8</version></provides>
+              <configuration><jdkHome>${{ env.JAVA_HOME_8_X64 }}</jdkHome></configuration>
+            </toolchain>
+            <toolchain>
+              <type>jdk</type>
+              <provides><version>16</version></provides>
+              <configuration><jdkHome>${{ env.JAVA_HOME_16_X64 }}</jdkHome></configuration>
+            </toolchain>
+            <toolchain>
+              <type>jdk</type>
+              <provides><version>17</version></provides>
+              <configuration><jdkHome>${{ env.JAVA_HOME_17_X64 }}</jdkHome></configuration>
+            </toolchain>
+            <toolchain>
+              <type>jdk</type>
+              <provides><version>21</version></provides>
+              <configuration><jdkHome>${{ env.JAVA_HOME_21_X64 }}</jdkHome></configuration>
+            </toolchain>
+            <toolchain>
+              <type>jdk</type>
+              <provides><version>25</version></provides>
+              <configuration><jdkHome>${{ env.JAVA_HOME_25_X64 }}</jdkHome></configuration>
+            </toolchain>
+          </toolchains>
+          EOF
+
+      - name: Determine version from tag
+        id: version
+        run: |
+          # Strip the 'v' prefix from the tag if present
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Releasing version: ${VERSION}"
+
+      - name: Run tests
+        run: mvn test -Drevision=${{ steps.version.outputs.version }} -B --no-transfer-progress
+
+      - name: Build
+        run: mvn clean package -Drevision=${{ steps.version.outputs.version }} -B --no-transfer-progress -DskipTests
+
+      - name: Upload release artifact
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            "target/SWR-${{ steps.version.outputs.version }}.jar" \
+            --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

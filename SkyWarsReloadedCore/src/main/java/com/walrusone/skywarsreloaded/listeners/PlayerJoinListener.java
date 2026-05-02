@@ -73,7 +73,9 @@ public class PlayerJoinListener implements Listener {
             // Not allowed? Stop.
             if (!postLoadStats(player)) return;
             // Send updater message if the player was allowed to join
-            //SkyWarsReloaded.get().getUpdater().handleJoiningPlayer(player);
+            if (SkyWarsReloaded.getUpdater() != null) {
+                SkyWarsReloaded.getUpdater().notifyPlayer(player);
+            }
         });
     }
 

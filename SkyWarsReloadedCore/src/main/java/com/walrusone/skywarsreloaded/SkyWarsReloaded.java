@@ -34,6 +34,7 @@ import com.walrusone.skywarsreloaded.utilities.LuckyBlockHook;
 import com.walrusone.skywarsreloaded.utilities.SoulWellManager;
 import com.walrusone.skywarsreloaded.utilities.SWRServer;
 import com.walrusone.skywarsreloaded.utilities.Util;
+import com.walrusone.skywarsreloaded.utilities.UpdateChecker;
 import com.walrusone.skywarsreloaded.utilities.holograms.DecentHoloUtil;
 import com.walrusone.skywarsreloaded.utilities.holograms.HologramsUtil;
 import com.walrusone.skywarsreloaded.utilities.minecraftping.MinecraftPing;
@@ -90,6 +91,7 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
     private HologramsUtil hu;
     private boolean loaded;
     private BukkitTask specObserver;
+    private UpdateChecker updateChecker;
 
     // Utils
 
@@ -154,6 +156,10 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 
     public static SoulWellManager getSoulWellManager() {
         return instance.soulWellManager;
+    }
+
+    public static UpdateChecker getUpdater() {
+        return instance.updateChecker;
     }
 
     public boolean isNewVersion() {
@@ -456,6 +462,9 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
 
     public void onDisable() {
         loaded = false;
+        if (updateChecker != null) {
+            updateChecker.stop();
+        }
         if (soulWellManager != null) {
             soulWellManager.deleteHologram();
         }
@@ -607,6 +616,16 @@ public class SkyWarsReloaded extends JavaPlugin implements PluginMessageListener
             }.runTaskTimer(SkyWarsReloaded.get(), 0, 40);
         }
         loaded = true;
+
+        // Start update checker
+        if (getConfig().getBoolean("updater.enabled", true)) {
+            String owner = getConfig().getString("updater.github-owner", "MythicalLTD");
+            String repo = getConfig().getString("updater.github-repo", "MythicSkyWars");
+            boolean checkBeta = getCfg().isCheckForBetaVersion();
+            boolean autoUpdate = getConfig().getBoolean("updater.autoUpdate", true);
+            updateChecker = new UpdateChecker(this, owner, repo, checkBeta, autoUpdate);
+            updateChecker.start();
+        }
     }
 
     private void purgeLegacyMapEventSections() {
