@@ -8,7 +8,13 @@ set "REVISION=5.6.40"
 set "UPLOAD_NAME=SWR-%REVISION%.jar"
 rem Shaded jar from skywars-assembly (includes v1_8_R3 NMS etc.) — NOT SkyWarsReloadedCore-only jar
 set "BUILD_JAR=%ROOT%target\SWR-%REVISION%.jar"
-set "COOKIE=remember_token=featherpanel_authtoken_bd94b8a30d35a591ba93380f76e60149; cf_clearance=BP4mmgYxL4EMgr1JHGw6SvlgQQTznGZnmC3JU48B_2A-1777055596-1.2.1.1-L4gIJgMyYcPOKm1ePDMegnrODgBzyqJ_4ijWIctvXxqWw.BMoebJ7.6kP5vFSq.BqWHB8Ne5bM1DiDJcWovwqFW5TVKD26CCjFXB1MLvfXcIgZYj5yR7gf6fuM7asM96B33.sLSFNmFeNMVGu1i0ln345ZQBHgcFC7CqqQ2w5qPl8HVJR0_f2GL9msGBXakeRkcR8mj56mI5IU7bniKu37MP1XsTxKyS9hiGeUhHkdY5VHlTw9DYbZulOTq0KhhIPLas8NwOB.15H9GW9pMHwNruFadaOXHV4YAn1VfvT5CpAcrQ1p2VblwwePfZpj6oA5J0XD8opg3zxdXSeSNMzA"
+set "COOKIE=%SWR_PANEL_COOKIE%"
+
+if "%COOKIE%"=="" (
+  echo ERROR: SWR_PANEL_COOKIE environment variable is not set.
+  echo Set it with: set "SWR_PANEL_COOKIE=remember_token=YOUR_TOKEN_HERE"
+  exit /b 1
+)
 
 where curl.exe >nul 2>&1
 if errorlevel 1 (
