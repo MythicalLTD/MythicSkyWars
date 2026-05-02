@@ -160,23 +160,25 @@ public class JoinTeamModeMenu {
     }
 
     /**
-     * Shows the team mode menu, or skips it if only one team size is available.
+     * Shows the team mode menu, or skips it if only one team size is available AND no lucky mode.
      */
     public static void showFor(Player player) {
         TreeSet<Integer> teamSizes = getAvailableTeamSizes();
+        boolean luckyAvailable = LuckyBlockHook.isAvailable();
 
-        if (teamSizes.size() <= 1) {
-            // Only one team size (or none) — skip the mode menu, go straight to map list
+        if (teamSizes.size() <= 1 && !luckyAvailable) {
+            // Only one team size and no lucky — skip the mode menu, go straight to map list
             if (!teamSizes.isEmpty()) {
                 teamSizeFilter.put(player.getUniqueId(), teamSizes.first());
             } else {
                 teamSizeFilter.put(player.getUniqueId(), 0);
             }
+            luckyTeamSelection.remove(player.getUniqueId());
             openTeamMenuStatic(player);
             return;
         }
 
-        // Multiple team sizes — show the selection menu
+        // Multiple team sizes or lucky available — show the selection menu
         refreshMenu();
         MythicSkywars.getIC().show(player, MENU_ID);
     }

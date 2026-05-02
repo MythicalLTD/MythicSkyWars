@@ -385,13 +385,24 @@ public class JoinTeamMenu {
                         if (i >= specs.size()) {
                             specs.add(Bukkit.createInventory(null, menuSize + 9, new Messaging.MessageFormatter().format("menu.spectateteamgame-menu-title")));
                         }
+                        // Copy all slots but skip autojoin button
+                        int autojoinSlot = inv.getSize() - AUTOJOIN_SLOT_FROM_END;
                         for (int slot = 0; slot < inv.getSize(); slot++) {
-                            specs.get(i).setItem(slot, inv.getItem(slot));
+                            if (slot == autojoinSlot) {
+                                specs.get(i).setItem(slot, new ItemStack(Material.AIR));
+                            } else {
+                                specs.get(i).setItem(slot, inv.getItem(slot));
+                            }
                         }
                         i++;
                     }
                 }
                 placeNavButtons(invs1);
+                // Autojoin button for play menu only
+                ItemStack autoBtn = createAutojoinTeamItem();
+                for (Inventory inv : invs1) {
+                    inv.setItem(inv.getSize() - AUTOJOIN_SLOT_FROM_END, autoBtn.clone());
+                }
             }
         };
 
@@ -413,6 +424,12 @@ public class JoinTeamMenu {
                 player.closeInventory();
                 player.sendMessage(org.bukkit.ChatColor.GREEN + "[SkyWars] " + org.bukkit.ChatColor.GRAY + "Type a map name to search (or 'cancel' to cancel):");
                 MapSearchListener.startSearch(player, "team");
+                return;
+            }
+
+            // Autojoin button
+            if (name.equalsIgnoreCase(MythicSkywars.getNMS().getItemName(createAutojoinTeamItem()))) {
+                performAutojoinTeam(player);
                 return;
             }
 
@@ -498,6 +515,11 @@ public class JoinTeamMenu {
             }
         });
         placeNavButtons(MythicSkywars.getIC().getMenu("jointeammenu").getInventories());
+        // Initial autojoin button
+        ItemStack initAutoBtn = createAutojoinTeamItem();
+        for (Inventory initInv : MythicSkywars.getIC().getMenu("jointeammenu").getInventories()) {
+            initInv.setItem(initInv.getSize() - AUTOJOIN_SLOT_FROM_END, initAutoBtn.clone());
+        }
         MythicSkywars.getIC().getMenu("jointeammenu").setUpdate(update);
     }
 }
