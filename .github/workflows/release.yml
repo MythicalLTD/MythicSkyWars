@@ -99,10 +99,44 @@ jobs:
       - name: Build
         run: mvn clean package -Drevision=${{ steps.version.outputs.version }} -B --no-transfer-progress -DskipTests -Daether.checksumPolicy=warn
 
-      - name: Upload release artifact
+      - name: Upload release artifact to GitHub
         run: |
           gh release upload "${{ github.event.release.tag_name }}" \
             "target/MythicSkywars-${{ steps.version.outputs.version }}.jar" \
             --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_API_KEY }}
+          MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+        run: |
+          JAR_FILE="target/MythicSkywars-${{ steps.version.outputs.version }}.jar"
+          VERSION="${{ steps.version.outputs.version }}"
+          CHANGELOG="${{ github.event.release.body }}"
+
+          # Build the version metadata JSON
+          DATA=$(cat <<EOF
+          {
+            "name": "MythicSkywars v${VERSION}",
+            "version_number": "${VERSION}",
+            "changelog": $(echo "$CHANGELOG" | jq -Rs .),
+            "dependencies": [],
+            "game_versions": ["1.8.9","1.9.4","1.10.2","1.11.2","1.12.2","1.13.2","1.14.4","1.15.2","1.16.5","1.17.1","1.18.2","1.19.4","1.20.6","1.21.4"],
+            "version_type": "release",
+            "loaders": ["bukkit","spigot","paper"],
+            "featured": true,
+            "project_id": "${MODRINTH_PROJECT_ID}",
+            "file_parts": ["file"],
+            "primary_file": "file"
+          }
+          EOF
+          )
+
+          curl -X POST "https://api.modrinth.com/v2/version" \
+            -H "Authorization: ${MODRINTH_TOKEN}" \
+            -H "User-Agent: MythicalSystems/MythicSkywars/${{ steps.version.outputs.version }} (github-actions)" \
+            -F "data=${DATA}" \
+            -F "file=@${JAR_FILE}" \
+            --fail-with-body
