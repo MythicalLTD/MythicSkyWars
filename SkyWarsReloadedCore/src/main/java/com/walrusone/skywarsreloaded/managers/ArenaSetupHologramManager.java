@@ -119,6 +119,16 @@ public final class ArenaSetupHologramManager {
         if (spectate != null) {
             create(world, ids, map.getName(), "spectate", spectate, msg("maps.editor.hologram.type.spectator-spawn"));
         }
+
+        // Deathmatch spawn holograms
+        int dmIndex = 0;
+        for (CoordLoc dmSpawn : map.getDeathMatchSpawns()) {
+            String dmLabel = new Messaging.MessageFormatter()
+                    .setVariable("num", String.valueOf(dmIndex + 1))
+                    .format("maps.editor.hologram.type.deathmatch-spawn");
+            create(world, ids, map.getName(), "dm_" + dmIndex, dmSpawn, dmLabel);
+            dmIndex++;
+        }
     }
 
     public void clear(GameMap map) {

@@ -44,6 +44,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -141,9 +142,22 @@ public class PlayerInteractListener implements Listener {
                     return;
                 }
                 
+                // Handle Deathmatch Spawner Tool
+                if (ArenaSetupMenu.isDeathmatchSpawnerTool(event.getItem())) {
+                    event.setCancelled(true);
+                    handleDeathmatchSpawnerTool(player, editorMap);
+                    return;
+                }
+                
                 // Handle Arena Setup Menu Tool
                 if (ArenaSetupMenu.isTool(event.getItem())) {
                     event.setCancelled(true);
+                    // If right-clicking a chest, toggle its type instead of opening menu
+                    if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null
+                            && (event.getClickedBlock().getType() == Material.CHEST || event.getClickedBlock().getType() == Material.TRAPPED_CHEST)) {
+                        handleChestTypeToggle(player, editorMap, event.getClickedBlock());
+                        return;
+                    }
                     ArenaSetupMenu.open(player, editorMap);
                     return;
                 }
@@ -501,9 +515,25 @@ public class PlayerInteractListener implements Listener {
                 }
                 String title = event.getView().getTitle();
                 GameMap editorMap = SkyWarsReloaded.getGameMapMgr().getMap(event.getWhoClicked().getWorld().getName());
-                if (editorMap != null && editorMap.isEditing()
-                        && ArenaSetupMenu.handleClick((Player) event.getWhoClicked(), editorMap, title, event.getRawSlot(), event.getClick())) {
-                    event.setCancelled(true);
+                if (editorMap != null && editorMap.isEditing()) {
+                    // If the arena setup menu is open, cancel all clicks (no item moving allowed)
+                    if (ArenaSetupMenu.isArenaSetupMenu(title)) {
+                        event.setCancelled(true);
+                        ArenaSetupMenu.handleClick((Player) event.getWhoClicked(), editorMap, title, event.getRawSlot(), event.getClick());
+                        return;
+                    }
+                    // Even outside the menu, prevent moving tools via shift-click or number keys
+                    if (ArenaSetupMenu.isTool(event.getCurrentItem()) || ArenaSetupMenu.isTool(event.getCursor())) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                    if (event.getClick().equals(ClickType.NUMBER_KEY)) {
+                        ItemStack hotbarItem = event.getWhoClicked().getInventory().getItem(event.getHotbarButton());
+                        if (ArenaSetupMenu.isTool(hotbarItem)) {
+                            event.setCancelled(true);
+                            return;
+                        }
+                    }
                 }
             } else {
                 MatchState state = gMap.getMatchState();
@@ -521,6 +551,29 @@ public class PlayerInteractListener implements Listener {
             }
         }
 
+    }
+
+    @EventHandler
+    public void onInventoryDrag(final InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) {
+            return;
+        }
+        Player player = (Player) event.getWhoClicked();
+        String title = event.getView().getTitle();
+
+        // Prevent dragging in the arena setup menu
+        GameMap editorMap = SkyWarsReloaded.getGameMapMgr().getMap(player.getWorld().getName());
+        if (editorMap != null && editorMap.isEditing()) {
+            if (ArenaSetupMenu.isArenaSetupMenu(title)) {
+                event.setCancelled(true);
+                return;
+            }
+            // Prevent dragging setup tools in any inventory while editing
+            if (ArenaSetupMenu.isTool(event.getOldCursor())) {
+                event.setCancelled(true);
+                return;
+            }
+        }
     }
 
     /**
@@ -607,6 +660,13 @@ public class PlayerInteractListener implements Listener {
     public void onPlayerDropItem(final PlayerDropItemEvent event) {
         final GameMap gameMap = MatchManager.get().getPlayerMapSafe(event.getPlayer());
         if (gameMap == null) {
+            // Prevent dropping arena setup tools while editing
+            GameMap editorMap = SkyWarsReloaded.getGameMapMgr().getMap(event.getPlayer().getWorld().getName());
+            if (editorMap != null && editorMap.isEditing()) {
+                if (ArenaSetupMenu.isTool(event.getItemDrop().getItemStack())) {
+                    event.setCancelled(true);
+                }
+            }
             return;
         }
         if (gameMap.getMatchState() == MatchState.WAITINGSTART || gameMap.getMatchState() == MatchState.ENDING || gameMap.getMatchState().equals(MatchState.WAITINGLOBBY)) {
@@ -868,5 +928,45 @@ public class PlayerInteractListener implements Listener {
         }
         
         return true;
+    }
+
+    /**
+     * Handles the Deathmatch Spawner Tool - sets a deathmatch spawn at the player's location
+     * and places an emerald block marker.
+     */
+    private void handleDeathmatchSpawnerTool(Player player, GameMap gMap) {
+        Location loc = player.getLocation();
+        gMap.addDeathMatchSpawn(loc);
+        loc.getBlock().setType(Material.EMERALD_BLOCK);
+        player.sendMessage(new Messaging.MessageFormatter()
+                .setVariable("num", "" + gMap.getDeathMatchSpawns().size())
+                .setVariable("mapname", gMap.getDisplayName())
+                .format("maps.addDeathSpawn"));
+    }
+
+    /**
+     * Handles toggling a chest's type between NORMAL and CENTER when right-clicked with the blaze rod.
+     */
+    private void handleChestTypeToggle(Player player, GameMap gMap, Block block) {
+        if (!(block.getState() instanceof Chest)) {
+            return;
+        }
+        Chest chest = (Chest) block.getState();
+        CoordLoc loc = new CoordLoc(chest.getX(), chest.getY(), chest.getZ());
+
+        // Check if it's currently a normal chest
+        if (gMap.getChests().contains(loc)) {
+            gMap.removeChest(chest);
+            gMap.addChest(chest, ChestPlacementType.CENTER);
+            player.sendMessage(ChatColor.GREEN + "Chest converted to " + ChatColor.GOLD + "CENTER" + ChatColor.GREEN + " type.");
+        } else if (gMap.getCenterChests().contains(loc)) {
+            gMap.removeChest(chest);
+            gMap.addChest(chest, ChestPlacementType.NORMAL);
+            player.sendMessage(ChatColor.GREEN + "Chest converted to " + ChatColor.AQUA + "NORMAL" + ChatColor.GREEN + " type.");
+        } else {
+            // Chest not registered yet, register as normal
+            gMap.addChest(chest, ChestPlacementType.NORMAL);
+            player.sendMessage(ChatColor.GREEN + "Chest registered as " + ChatColor.AQUA + "NORMAL" + ChatColor.GREEN + " type. Right click again to toggle.");
+        }
     }
 }

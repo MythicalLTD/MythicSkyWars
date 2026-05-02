@@ -24,11 +24,15 @@ public final class ArenaSetupMenu {
 
     private static final String ITEM_NAME = ChatColor.LIGHT_PURPLE + "Arena Setup Tool";
     private static final String TEAM_SPAWNER_ITEM_NAME = ChatColor.GOLD + "Team Spawner Tool";
+    private static final String DEATHMATCH_SPAWNER_ITEM_NAME = ChatColor.GREEN + "Deathmatch Spawner Tool";
 
     public static ItemStack createToolItem() {
         return SkyWarsReloaded.getNMS().getItemStack(
                 new ItemStack(Material.BLAZE_ROD, 1),
-                Lists.newArrayList(ChatColor.GRAY + "Right click to open arena setup"),
+                Lists.newArrayList(
+                        ChatColor.GRAY + "Right click to open arena setup",
+                        ChatColor.GRAY + "Right click a chest to toggle type"
+                ),
                 ITEM_NAME
         );
     }
@@ -44,11 +48,22 @@ public final class ArenaSetupMenu {
         );
     }
 
+    public static ItemStack createDeathmatchSpawnerItem() {
+        return SkyWarsReloaded.getNMS().getItemStack(
+                new ItemStack(Material.EMERALD, 1),
+                Lists.newArrayList(
+                        ChatColor.GRAY + "Right click to set deathmatch spawn",
+                        ChatColor.GRAY + "Places an emerald block at your location"
+                ),
+                DEATHMATCH_SPAWNER_ITEM_NAME
+        );
+    }
+
     public static boolean isTool(ItemStack stack) {
         if (stack == null) {
             return false;
         }
-        return stack.isSimilar(createToolItem()) || stack.isSimilar(createTeamSpawnerItem());
+        return stack.isSimilar(createToolItem()) || stack.isSimilar(createTeamSpawnerItem()) || stack.isSimilar(createDeathmatchSpawnerItem());
     }
 
     public static boolean isTeamSpawnerTool(ItemStack stack) {
@@ -58,12 +73,19 @@ public final class ArenaSetupMenu {
         return stack.isSimilar(createTeamSpawnerItem());
     }
 
+    public static boolean isDeathmatchSpawnerTool(ItemStack stack) {
+        if (stack == null) {
+            return false;
+        }
+        return stack.isSimilar(createDeathmatchSpawnerItem());
+    }
+
     public static void giveTool(Player player) {
         player.getInventory().setItem(0, createToolItem());
     }
 
     public static void open(Player player, GameMap gMap) {
-        Inventory inv = Bukkit.createInventory(null, 36, new Messaging.MessageFormatter().setVariable("map", gMap.getName()).format("menu.arena-setup-title"));
+        Inventory inv = Bukkit.createInventory(null, 45, new Messaging.MessageFormatter().setVariable("map", gMap.getName()).format("menu.arena-setup-title"));
         inv.setItem(10, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.DIAMOND_BLOCK), Lists.newArrayList(msg("maps.editor.item.add-player-spawn.lore")), msg("maps.editor.item.add-player-spawn.name")));
         inv.setItem(11, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(SkyWarsReloaded.getNMS().getMaterial("ENDER_CHEST")), Lists.newArrayList(
                 new Messaging.MessageFormatter().setVariable("mode", getChestModeName(gMap)).format("maps.editor.item.chest-mode.lore-current"),
@@ -83,7 +105,12 @@ public final class ArenaSetupMenu {
                 ChatColor.GRAY + "Right click with it to auto-set spawns"
         ), ChatColor.GOLD + "Get Team Spawner Tool"));
 
-        inv.setItem(20, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.REDSTONE_COMPARATOR), Lists.newArrayList(
+        inv.setItem(25, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.EMERALD), Lists.newArrayList(
+                ChatColor.GRAY + "Get the Deathmatch Spawner tool",
+                ChatColor.GRAY + "Right click to set deathmatch spawns"
+        ), ChatColor.GREEN + "Get Deathmatch Spawner Tool"));
+
+        inv.setItem(20, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(SkyWarsReloaded.getNMS().getMaterial("REDSTONE_COMPARATOR")), Lists.newArrayList(
                 new Messaging.MessageFormatter().setVariable("size", String.valueOf(gMap.getTeamSize())).format("maps.editor.item.team-size.lore-current"),
                 msg("maps.editor.item.team-size.lore-left"),
                 msg("maps.editor.item.team-size.lore-right")
@@ -97,8 +124,22 @@ public final class ArenaSetupMenu {
         inv.setItem(23, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.MAP), Lists.newArrayList(msg("maps.editor.item.open-arena-manager.lore")), msg("maps.editor.item.open-arena-manager.name")));
         inv.setItem(24, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.SHEARS), Lists.newArrayList(msg("maps.editor.item.remove-deathmatch-spawn.lore")), msg("maps.editor.item.remove-deathmatch-spawn.name")));
 
-        inv.setItem(30, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.BOOK), Lists.newArrayList(msg("maps.editor.item.save-exit.lore")), msg("maps.editor.item.save-exit.name")));
-        inv.setItem(32, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.BARRIER), Lists.newArrayList(msg("maps.editor.item.exit-no-save.lore")), msg("maps.editor.item.exit-no-save.name")));
+        inv.setItem(30, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.NAME_TAG), Lists.newArrayList(
+                ChatColor.GRAY + "Current: " + ChatColor.WHITE + gMap.getDisplayName(),
+                ChatColor.GRAY + "Click to rename arena"
+        ), ChatColor.YELLOW + "Rename Arena"));
+        inv.setItem(31, SkyWarsReloaded.getNMS().getItemStack(SkyWarsReloaded.getNMS().getBlankPlayerHead(), Lists.newArrayList(
+                ChatColor.GRAY + "Current: " + ChatColor.WHITE + (gMap.getDesigner() == null || gMap.getDesigner().isEmpty() ? "Not set" : gMap.getDesigner()),
+                ChatColor.GRAY + "Left click to type a creator name",
+                ChatColor.GRAY + "Right click to set to yourself"
+        ), ChatColor.YELLOW + "Set Creator"));
+        inv.setItem(32, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.ITEM_FRAME), Lists.newArrayList(
+                ChatColor.GRAY + "Click to set the item in your",
+                ChatColor.GRAY + "hand as the map icon"
+        ), ChatColor.YELLOW + "Set Map Icon"));
+
+        inv.setItem(39, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.BOOK), Lists.newArrayList(msg("maps.editor.item.save-exit.lore")), msg("maps.editor.item.save-exit.name")));
+        inv.setItem(41, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.BARRIER), Lists.newArrayList(msg("maps.editor.item.exit-no-save.lore")), msg("maps.editor.item.exit-no-save.name")));
         player.openInventory(inv);
     }
 
@@ -110,12 +151,12 @@ public final class ArenaSetupMenu {
             player.closeInventory();
             return true;
         }
-        if (slot == 30) {
+        if (slot == 39) {
             gMap.exitEditMode(player, true);
             player.closeInventory();
             return true;
         }
-        if (slot == 32) {
+        if (slot == 41) {
             gMap.exitEditMode(player, false);
             player.closeInventory();
             return true;
@@ -125,6 +166,11 @@ public final class ArenaSetupMenu {
             case 19:
                 player.getInventory().addItem(createTeamSpawnerItem());
                 player.sendMessage(ChatColor.GREEN + "Team Spawner tool given! Right click to teleport up and set team spawn.");
+                player.closeInventory();
+                return true;
+            case 25:
+                player.getInventory().addItem(createDeathmatchSpawnerItem());
+                player.sendMessage(ChatColor.GREEN + "Deathmatch Spawner tool given! Right click to set deathmatch spawn.");
                 player.closeInventory();
                 return true;
             case 10:
@@ -156,7 +202,7 @@ public final class ArenaSetupMenu {
                     gMap.setChestPlacementType(ChestPlacementType.NORMAL);
                 }
                 player.sendMessage(new Messaging.MessageFormatter().setVariable("mode", getChestModeName(gMap)).format("maps.editor.chest-mode-set"));
-                open(player, gMap);
+                reopen(player, gMap);
                 return true;
             case 12:
                 gMap.addDeathMatchSpawn(player.getLocation());
@@ -182,7 +228,7 @@ public final class ArenaSetupMenu {
             case 15:
                 gMap.setFriendlyFire(!gMap.allowFriendlyFire());
                 player.sendMessage(new Messaging.MessageFormatter().setVariable("state", gMap.allowFriendlyFire() ? msg("maps.editor.state.enabled") : msg("maps.editor.state.disabled")).format("maps.editor.friendly-fire-state"));
-                open(player, gMap);
+                reopen(player, gMap);
                 return true;
             case 16:
                 if (gMap.getTeamSize() <= 1) {
@@ -211,7 +257,7 @@ public final class ArenaSetupMenu {
                 if (adjustedMaxPlayers >= 2 && gMap.getMinTeams() > adjustedMaxPlayers) {
                     gMap.setMinTeams(adjustedMaxPlayers);
                 }
-                open(player, gMap);
+                reopen(player, gMap);
                 return true;
             case 21:
                 int maxPlayers = gMap.getMaxPlayers();
@@ -228,14 +274,14 @@ public final class ArenaSetupMenu {
                         gMap.setMinTeams(gMap.getMinTeams() + 1);
                     }
                 }
-                open(player, gMap);
+                reopen(player, gMap);
                 return true;
             case 22:
                 int converted = gMap.registerAllMapChestsAsNormal();
                 player.sendMessage(new Messaging.MessageFormatter()
                         .setVariable("count", String.valueOf(converted))
                         .format("maps.editor.all-chests-normalized"));
-                open(player, gMap);
+                reopen(player, gMap);
                 return true;
             case 23:
                 SkyWarsReloaded.getIC().show(player, gMap.getArenaKey());
@@ -249,6 +295,37 @@ public final class ArenaSetupMenu {
                 } else {
                     player.sendMessage(msg("maps.editor.no-deathmatch-spawn-at-location"));
                 }
+                return true;
+            case 30:
+                // Rename arena - prompt via chat using existing ChatListener system
+                player.closeInventory();
+                player.sendMessage(ChatColor.GREEN + "Type the new arena display name in chat. (20 second timeout)");
+                com.walrusone.skywarsreloaded.listeners.ChatListener.setTime(player.getUniqueId(), System.currentTimeMillis());
+                com.walrusone.skywarsreloaded.listeners.ChatListener.setSetting(player.getUniqueId(), gMap.getName() + ":display");
+                return true;
+            case 31:
+                // Set creator - left click to type, right click to set to yourself
+                if (clickType == ClickType.RIGHT) {
+                    gMap.setCreator(player.getName());
+                    player.sendMessage(ChatColor.GREEN + "Arena creator set to: " + ChatColor.GOLD + player.getName());
+                    reopen(player, gMap);
+                } else {
+                    player.closeInventory();
+                    player.sendMessage(ChatColor.GREEN + "Type the creator name in chat. (20 second timeout)");
+                    com.walrusone.skywarsreloaded.listeners.ChatListener.setTime(player.getUniqueId(), System.currentTimeMillis());
+                    com.walrusone.skywarsreloaded.listeners.ChatListener.setSetting(player.getUniqueId(), gMap.getName() + ":creator");
+                }
+                return true;
+            case 32:
+                // Set map icon to item in hand
+                ItemStack handItem = player.getInventory().getItemInMainHand();
+                if (handItem == null || handItem.getType() == Material.AIR) {
+                    player.sendMessage(ChatColor.RED + "Hold an item in your main hand to set it as the map icon!");
+                } else {
+                    setMapIcon(gMap, handItem.getType());
+                    player.sendMessage(ChatColor.GREEN + "Map icon set to: " + ChatColor.GOLD + handItem.getType().name());
+                }
+                reopen(player, gMap);
                 return true;
             default:
                 return true;
@@ -287,9 +364,35 @@ public final class ArenaSetupMenu {
         }
     }
 
+    public static boolean isArenaSetupMenu(String title) {
+        return isArenaSetupMenuTitle(title);
+    }
+
+    /**
+     * Reopens the menu on the next tick to avoid Bukkit inventory update issues.
+     */
+    private static void reopen(Player player, GameMap gMap) {
+        Bukkit.getScheduler().runTask(SkyWarsReloaded.get(), () -> open(player, gMap));
+    }
+
     private static boolean isArenaSetupMenuTitle(String title) {
         String strippedTitle = ChatColor.stripColor(title);
         String expectedPrefix = ChatColor.stripColor(new Messaging.MessageFormatter().setVariable("map", "").format("menu.arena-setup-title"));
         return strippedTitle != null && expectedPrefix != null && strippedTitle.startsWith(expectedPrefix);
+    }
+
+    private static void setMapIcon(GameMap gMap, Material material) {
+        java.io.File dataDirectory = new java.io.File(SkyWarsReloaded.get().getDataFolder(), "mapsData");
+        java.io.File mapFile = new java.io.File(dataDirectory, gMap.getName() + ".yml");
+        if (mapFile.exists()) {
+            org.bukkit.configuration.file.FileConfiguration fc = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(mapFile);
+            fc.set("enableCustomJoinMenuItem", true);
+            fc.set("customJoinMenuItem", material.name());
+            try {
+                fc.save(mapFile);
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

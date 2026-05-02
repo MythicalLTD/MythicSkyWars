@@ -117,7 +117,7 @@ public class FileWorldManager implements WorldManager {
 
     public void deleteWorld(String name, boolean removeFile) {
         unloadWorld(name, false);
-        File target = new File(SkyWarsReloaded.get().getServer().getWorldContainer().getAbsolutePath(), name);
+        File target = getWorldFolder(name);
         deleteWorld(target);
     }
 

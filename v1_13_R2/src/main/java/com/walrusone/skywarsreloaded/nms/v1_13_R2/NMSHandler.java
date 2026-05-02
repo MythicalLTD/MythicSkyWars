@@ -137,6 +137,10 @@ public class NMSHandler extends com.walrusone.skywarsreloaded.nms.v1_12_R1.NMSHa
         if (item.equalsIgnoreCase("SNOW_BALL")) {
             return new ItemStack(Material.valueOf("SNOWBALL"));
         }
+        if (item.equalsIgnoreCase("EYE_OF_ENDER"))
+            return new ItemStack(Material.valueOf("ENDER_EYE"), 1);
+        if (item.equalsIgnoreCase("ENDER_CHEST"))
+            return new ItemStack(Material.valueOf("ENDER_CHEST"), 1);
         return new ItemStack(Material.AIR, 1);
     }
 

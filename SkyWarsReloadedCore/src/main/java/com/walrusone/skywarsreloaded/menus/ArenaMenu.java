@@ -128,10 +128,6 @@ public class ArenaMenu {
                 ItemStack cage = SkyWarsReloaded.getNMS().getItemStack(new ItemStack(SkyWarsReloaded.getNMS().getMaterial("IRON_FENCE")), lores, "Cage Type");
 
                 lores.clear();
-                lores.add(ChatColor.AQUA + "Left Click to view events!");
-                ItemStack events = SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.JUKEBOX, 1), lores, "Events");
-
-                lores.clear();
                 lores.add(ChatColor.GREEN + "Team Size: " + ChatColor.GOLD + gMap.getTeamSize());
                 if (gMap.allowFriendlyFire()) {
                     lores.add(ChatColor.GREEN + "Freindly Fire Enabled: " + ChatColor.GREEN + "TRUE");
@@ -161,7 +157,6 @@ public class ArenaMenu {
                 menu.setItem(14, edit);
                 menu.setItem(16, save);
                 menu.setItem(20, cage);
-                menu.setItem(22, events);
                 menu.setItem(24, teams);
             }
         };
@@ -280,8 +275,6 @@ public class ArenaMenu {
                         gMap.setCage(CageType.getNext(gMap.getCage().getType()));
                         gMap.update();
                     }
-                } else if (event.getClick().equals(ClickType.LEFT) && event.getSlot() == 22) {
-                    new EventsMenu(player, gMap);
                 } else if (event.getClick().equals(ClickType.SHIFT_LEFT) && event.getSlot() == 24) {
                     if (!gMap.isRegistered()) {
                         gMap.setFriendlyFire(!gMap.allowFriendlyFire());

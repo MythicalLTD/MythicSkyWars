@@ -13,15 +13,15 @@ import java.util.Map;
 
 public class NMSHandler extends com.walrusone.skywarsreloaded.nms.v1_21_R1.NMSHandler {
 
-    // Map old game rule names to new Minecraft 1.21.11+ names
+    // Map old game rule names to new Minecraft 1.21.11+ registry key names (snake_case, no namespace prefix)
     private static final Map<String, String> GAME_RULE_MAPPINGS = new HashMap<>();
     
     static {
-        GAME_RULE_MAPPINGS.put("doMobSpawning", "minecraft:spawn_mobs");
-        GAME_RULE_MAPPINGS.put("mobGriefing", "minecraft:mob_griefing");
-        GAME_RULE_MAPPINGS.put("doFireTick", "minecraft:fire_spread_radius_around_players");
-        GAME_RULE_MAPPINGS.put("showDeathMessages", "minecraft:show_death_messages");
-        GAME_RULE_MAPPINGS.put("announceAdvancements", "minecraft:show_advancement_messages");
+        GAME_RULE_MAPPINGS.put("doMobSpawning", "spawn_mobs");
+        GAME_RULE_MAPPINGS.put("mobGriefing", "mob_griefing");
+        GAME_RULE_MAPPINGS.put("doFireTick", "fire_spread_radius_around_player");
+        GAME_RULE_MAPPINGS.put("showDeathMessages", "show_death_messages");
+        GAME_RULE_MAPPINGS.put("announceAdvancements", "show_advancement_messages");
         GAME_RULE_MAPPINGS.put("doDaylightCycle", "advance_time");
     }
 
@@ -34,6 +34,23 @@ public class NMSHandler extends com.walrusone.skywarsreloaded.nms.v1_21_R1.NMSHa
     public void setGameRule(World world, String ruleName, String value) {
         // Map old game rule names to new ones for Minecraft 1.21.11+
         String mappedRuleName = GAME_RULE_MAPPINGS.getOrDefault(ruleName, ruleName);
+        
+        // Special handling for doFireTick: was Boolean, now maps to Integer rule
+        // fire_spread_radius_around_player: 0 = disabled, -1 = unlimited spread
+        if (ruleName.equals("doFireTick")) {
+            try {
+                GameRule<?> gameRule = Registry.GAME_RULE.get(NamespacedKey.minecraft("fire_spread_radius_around_player"));
+                if (gameRule != null) {
+                    @SuppressWarnings("unchecked")
+                    GameRule<Integer> intRule = (GameRule<Integer>) gameRule;
+                    int fireValue = value.equalsIgnoreCase("true") ? -1 : 0;
+                    world.setGameRule(intRule, fireValue);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return;
+        }
         
         // Handle bools
         Boolean valueBool = null;
@@ -50,22 +67,58 @@ public class NMSHandler extends com.walrusone.skywarsreloaded.nms.v1_21_R1.NMSHa
             }
         }
         
-        // Apply
+        // Apply using Registry API (GameRule is now an interface in 1.21.11+)
         try {
+            // Normalize the rule name to a valid NamespacedKey
+            String keyName = mappedRuleName.toLowerCase(Locale.ROOT);
+            // Strip minecraft: prefix if present
+            if (keyName.startsWith("minecraft:")) {
+                keyName = keyName.substring("minecraft:".length());
+            }
+            // Convert camelCase to snake_case for legacy names
+            keyName = camelToSnake(keyName);
+            
+            GameRule<?> gameRule = Registry.GAME_RULE.get(NamespacedKey.minecraft(keyName));
+            if (gameRule == null) {
+                // Try the original name as-is (already snake_case)
+                gameRule = Registry.GAME_RULE.get(NamespacedKey.minecraft(mappedRuleName.toLowerCase(Locale.ROOT)));
+            }
+            
+            if (gameRule == null) {
+                throw new Exception("Invalid GameRule: " + mappedRuleName + " (original: " + ruleName + ", resolved key: " + keyName + ")");
+            }
+            
             if (valueBool == null) {
-                GameRule<Integer> gameRule = (GameRule<Integer>) GameRule.getByName(mappedRuleName);
-                if (gameRule == null || valueInt == null)
-                    throw new Exception("Invalid GameRule or value provided: " + mappedRuleName + " (original: " + ruleName + ") -> " + value);
-                world.setGameRule(gameRule, valueInt);
+                if (valueInt == null)
+                    throw new Exception("Invalid GameRule value provided: " + mappedRuleName + " (original: " + ruleName + ") -> " + value);
+                @SuppressWarnings("unchecked")
+                GameRule<Integer> intRule = (GameRule<Integer>) gameRule;
+                world.setGameRule(intRule, valueInt);
             } else {
-                GameRule<Boolean> gameRule = (GameRule<Boolean>) GameRule.getByName(mappedRuleName);
-                if (gameRule == null)
-                    throw new Exception("Invalid GameRule: " + mappedRuleName + " (original: " + ruleName + ")");
-                world.setGameRule(gameRule, valueBool);
+                @SuppressWarnings("unchecked")
+                GameRule<Boolean> boolRule = (GameRule<Boolean>) gameRule;
+                world.setGameRule(boolRule, valueBool);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+    
+    private static String camelToSnake(String camel) {
+        if (camel == null || camel.isEmpty()) return camel;
+        // If it already contains underscores, assume it's already snake_case
+        if (camel.contains("_")) return camel;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < camel.length(); i++) {
+            char c = camel.charAt(i);
+            if (Character.isUpperCase(c)) {
+                if (i > 0) sb.append('_');
+                sb.append(Character.toLowerCase(c));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     @Override

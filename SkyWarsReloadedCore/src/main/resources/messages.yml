@@ -119,6 +119,7 @@ maps:
         chest-center: '&eCHEST: CENTER'
         chest-unregistered: '&cCHEST: NOT SETUP'
         spawn: '&bSPAWN T{team}#{spawn}'
+        deathmatch-spawn: '&2DM SPAWN #{num}'
         world-spawn: '&dWORLD SPAWN'
         spectator-spawn: '&5SPECTATOR SPAWN'
     no-spawn-at-location: '&cNo player/team spawn exists at your current location.'

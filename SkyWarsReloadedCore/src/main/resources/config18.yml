@@ -9,14 +9,14 @@ gameServers:
   - server-name:port:display_name:max_players:team_size:127.0.0.1
 gameEndCommands:
 tauntCooldown: 10
-enablePressurePlateJoin: true
-teleportToSpawnOnJoin: false
+enablePressurePlateJoin: false
+teleportToSpawnOnJoin: true
 teleportToSpawnOnWorldEnter: true
 resourcepack: https://www.dropbox.com/s/8scs6c911y3mqbg/taunts-resource-pack.zip?dl=1
 promptForResourcePackOnJoin: false
-lobbyBoardEnabled: false
+lobbyBoardEnabled: true
 displayPlayerLevelOnXpBar: true
-enabledLobbyGuard: false
+enabledLobbyGuard: true
 lobby:
   forceSunnyWhenProtected: true
   forceDayWhenProtected: true
@@ -86,7 +86,7 @@ parties:
   maxPartySize: 4
   lobbyWorlds: []
 holograms: 
-  enabled: false
+  enabled: true
 chests:
   loadTrappedChestsAsCenter: false
   maxItemsChest: 26
@@ -94,8 +94,8 @@ chests:
   refill:
     enabled: true
     intervalSeconds: 180
-    keepChestOpen: false
-    showHologram: false
+    keepChestOpen: true
+    showHologram: true
 kit:
   randPos: 0
   menuSize: 45

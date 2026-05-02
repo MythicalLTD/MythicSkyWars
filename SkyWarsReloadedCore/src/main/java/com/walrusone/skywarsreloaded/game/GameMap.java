@@ -194,10 +194,8 @@ public class GameMap {
             File dataDirectory = SkyWarsReloaded.get().getDataFolder();
             File maps = new File(dataDirectory, "maps");
 
-            String root = SkyWarsReloaded.get().getServer().getWorldContainer().getAbsolutePath();
-            File rootDirectory = new File(root);
             File source = new File(maps, name);
-            File target = new File(rootDirectory, name);
+            File target = wm.getWorldFolder(name);
             wm.copyWorld(source, target);
             boolean mapExists = false;
             if (target.isDirectory()) {
@@ -272,7 +270,7 @@ public class GameMap {
     private static boolean loadWorld(String worldName, GameMap gMap, boolean readOnly) {
         File dataDirectory = new File(SkyWarsReloaded.get().getDataFolder(), "maps");
         File source = new File(dataDirectory, worldName);
-        File target = new File(SkyWarsReloaded.get().getServer().getWorldContainer().getAbsolutePath(), worldName);
+        File target = SkyWarsReloaded.getWM().getWorldFolder(worldName);
         boolean mapExists = false;
         if (target.isDirectory()) {
             String[] list = target.list();
@@ -290,6 +288,16 @@ public class GameMap {
     private static void prepareForEditor(Player player, GameMap gMap, String worldName) {
         World editWorld = SkyWarsReloaded.get().getServer().getWorld(worldName);
         editWorld.setAutoSave(true);
+        
+        // Disable mob spawning and clear all existing mobs/animals
+        SkyWarsReloaded.getNMS().setGameRule(editWorld, "doMobSpawning", "false");
+        SkyWarsReloaded.getNMS().setGameRule(editWorld, "doDaylightCycle", "false");
+        for (org.bukkit.entity.Entity entity : editWorld.getEntities()) {
+            if (!(entity instanceof Player)) {
+                entity.remove();
+            }
+        }
+        
         for (TeamCard tCard : gMap.getTeamCards()) {
             if (tCard.getSpawns() != null) {
                 for (CoordLoc loc : tCard.getSpawns()) {
@@ -1051,9 +1059,7 @@ public class GameMap {
             boolean mapFolderExists = false;
 
             // Find map folder
-            String root = server.getWorldContainer().getAbsolutePath();
-            File rootDirectory = new File(root);
-            File target = new File(rootDirectory, mapName);
+            File target = worldManager.getWorldFolder(mapName);
             if (target.isDirectory()) {
                 String[] list = target.list();
                 if (list != null && list.length > 0) {
@@ -2047,7 +2053,7 @@ public class GameMap {
             for (Player player : editWorld.getPlayers()) {
                 player.teleport(respawn, TeleportCause.PLUGIN);
             }
-            File source = new File(SkyWarsReloaded.get().getServer().getWorldContainer().getAbsolutePath(), name);
+            File source = SkyWarsReloaded.getWM().getWorldFolder(name);
             SkyWarsReloaded.getWM().unloadWorld(name, saveChanges);
             if (saveChanges) {
                 File dataDirectory = new File(SkyWarsReloaded.get().getDataFolder(), "maps");

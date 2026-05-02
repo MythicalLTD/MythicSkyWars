@@ -42,9 +42,9 @@ tauntCooldown: 10
 #   Stone Pressure Plate = random game
 #   Iron Pressure Plate = random solo game
 #   Gold Pressure Plate = random team game
-enablePressurePlateJoin: true
+enablePressurePlateJoin: false
 # Whether you want players to be teleported to the skywars lobby spawn location when they join the server
-teleportToSpawnOnJoin: false
+teleportToSpawnOnJoin: true
 # Whether you want players to be teleported to the skywars lobby spawn location when they enter the lobby world
 teleportToSpawnOnWorldEnter: true
 # A valid link to a resource pack ZIP file - this requires "promptForResourcePackOnJoin" to be enabled
@@ -52,11 +52,11 @@ resourcepack: https://www.dropbox.com/s/8scs6c911y3mqbg/taunts-resource-pack.zip
 # Whether you want to send a resource pack download request to the players when they join
 promptForResourcePackOnJoin: false
 # Whether you want the Skywars lobby scoreboard to appear if the player is in the lobby world
-lobbyBoardEnabled: false
+lobbyBoardEnabled: true
 # Whether you want the XP bar in the Skywars lobby to have the value of the player's Skywars XP amount
 displayPlayerLevelOnXpBar: true
 # If you enable the lobbyGuard, players without permission won't be able to break/place blocks or drop items
-enabledLobbyGuard: false
+enabledLobbyGuard: true
 lobby:
   forceSunnyWhenProtected: true
   forceDayWhenProtected: true
@@ -249,7 +249,7 @@ holograms:
   # Whether you want to enable holograms in your server
   # Please know that after enabling this option you will have to RESTART your server!
   # Want to learn how to create holograms? Read this: https://gcnt.net/skywars/creating-holograms
-  enabled: false
+  enabled: true
 
 
 ##################
@@ -263,8 +263,8 @@ chests:
   refill:
     enabled: true
     intervalSeconds: 180
-    keepChestOpen: false
-    showHologram: false
+    keepChestOpen: true
+    showHologram: true
 
 
 ################

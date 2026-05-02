@@ -55,13 +55,7 @@ public class ProjectileEffectOption extends PlayerOption {
         }
 
         if (!particleFile.exists()) {
-            SkyWarsReloaded.get().saveResource("projectileeffects.yml", false);
-            File sf = new File(SkyWarsReloaded.get().getDataFolder(), "projectileeffects.yml");
-            if (sf.exists()) {
-                if (sf.renameTo(particleFile)) {
-                    SkyWarsReloaded.get().getLogger().info("Migrated projectileeffects.yml to cosmetics folder");
-                }
-            }
+            SkyWarsReloaded.get().saveResource("cosmetics/projectileeffects.yml", false);
         }
 
         if (particleFile.exists()) {

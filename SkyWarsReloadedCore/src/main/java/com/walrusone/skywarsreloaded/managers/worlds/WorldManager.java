@@ -23,6 +23,21 @@ public interface WorldManager {
 
     void deleteWorld(File file);
 
+    /**
+     * Gets the actual filesystem folder for a world by name.
+     * In MC 1.21.11+ (Paper/Purpur 26.1+), worlds are stored under world/dimensions/minecraft/{name}
+     * rather than as top-level folders.
+     */
+    default File getWorldFolder(String worldName) {
+        File legacy = new File(org.bukkit.Bukkit.getWorldContainer().getAbsolutePath(), worldName);
+        if (legacy.exists()) return legacy;
+        // Modern path: world/dimensions/minecraft/<name>
+        File modern = new File(org.bukkit.Bukkit.getWorldContainer().getAbsolutePath(), "world/dimensions/minecraft/" + worldName);
+        if (modern.exists()) return modern;
+        // Default to legacy path
+        return legacy;
+    }
+
     WorldManagerType getType();
 
 }
