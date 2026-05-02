@@ -13,3 +13,4 @@ settings.xml
 BuildTools/
 
 deploy.bat
+deploy-neux.ps1
