@@ -6,6 +6,8 @@ import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.managers.Leaderboard;
 import com.walrusone.skywarsreloaded.managers.PlayerStat;
+import com.walrusone.skywarsreloaded.utilities.LevelManager;
+import com.walrusone.skywarsreloaded.utilities.PrestigeManager;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
@@ -22,6 +24,7 @@ import java.util.Locale;
  *   <li>{@code %swr_kill_death%} — kills ÷ deaths (0 deaths → shows kills as {@code n.00}; both 0 → {@code 0.00})</li>
  *   <li>{@code %swr_win_loss%} — wins ÷ losses (0 losses → {@code 0.00} unless wins only, then wins as {@code n.00})</li>
  *   <li>{@code %swr_level%}</li>
+ *   <li>{@code %swr_prestige_prefix%}, {@code %swr_level_display_prefix%}, {@code %swr_prestige_id%}</li>
  *   <li>{@code %swr_time%}, {@code %swr_players_playing%}, {@code %swr_players_waiting%}, …</li>
  * </ul>
  */
@@ -139,6 +142,12 @@ public class SWRPlaceholderAPI extends PlaceholderExpansion {
             if ("level".equals(id)) {
                 return "" + Util.get().getPlayerLevel(p, false);
             }
+            if ("prestige_prefix".equals(id) || "level_display_prefix".equals(id)) {
+                return "";
+            }
+            if ("prestige_id".equals(id)) {
+                return "icon1";
+            }
             if ("wins".equals(id) || "losses".equals(id) || "kills".equals(id) || "deaths".equals(id) || "xp".equals(id)
                     || "souls".equals(id) || "total_souls".equals(id)
                     || "soulwell_usages".equals(id) || "soul_well_usages".equals(id)
@@ -190,6 +199,17 @@ public class SWRPlaceholderAPI extends PlaceholderExpansion {
         }
         if ("level".equals(id)) {
             return Integer.toString(Util.get().getPlayerLevel(p, false));
+        }
+        int swLevel = LevelManager.get().getLevelForXp(stat.getXp());
+        if ("prestige_id".equals(id)) {
+            return stat.getPrestigeIcon();
+        }
+        if ("prestige_prefix".equals(id)) {
+            return PrestigeManager.get().isEnabled()
+                    ? PrestigeManager.get().translatePrefixForStat(stat, swLevel, stat.getPrestigeIcon()) : "";
+        }
+        if ("level_display_prefix".equals(id)) {
+            return LevelManager.get().getDisplayPrefixForPlayer(stat, p, swLevel);
         }
         if ("kill_death".equals(id)) {
             return formatKillDeathRatio(stat);

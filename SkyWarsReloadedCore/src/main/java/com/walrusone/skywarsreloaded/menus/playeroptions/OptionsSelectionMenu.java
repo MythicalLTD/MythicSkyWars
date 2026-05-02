@@ -5,6 +5,7 @@ import com.walrusone.skywarsreloaded.SkyWarsReloaded;
 import com.walrusone.skywarsreloaded.enums.PlayerOptions;
 import com.walrusone.skywarsreloaded.menus.soulwell.SoulWellMenu;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
+import com.walrusone.skywarsreloaded.utilities.PrestigeManager;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -56,6 +57,18 @@ public class OptionsSelectionMenu {
             }
         }
 
+        if (PrestigeManager.get().isEnabled() && player.hasPermission("sw.prestige")) {
+            int prestigeSlot = PrestigeManager.get().getOptionsMenuSlot();
+            if (prestigeSlot >= 0 && prestigeSlot < menuSize) {
+                ItemStack icon = new ItemStack(Material.NETHER_STAR, 1);
+                List<String> lore = Lists.newArrayList();
+                lore.add(new Messaging.MessageFormatter().format("items.prestige-open-lore"));
+                String prestigeName = new Messaging.MessageFormatter().format("items.prestige-sel");
+                inv.setItem(prestigeSlot, SkyWarsReloaded.getNMS().getItemStack(icon, lore,
+                        ChatColor.translateAlternateColorCodes('&', prestigeName)));
+            }
+        }
+
         ArrayList<Inventory> invs = new ArrayList<>();
         invs.add(inv);
 
@@ -84,6 +97,11 @@ public class OptionsSelectionMenu {
             } else if (name.equalsIgnoreCase(new Messaging.MessageFormatter().format("items.soul-well-sel"))) {
                 if (SkyWarsReloaded.getCfg().isSoulWellEnabled() && player.hasPermission("sw.soulwell")) {
                     SoulWellMenu.open(player);
+                    Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getOpenOptionsMenuSound(), 1, 1);
+                }
+            } else if (name.equalsIgnoreCase(new Messaging.MessageFormatter().format("items.prestige-sel"))) {
+                if (PrestigeManager.get().isEnabled() && player.hasPermission("sw.prestige")) {
+                    PrestigeMenu.open(player);
                     Util.get().playSound(player, player.getLocation(), SkyWarsReloaded.getCfg().getOpenOptionsMenuSound(), 1, 1);
                 }
             } else if (name.equalsIgnoreCase(new Messaging.MessageFormatter().format("items.exit-menu-item"))) {

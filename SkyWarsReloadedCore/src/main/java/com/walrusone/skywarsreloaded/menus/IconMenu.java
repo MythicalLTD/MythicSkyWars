@@ -16,14 +16,23 @@ public class IconMenu {
     private Runnable update;
 
     public IconMenu(ArrayList<Inventory> invs, OptionClickEventHandler optionClickEventHandler) {
+        this(invs, optionClickEventHandler, true);
+    }
+
+    /**
+     * @param injectDefaultNav when false, do not place exit/prev/next footer items (menus that supply their own footer).
+     */
+    public IconMenu(ArrayList<Inventory> invs, OptionClickEventHandler optionClickEventHandler, boolean injectDefaultNav) {
         this.invs = invs;
-        for (int i = 0; i < invs.size(); i++) {
-            addExitItem((Inventory) invs.get(i));
-            if ((invs.size() > 0) && (i + 1 < invs.size())) {
-                addNextItem((Inventory) invs.get(i));
-            }
-            if ((i > 0) && (i < invs.size())) {
-                addPrevItem((Inventory) invs.get(i));
+        if (injectDefaultNav) {
+            for (int i = 0; i < invs.size(); i++) {
+                addExitItem((Inventory) invs.get(i));
+                if ((invs.size() > 0) && (i + 1 < invs.size())) {
+                    addNextItem((Inventory) invs.get(i));
+                }
+                if ((i > 0) && (i < invs.size())) {
+                    addPrevItem((Inventory) invs.get(i));
+                }
             }
         }
         handler = optionClickEventHandler;

@@ -62,3 +62,28 @@ levels:
   others:
     name: '&7[{number}✩] '
     rankup-cost: 15000
+
+# Commands run once per crossed level when XP increases (Soul Well wins, kills, minute XP all use addXp).
+# Example:
+#level-up-rewards:
+#  enabled: true
+#  levelRewards:
+#    '5':
+#      - 'eco give <player> 100'
+#      - '/sw stat <player> souls add 1'
+
+# Options menu slot: inventory index 0–26 (-1 disables the star button).
+#prestige:
+#  enabled: false
+#  options-menu-slot: -1
+#  menu-size: 36
+#  icon1:
+#    enabled: true
+#    slot: 10
+#    page: 1
+#    name: '&7Default'
+#    material: GOLD_NUGGET
+#    prefix: '&7✫ '
+#    requirements:
+#      level: 1
+#      angelDeath: 0

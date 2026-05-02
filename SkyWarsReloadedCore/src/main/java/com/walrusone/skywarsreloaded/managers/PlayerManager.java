@@ -525,7 +525,7 @@ public class PlayerManager {
                 }
             }
             int xpReward = LevelManager.get().getXpReward("per-kill", 10);
-            killerData.setXp(killerData.getXp() + (multiplier * xpReward));
+            killerData.addXp(killer, multiplier * xpReward);
             KillSoundOption sound = (KillSoundOption) KillSoundOption.getPlayerOptionByKey(killerData.getKillSound());
             if (sound != null) {
                 sound.playSound(killer.getLocation());

@@ -125,6 +125,7 @@ permissions:
       sw.top: true
       sw.quit: true
       sw.soulwell: true
+      sw.prestige: true
       sw.leave: true
       sw.rejoin: true
   sw.join:
@@ -147,6 +148,9 @@ permissions:
     default: true
   sw.soulwell:
     description: Use the Soul Well from the lobby options menu.
+    default: true
+  sw.prestige:
+    description: Use /sw prestige and the prestige button in the options menu (when configured in levels.yml).
     default: true
   sw.soulwell.xezbethluck:
     description: After a win, your next x1 Soul Well spin costs no souls (Hypixel-style luck).

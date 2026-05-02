@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `sw_player` (
   `killsound`	VARCHAR(255)    NOT NULL,
   `winsound`	VARCHAR(255)    NOT NULL,
   `taunt`		VARCHAR(255)    NOT NULL,
+  `prestige_icon` VARCHAR(64)   NOT NULL DEFAULT 'icon1',
   `souls`       INT(6)          NOT NULL DEFAULT 0,
   `soulwell_usages` INT(6)      NOT NULL DEFAULT 0,
   `soulwell_legendaries` INT(6) NOT NULL DEFAULT 0,

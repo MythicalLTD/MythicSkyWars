@@ -890,7 +890,7 @@ public class MatchManager {
                         }
                         int gain = Math.max(0, perMinute + (teammates * perTeammate));
                         if (gain > 0) {
-                            ps.setXp(ps.getXp() + gain);
+                            ps.addXp(alive, gain);
                         }
                     }
                 }
@@ -966,7 +966,7 @@ public class MatchManager {
                         }
                         final int multiplier = Util.get().getMultiplier(pWinner);
                         int winXp = LevelManager.get().getXpReward("game-win", 100);
-                        winnerData.setXp(winnerData.getXp() + (multiplier * winXp));
+                        winnerData.addXp(pWinner, multiplier * winXp);
                         if (SkyWarsReloaded.getCfg().economyEnabled()) {
                             VaultUtils.get().give(pWinner, multiplier * SkyWarsReloaded.getCfg().getWinnerEco());
                         }

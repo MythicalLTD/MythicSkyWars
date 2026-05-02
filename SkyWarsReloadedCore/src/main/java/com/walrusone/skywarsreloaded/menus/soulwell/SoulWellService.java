@@ -395,7 +395,7 @@ public final class SoulWellService {
                 player.sendMessage(new Messaging.MessageFormatter().setVariable("amount", "" + r.amount).format("soulwell.reward-coins"));
                 break;
             case XP:
-                ps.setXp(ps.getXp() + r.amount);
+                ps.addXp(player, r.amount);
                 DataStorage.get().saveStats(ps);
                 player.sendMessage(new Messaging.MessageFormatter().setVariable("amount", "" + r.amount).format("soulwell.reward-xp"));
                 break;

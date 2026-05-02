@@ -6,6 +6,7 @@ import com.walrusone.skywarsreloaded.enums.MatchState;
 import com.walrusone.skywarsreloaded.game.GameMap;
 import com.walrusone.skywarsreloaded.matchevents.MatchEvent;
 import com.walrusone.skywarsreloaded.utilities.LevelManager;
+import com.walrusone.skywarsreloaded.utilities.PrestigeManager;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import com.walrusone.skywarsreloaded.utilities.VaultUtils;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -46,6 +47,8 @@ public class PlayerStat {
     private String killSound = "none";
     private String winSound = "none";
     private String taunt = "none";
+    /** Cosmetic prestige id from {@code levels.yml}; displayed with level prefix when enabled. */
+    private String prestigeIcon = "icon1";
     /** Banked Soul Well currency (separate from kill counter). */
     private int souls;
     private int soulWellUsages;
@@ -296,6 +299,9 @@ public class PlayerStat {
                         .replace("{winloss}", winloss)
                         .replace("{balance}", "" + getBalance(player))
                         .replace("{level_prefix}", LevelManager.get().getPrefixForLevel(level))
+                        .replace("{prestige_prefix}", PrestigeManager.get().isEnabled()
+                                ? PrestigeManager.get().translatePrefixForStat(ps, level, ps.getPrestigeIcon()) : "")
+                        .replace("{level_display_prefix}", LevelManager.get().getDisplayPrefixForPlayer(ps, player, level))
                         .replace("{level_progress_bar}", LevelManager.get().getProgressBar(xp));
                 if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                     formatted = PlaceholderAPI.setPlaceholders(player, formatted);
@@ -458,6 +464,29 @@ public class PlayerStat {
 
     public void setXp(int x) {
         this.xp = x;
+    }
+
+    /**
+     * Adds XP and runs {@link LevelManager#grantLevelUpRewards} when {@code onlinePlayer} is non-null
+     * (normal gameplay — setXp alone skips automatic rewards for admin edits).
+     */
+    public void addXp(Player onlinePlayer, int delta) {
+        if (delta == 0) {
+            return;
+        }
+        int oldXp = this.xp;
+        this.xp = Math.max(0, this.xp + delta);
+        if (onlinePlayer != null && this.xp > oldXp) {
+            LevelManager.get().grantLevelUpRewards(onlinePlayer, oldXp, this.xp);
+        }
+    }
+
+    public String getPrestigeIcon() {
+        return prestigeIcon != null && !prestigeIcon.isEmpty() ? prestigeIcon : "icon1";
+    }
+
+    public void setPrestigeIcon(String prestigeIcon) {
+        this.prestigeIcon = prestigeIcon != null && !prestigeIcon.trim().isEmpty() ? prestigeIcon.trim() : "icon1";
     }
 
     public int getDeaths() {

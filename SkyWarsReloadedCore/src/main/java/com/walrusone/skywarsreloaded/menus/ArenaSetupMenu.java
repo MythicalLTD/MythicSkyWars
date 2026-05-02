@@ -23,6 +23,7 @@ public final class ArenaSetupMenu {
     }
 
     private static final String ITEM_NAME = ChatColor.LIGHT_PURPLE + "Arena Setup Tool";
+    private static final String TEAM_SPAWNER_ITEM_NAME = ChatColor.GOLD + "Team Spawner Tool";
 
     public static ItemStack createToolItem() {
         return SkyWarsReloaded.getNMS().getItemStack(
@@ -32,11 +33,29 @@ public final class ArenaSetupMenu {
         );
     }
 
+    public static ItemStack createTeamSpawnerItem() {
+        return SkyWarsReloaded.getNMS().getItemStack(
+                new ItemStack(Material.NETHER_STAR, 1),
+                Lists.newArrayList(
+                        ChatColor.GRAY + "Right click to teleport up and set team spawn",
+                        ChatColor.GRAY + "Checks 6 blocks above for free 3x3 space"
+                ),
+                TEAM_SPAWNER_ITEM_NAME
+        );
+    }
+
     public static boolean isTool(ItemStack stack) {
         if (stack == null) {
             return false;
         }
-        return stack.isSimilar(createToolItem());
+        return stack.isSimilar(createToolItem()) || stack.isSimilar(createTeamSpawnerItem());
+    }
+
+    public static boolean isTeamSpawnerTool(ItemStack stack) {
+        if (stack == null) {
+            return false;
+        }
+        return stack.isSimilar(createTeamSpawnerItem());
     }
 
     public static void giveTool(Player player) {
@@ -58,6 +77,11 @@ public final class ArenaSetupMenu {
                 msg("maps.editor.item.friendly-fire.lore-toggle")
         ), msg("maps.editor.item.friendly-fire.name")));
         inv.setItem(16, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(SkyWarsReloaded.getNMS().getMaterial("ENDER_PORTAL_FRAME")), Lists.newArrayList(msg("maps.editor.item.set-waiting-spawn.lore")), msg("maps.editor.item.set-waiting-spawn.name")));
+
+        inv.setItem(19, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.NETHER_STAR), Lists.newArrayList(
+                ChatColor.GRAY + "Get the Team Spawner tool",
+                ChatColor.GRAY + "Right click with it to auto-set spawns"
+        ), ChatColor.GOLD + "Get Team Spawner Tool"));
 
         inv.setItem(20, SkyWarsReloaded.getNMS().getItemStack(new ItemStack(Material.REDSTONE_COMPARATOR), Lists.newArrayList(
                 new Messaging.MessageFormatter().setVariable("size", String.valueOf(gMap.getTeamSize())).format("maps.editor.item.team-size.lore-current"),
@@ -98,6 +122,11 @@ public final class ArenaSetupMenu {
         }
 
         switch (slot) {
+            case 19:
+                player.getInventory().addItem(createTeamSpawnerItem());
+                player.sendMessage(ChatColor.GREEN + "Team Spawner tool given! Right click to teleport up and set team spawn.");
+                player.closeInventory();
+                return true;
             case 10:
                 if (clickType == ClickType.RIGHT) {
                     removeTeamSpawnsAtLocation(player, gMap);

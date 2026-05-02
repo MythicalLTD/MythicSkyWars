@@ -176,6 +176,7 @@ public class Database {
         if (checkConnection()) {
             return;
         }
+        ensureColumn("prestige_icon", "VARCHAR(64) NOT NULL DEFAULT 'icon1'");
         ensureColumn("souls", "INT(6) NOT NULL DEFAULT 0");
         ensureColumn("soulwell_usages", "INT(6) NOT NULL DEFAULT 0");
         ensureColumn("soulwell_legendaries", "INT(6) NOT NULL DEFAULT 0");
@@ -214,8 +215,8 @@ public class Database {
 
         try {
             String query = "INSERT INTO `sw_player` (`player_id`, `uuid`, `player_name`, `wins`, `losses`, `kills`, `deaths`, `xp`, " +
-                    "`pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt`, `souls`, `soulwell_usages`, `soulwell_legendaries`, `soulwell_rares`, `soulwell_souls_gathered`, `soulwell_souls_purchased`) " +
-                    "VALUES (NULL, ?, ?, 0, 0, 0, 0, 0, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0);";
+                    "`pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt`, `prestige_icon`, `souls`, `soulwell_usages`, `soulwell_legendaries`, `soulwell_rares`, `soulwell_souls_gathered`, `soulwell_souls_purchased`) " +
+                    "VALUES (NULL, ?, ?, 0, 0, 0, 0, 0, ?, ?, ?, ?, ?, ?, 'icon1', 0, 0, 0, 0, 0, 0);";
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, fId);
             preparedStatement.setString(2, name);

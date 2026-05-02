@@ -161,7 +161,7 @@ public final class UltraSkyWarsMongoMigrator {
             PreparedStatement update = null;
             try {
                 update = connection.prepareStatement(
-                        "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `losses` = ?, `kills` = ?, `deaths` = ?, `xp` = ?, `pareffect` = ?, `proeffect` = ?, `glasscolor` = ?, `killsound` = ?, `winsound` = ?, `taunt` = ?, `souls` = ?, `soulwell_usages` = ?, `soulwell_legendaries` = ?, `soulwell_rares` = ?, `soulwell_souls_gathered` = ?, `soulwell_souls_purchased` = ? WHERE `uuid` = ?;"
+                        "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `losses` = ?, `kills` = ?, `deaths` = ?, `xp` = ?, `pareffect` = ?, `proeffect` = ?, `glasscolor` = ?, `killsound` = ?, `winsound` = ?, `taunt` = ?, `prestige_icon` = ?, `souls` = ?, `soulwell_usages` = ?, `soulwell_legendaries` = ?, `soulwell_rares` = ?, `soulwell_souls_gathered` = ?, `soulwell_souls_purchased` = ? WHERE `uuid` = ?;"
                 );
                 update.setString(1, name);
                 update.setInt(2, stats.wins);
@@ -175,13 +175,14 @@ public final class UltraSkyWarsMongoMigrator {
                 update.setString(10, stats.killSound);
                 update.setString(11, stats.winSound);
                 update.setString(12, stats.taunt);
-                update.setInt(13, stats.souls);
-                update.setInt(14, stats.soulWellUsages);
-                update.setInt(15, stats.soulWellLegendaries);
-                update.setInt(16, stats.soulWellRares);
-                update.setInt(17, stats.soulWellSoulsGathered);
-                update.setInt(18, stats.soulWellSoulsPurchased);
-                update.setString(19, uuid);
+                update.setString(13, stats.prestigeIcon != null ? stats.prestigeIcon : "icon1");
+                update.setInt(14, stats.souls);
+                update.setInt(15, stats.soulWellUsages);
+                update.setInt(16, stats.soulWellLegendaries);
+                update.setInt(17, stats.soulWellRares);
+                update.setInt(18, stats.soulWellSoulsGathered);
+                update.setInt(19, stats.soulWellSoulsPurchased);
+                update.setString(20, uuid);
                 update.executeUpdate();
             } finally {
                 if (update != null) {
@@ -195,8 +196,8 @@ public final class UltraSkyWarsMongoMigrator {
         try {
             name = choosePreferredName(name, null, uuid);
             insert = connection.prepareStatement(
-                    "INSERT INTO `sw_player` (`player_id`, `uuid`, `player_name`, `wins`, `losses`, `kills`, `deaths`, `xp`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt`, `souls`, `soulwell_usages`, `soulwell_legendaries`, `soulwell_rares`, `soulwell_souls_gathered`, `soulwell_souls_purchased`) " +
-                            "VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+                    "INSERT INTO `sw_player` (`player_id`, `uuid`, `player_name`, `wins`, `losses`, `kills`, `deaths`, `xp`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt`, `prestige_icon`, `souls`, `soulwell_usages`, `soulwell_legendaries`, `soulwell_rares`, `soulwell_souls_gathered`, `soulwell_souls_purchased`) " +
+                            "VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
             );
             insert.setString(1, uuid);
             insert.setString(2, name);
@@ -211,12 +212,13 @@ public final class UltraSkyWarsMongoMigrator {
             insert.setString(11, stats.killSound);
             insert.setString(12, stats.winSound);
             insert.setString(13, stats.taunt);
-            insert.setInt(14, stats.souls);
-            insert.setInt(15, stats.soulWellUsages);
-            insert.setInt(16, stats.soulWellLegendaries);
-            insert.setInt(17, stats.soulWellRares);
-            insert.setInt(18, stats.soulWellSoulsGathered);
-            insert.setInt(19, stats.soulWellSoulsPurchased);
+            insert.setString(14, stats.prestigeIcon != null ? stats.prestigeIcon : "icon1");
+            insert.setInt(15, stats.souls);
+            insert.setInt(16, stats.soulWellUsages);
+            insert.setInt(17, stats.soulWellLegendaries);
+            insert.setInt(18, stats.soulWellRares);
+            insert.setInt(19, stats.soulWellSoulsGathered);
+            insert.setInt(20, stats.soulWellSoulsPurchased);
             insert.executeUpdate();
             return true;
         } finally {
@@ -274,6 +276,7 @@ public final class UltraSkyWarsMongoMigrator {
         fc.set("killsound", stats.killSound);
         fc.set("winsound", stats.winSound);
         fc.set("taunt", stats.taunt);
+        fc.set("prestige_icon", stats.prestigeIcon != null ? stats.prestigeIcon : "icon1");
         fc.set("souls", stats.souls);
         fc.set("soulwell_usages", stats.soulWellUsages);
         fc.set("soulwell_legendaries", stats.soulWellLegendaries);
@@ -302,6 +305,7 @@ public final class UltraSkyWarsMongoMigrator {
         stats.killSound = asString(playerDoc.get("killsound"));
         stats.winSound = asString(playerDoc.get("winsound"));
         stats.taunt = asString(playerDoc.get("taunt"));
+        stats.prestigeIcon = firstNonEmpty(asString(playerDoc.get("prestige_icon")), asString(playerDoc.get("prestigeIcon")));
         stats.coins = Math.max(0, asInt(playerDoc.get("coins")));
         stats.elo = Math.max(0, asInt(playerDoc.get("elo")));
         stats.level = Math.max(1, asInt(playerDoc.get("level")));
@@ -329,6 +333,10 @@ public final class UltraSkyWarsMongoMigrator {
             stats.killSound = coalesceOptionString(stats.killSound, extractJsonInt(skywarsJson, "killSound", 0));
             stats.winSound = coalesceOptionString(stats.winSound, extractJsonInt(skywarsJson, "winEffect", 0));
             stats.glassColor = coalesceOptionString(stats.glassColor, extractJsonInt(skywarsJson, "glass", 0));
+            String jsonPrestige = firstNonEmpty(
+                    extractJsonString(skywarsJson, "prestigeIcon", null),
+                    extractJsonString(skywarsJson, "prestige_icon", null));
+            stats.prestigeIcon = firstNonEmpty(stats.prestigeIcon, jsonPrestige);
         }
 
         if (stats.particleEffect == null) stats.particleEffect = "none";
@@ -337,6 +345,9 @@ public final class UltraSkyWarsMongoMigrator {
         if (stats.killSound == null) stats.killSound = "none";
         if (stats.winSound == null) stats.winSound = "none";
         if (stats.taunt == null) stats.taunt = "none";
+        if (stats.prestigeIcon == null || stats.prestigeIcon.trim().isEmpty()) {
+            stats.prestigeIcon = "icon1";
+        }
 
         // SWR e gay si calculeaza xp-ul in functie de level, asa ca mai bine ii dam xp necesar pentru levelul respectiv :))))))))
         if (stats.level > 1) {
@@ -451,6 +462,16 @@ public final class UltraSkyWarsMongoMigrator {
         }
     }
 
+    private static String firstNonEmpty(String a, String b) {
+        if (a != null && !a.trim().isEmpty()) {
+            return a.trim();
+        }
+        if (b != null && !b.trim().isEmpty()) {
+            return b.trim();
+        }
+        return null;
+    }
+
     private static String coalesceOptionString(String currentValue, int optionId) {
         String current = asString(currentValue);
         if (current != null && !"none".equalsIgnoreCase(current)) {
@@ -481,6 +502,7 @@ public final class UltraSkyWarsMongoMigrator {
         private String killSound;
         private String winSound;
         private String taunt;
+        private String prestigeIcon;
         private int coins;
         private int elo;
         private int level;

@@ -1,14 +1,20 @@
 package com.walrusone.skywarsreloaded.utilities;
 
 import com.walrusone.skywarsreloaded.SkyWarsReloaded;
+import com.walrusone.skywarsreloaded.managers.PlayerStat;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -19,12 +25,14 @@ public final class LevelManager {
     private final NavigableMap<Integer, Integer> xpByLevel = new TreeMap<>();
     private final Map<Integer, String> prefixByLevel = new HashMap<>();
     private final Map<Integer, Integer> rankupCostByLevel = new HashMap<>();
+    private final Map<Integer, List<String>> levelRewards = new HashMap<>();
     private String progressSymbol = "■";
     private String progressUnlockedColor = "&b";
     private String progressLockedColor = "&7";
     private String progressFormat = "&8 [{progress}&8]";
     private int progressSegments = 10;
     private final Map<String, Integer> xpRewards = new HashMap<>();
+    private boolean levelUpRewardsEnabled = true;
 
     private LevelManager() {
     }
@@ -43,15 +51,23 @@ public final class LevelManager {
         prefixByLevel.clear();
         rankupCostByLevel.clear();
         xpRewards.clear();
+        levelRewards.clear();
 
         loadXpRewards(cfg.getConfigurationSection("xp-rewards"));
         loadProgressBar(cfg.getConfigurationSection("progress-bar"));
 
+        levelUpRewardsEnabled = cfg.getBoolean("level-up-rewards.enabled", true);
+
         ConfigurationSection levelsSection = cfg.getConfigurationSection("levels");
-        boolean loadedAdvanced = tryLoadAdvancedLevels(levelsSection);
-        if (!loadedAdvanced) {
-            loadSimpleXpThresholds(levelsSection);
+
+        boolean loadedUsw = tryLoadExplicitUswStyleLevels(levelsSection);
+        if (!loadedUsw) {
+            boolean loadedAdvanced = tryLoadAdvancedLevels(levelsSection);
+            if (!loadedAdvanced) {
+                loadSimpleXpThresholds(levelsSection);
+            }
         }
+
         if (xpByLevel.isEmpty()) {
             xpByLevel.put(1, 0);
             xpByLevel.put(2, 100);
@@ -67,6 +83,81 @@ public final class LevelManager {
                 prefixByLevel.put(level, "&7[" + level + "✩] ");
             }
         }
+
+        PrestigeManager.get().load(plugin);
+    }
+
+    public synchronized boolean isLevelUpRewardsEnabled() {
+        return levelUpRewardsEnabled;
+    }
+
+    /** Console / admin reward lines for the given SkyWars numeric level (UltraSkyWars-style). */
+    public synchronized List<String> getRewardCommandsForLevel(int level) {
+        List<String> list = levelRewards.get(level);
+        return list == null ? java.util.Collections.emptyList() : java.util.Collections.unmodifiableList(list);
+    }
+
+    /** Fires when XP increases in normal gameplay (online player). */
+    public void grantLevelUpRewards(Player player, int oldXp, int newXp) {
+        if (!levelUpRewardsEnabled || player == null || newXp <= oldXp) {
+            return;
+        }
+        int oldLvl = getLevelForXp(oldXp);
+        int newLvl = getLevelForXp(newXp);
+        if (newLvl <= oldLvl) {
+            return;
+        }
+        final java.util.UUID uid = player.getUniqueId();
+        Bukkit.getScheduler().runTask(SkyWarsReloaded.get(), () -> {
+            Player p = SkyWarsReloaded.get().getServer().getPlayer(uid);
+            if (p == null || !p.isOnline()) {
+                return;
+            }
+            for (int level = oldLvl + 1; level <= newLvl; level++) {
+                List<String> cmds = levelRewards.get(level);
+                if (cmds == null || cmds.isEmpty()) {
+                    continue;
+                }
+                for (String raw : cmds) {
+                    runRewardLine(p, raw);
+                }
+                if (SkyWarsReloaded.getMessaging().getMessage("levels.level-reward-broadcast") != null) {
+                    p.sendMessage(new Messaging.MessageFormatter()
+                            .setVariable("level", Integer.toString(level))
+                            .format("levels.level-reward-broadcast"));
+                }
+            }
+        });
+    }
+
+    private void runRewardLine(Player player, String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            return;
+        }
+        String trimmed = raw.trim().startsWith("/") ? raw.trim().substring(1) : raw.trim();
+        String lowered = trimmed.toLowerCase(Locale.ROOT);
+        boolean selfPlayer = SkyWarsReloaded.get().getName().equalsIgnoreCase("skywars")
+                || lowered.startsWith("skywars ")
+                || lowered.startsWith("sw ");
+
+        if (lowered.startsWith("tell ") || lowered.startsWith("msg ") || lowered.startsWith("minecraft:tell ")) {
+            trimmed = applyPlaceholders(player, trimmed);
+            Bukkit.dispatchCommand(player, trimmed);
+        } else if (selfPlayer) {
+            trimmed = applyPlaceholders(player, trimmed);
+            player.performCommand(trimmed);
+        } else {
+            trimmed = applyPlaceholders(player, trimmed);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), trimmed);
+        }
+    }
+
+    private static String applyPlaceholders(Player player, String command) {
+        String name = player.getName();
+        return command
+                .replace("<player>", name)
+                .replace("%player%", name)
+                .replace("{player}", name);
     }
 
     public synchronized int getLevelForXp(int xp) {
@@ -141,6 +232,24 @@ public final class LevelManager {
         return getPrefixForLevel(getLevelForXp(xp));
     }
 
+    /**
+     * Prefix + optional prestige icon (from {@link PrestigeManager}) for scoreboard / chat placeholders.
+     */
+    public synchronized String getDisplayPrefixForPlayer(PlayerStat ps, Player player, int levelHint) {
+        if (ps == null) {
+            return getPrefixForLevel(levelHint);
+        }
+        String levelPart = getPrefixForLevel(levelHint);
+        if (!PrestigeManager.get().isEnabled()) {
+            return levelPart;
+        }
+        String pfx = PrestigeManager.get().translatePrefixForStat(ps, levelHint, ps.getPrestigeIcon());
+        if (pfx == null || pfx.isEmpty()) {
+            return levelPart;
+        }
+        return ChatColor.translateAlternateColorCodes('&', pfx) + levelPart;
+    }
+
     public synchronized String getProgressBar(int xp) {
         int pct = getProgressPercent(xp);
         int unlocked = Math.min(progressSegments, Math.max(0, (int) Math.round((pct / 100.0D) * progressSegments)));
@@ -192,9 +301,59 @@ public final class LevelManager {
                     xpByLevel.put(level, xp);
                 }
             } catch (NumberFormatException ignored) {
-                // Ignore non-numeric levels in simple mode.
             }
         }
+    }
+
+    /**
+     * UltraSkyWars-style definitions: each row has {@code level}, {@code xp}, optional {@code prefix} / {@code name},
+     * and {@code rewards}.
+     */
+    private boolean tryLoadExplicitUswStyleLevels(ConfigurationSection section) {
+        if (section == null) {
+            return false;
+        }
+        Map<Integer, Integer> xpThreshold = new TreeMap<>();
+        Map<Integer, String> prefixMap = new TreeMap<>();
+        Map<Integer, List<String>> rewardMap = new TreeMap<>();
+        boolean any = false;
+        for (String key : section.getKeys(false)) {
+            if (!section.isConfigurationSection(key)) {
+                continue;
+            }
+            ConfigurationSection node = section.getConfigurationSection(key);
+            if (node == null || !node.contains("level") || !node.contains("xp")) {
+                continue;
+            }
+            any = true;
+            int levelNum = Math.max(1, node.getInt("level"));
+            int minXp = Math.max(0, node.getInt("xp"));
+            xpThreshold.put(levelNum, minXp);
+            String pref = node.contains("prefix") ? node.getString("prefix", "") : node.getString("name", "&7[{number}✩] ");
+            prefixMap.put(levelNum, pref != null ? pref : "&7[{number}✩] ");
+            List<String> rewards = node.getStringList("rewards");
+            if (!rewards.isEmpty()) {
+                rewardMap.put(levelNum, new ArrayList<>(rewards));
+            }
+        }
+        if (!any) {
+            return false;
+        }
+        TreeMap<Integer, Integer> sorted = new TreeMap<>(xpThreshold);
+        int maxLevel = sorted.lastKey();
+        int carried = 0;
+        for (int lvl = 1; lvl <= maxLevel; lvl++) {
+            if (sorted.containsKey(lvl)) {
+                carried = sorted.get(lvl);
+            }
+            xpByLevel.put(lvl, carried);
+            prefixByLevel.put(lvl, prefixMap.getOrDefault(lvl, "&7[{number}✩] "));
+            List<String> rw = rewardMap.get(lvl);
+            if (rw != null && !rw.isEmpty()) {
+                levelRewards.put(lvl, new ArrayList<>(rw));
+            }
+        }
+        return true;
     }
 
     private boolean tryLoadAdvancedLevels(ConfigurationSection section) {
@@ -223,11 +382,13 @@ public final class LevelManager {
                 continue;
             }
             ConfigurationSection node = section.getConfigurationSection(key);
-            if (node == null) {
+            if (node == null || node.contains("xp")) {
+                // Explicit USW rows handled elsewhere.
                 continue;
             }
             int rankupCost = Math.max(1, node.getInt("rankup-cost", 1000));
             String name = node.getString("name", "&7[{number}✩] ");
+            List<String> rewardRows = node.getStringList("rewards");
             if ("others".equalsIgnoreCase(key)) {
                 othersCost = rankupCost;
                 othersName = name;
@@ -260,6 +421,9 @@ public final class LevelManager {
             for (int lvl = start; lvl <= end; lvl++) {
                 tempCostByLevel.put(lvl, rankupCost);
                 tempPrefixByLevel.put(lvl, name);
+                if (!rewardRows.isEmpty()) {
+                    levelRewards.put(lvl, new ArrayList<>(rewardRows));
+                }
             }
             maxLevel = Math.max(maxLevel, end);
         }

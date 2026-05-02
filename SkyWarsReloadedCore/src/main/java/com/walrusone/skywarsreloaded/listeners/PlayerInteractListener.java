@@ -130,11 +130,23 @@ public class PlayerInteractListener implements Listener {
         if (gameMap == null) {
             GameMap editorMap = SkyWarsReloaded.getGameMapMgr().getMap(player.getWorld().getName());
             if (editorMap != null && editorMap.isEditing() && event.hasItem()
-                    && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
-                    && ArenaSetupMenu.isTool(event.getItem())) {
-                event.setCancelled(true);
-                ArenaSetupMenu.open(player, editorMap);
-                return;
+                    && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+                
+                // Handle Team Spawner Tool - only trigger on RIGHT_CLICK_AIR to prevent double execution
+                if (ArenaSetupMenu.isTeamSpawnerTool(event.getItem())) {
+                    event.setCancelled(true);
+                    if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+                        handleTeamSpawnerTool(player, editorMap);
+                    }
+                    return;
+                }
+                
+                // Handle Arena Setup Menu Tool
+                if (ArenaSetupMenu.isTool(event.getItem())) {
+                    event.setCancelled(true);
+                    ArenaSetupMenu.open(player, editorMap);
+                    return;
+                }
             }
             if ((event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK)
                     && event.getClickedBlock() != null
@@ -784,5 +796,77 @@ public class PlayerInteractListener implements Listener {
                 b.setType(Material.AIR);
             }
         }
+    }
+
+    /**
+     * Handles the Team Spawner Tool - teleports player up, checks for free space, and sets team spawn
+     */
+    private void handleTeamSpawnerTool(Player player, GameMap gMap) {
+        Location currentLoc = player.getLocation();
+        Location targetLoc = currentLoc.clone().add(0, 6, 0);
+        
+        // Check if there's a 3x3 free space at the target location
+        if (!hasFreeCuboidSpace(targetLoc, 3, 3, 3)) {
+            player.sendMessage(ChatColor.RED + "Not enough free space 6 blocks above! Need a 3x3x3 area.");
+            return;
+        }
+        
+        // Teleport player to the target location
+        targetLoc.setPitch(currentLoc.getPitch());
+        targetLoc.setYaw(currentLoc.getYaw());
+        player.teleport(targetLoc);
+        
+        // Set the team spawn at the new location
+        Location spawnLoc = player.getLocation();
+        if (gMap.getTeamSize() == 1 || !SkyWarsReloaded.getCfg().isUseSeparateCages()) {
+            int teamIndex = gMap.getTeamCards().size();
+            TeamCard team = gMap.getTeamCardByIndex(teamIndex);
+            if (team == null) {
+                gMap.addTeamCard(Lists.newArrayList(new CoordLoc(spawnLoc)));
+            } else {
+                gMap.addSpawnLocationForTeam(team, spawnLoc);
+            }
+            spawnLoc.getBlock().setType(Material.DIAMOND_BLOCK);
+            player.sendMessage(new Messaging.MessageFormatter()
+                    .setVariable("mapname", gMap.getDisplayName())
+                    .setVariable("num", "" + gMap.getMaxPlayers())
+                    .format("maps.addSpawn"));
+        } else {
+            int teamIndex = gMap.getTeamCards().size() + 1;
+            gMap.addTeamCard(Lists.newArrayList(new CoordLoc(spawnLoc)));
+            spawnLoc.getBlock().setType(Material.DIAMOND_BLOCK);
+            player.sendMessage(new Messaging.MessageFormatter()
+                    .setVariable("team", String.valueOf(teamIndex))
+                    .format("maps.editor.team-spawn-added"));
+        }
+        
+        player.sendMessage(ChatColor.GREEN + "Teleported up 6 blocks and set team spawn!");
+    }
+    
+    /**
+     * Checks if there's free space in a cuboid area
+     */
+    private boolean hasFreeCuboidSpace(Location center, int width, int height, int depth) {
+        World world = center.getWorld();
+        int centerX = center.getBlockX();
+        int centerY = center.getBlockY();
+        int centerZ = center.getBlockZ();
+        
+        // Check a 3x3x3 area centered on the location
+        int halfWidth = width / 2;
+        int halfDepth = depth / 2;
+        
+        for (int x = centerX - halfWidth; x <= centerX + halfWidth; x++) {
+            for (int y = centerY; y < centerY + height; y++) {
+                for (int z = centerZ - halfDepth; z <= centerZ + halfDepth; z++) {
+                    Block block = world.getBlockAt(x, y, z);
+                    if (block.getType() != Material.AIR) {
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        return true;
     }
 }

@@ -73,6 +73,7 @@ public class DataStorage {
                 fc.set("soulwell_rares", pData.getSoulWellRares());
                 fc.set("soulwell_souls_gathered", pData.getSoulWellSoulsGathered());
                 fc.set("soulwell_souls_purchased", pData.getSoulWellSoulsPurchased());
+                fc.set("prestige_icon", pData.getPrestigeIcon());
                 fc.save(playerFile);
 
             } catch (IOException ioException) {
@@ -90,7 +91,7 @@ public class DataStorage {
 
             try {
                 String query = "UPDATE `sw_player` SET `player_name` = ?, `wins` = ?, `losses` = ?, `kills` = ?, `deaths` = ?, `xp` = ?, `pareffect` = ?, " +
-                        "`proeffect` = ?, `glasscolor` = ?,`killsound` = ?, `winsound` = ?, `taunt` = ?, `souls` = ?, `soulwell_usages` = ?, " +
+                        "`proeffect` = ?, `glasscolor` = ?,`killsound` = ?, `winsound` = ?, `taunt` = ?, `prestige_icon` = ?, `souls` = ?, `soulwell_usages` = ?, " +
                         "`soulwell_legendaries` = ?, `soulwell_rares` = ?, `soulwell_souls_gathered` = ?, `soulwell_souls_purchased` = ? WHERE `uuid` = ?;";
 
                 preparedStatement = connection.prepareStatement(query);
@@ -106,13 +107,14 @@ public class DataStorage {
                 preparedStatement.setString(10, pData.getKillSound());
                 preparedStatement.setString(11, pData.getWinSound());
                 preparedStatement.setString(12, pData.getTaunt());
-                preparedStatement.setInt(13, pData.getSouls());
-                preparedStatement.setInt(14, pData.getSoulWellUsages());
-                preparedStatement.setInt(15, pData.getSoulWellLegendaries());
-                preparedStatement.setInt(16, pData.getSoulWellRares());
-                preparedStatement.setInt(17, pData.getSoulWellSoulsGathered());
-                preparedStatement.setInt(18, pData.getSoulWellSoulsPurchased());
-                preparedStatement.setString(19, pData.getId());
+                preparedStatement.setString(13, pData.getPrestigeIcon());
+                preparedStatement.setInt(14, pData.getSouls());
+                preparedStatement.setInt(15, pData.getSoulWellUsages());
+                preparedStatement.setInt(16, pData.getSoulWellLegendaries());
+                preparedStatement.setInt(17, pData.getSoulWellRares());
+                preparedStatement.setInt(18, pData.getSoulWellSoulsGathered());
+                preparedStatement.setInt(19, pData.getSoulWellSoulsPurchased());
+                preparedStatement.setString(20, pData.getId());
                 preparedStatement.executeUpdate();
 
             } catch (final SQLException sqlException) {
@@ -168,7 +170,7 @@ public class DataStorage {
                         ResultSet resultSet = null;
 
                         try {
-                            String query = "SELECT `player_name`, `wins`, `losses`, `kills`, `deaths`, `xp`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt`, `souls`, `soulwell_usages`, `soulwell_legendaries`, `soulwell_rares`, `soulwell_souls_gathered`, `soulwell_souls_purchased` " +
+                            String query = "SELECT `player_name`, `wins`, `losses`, `kills`, `deaths`, `xp`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt`, `prestige_icon`, `souls`, `soulwell_usages`, `soulwell_legendaries`, `soulwell_rares`, `soulwell_souls_gathered`, `soulwell_souls_purchased` " +
                                     "FROM `sw_player` WHERE `uuid` = ? LIMIT 1;";
 
                             preparedStatement = connection.prepareStatement(query);
@@ -191,6 +193,8 @@ public class DataStorage {
                                 pData.setKillSound(resultSet.getString("killsound"));
                                 pData.setWinSound(resultSet.getString("winsound"));
                                 pData.setTaunt(resultSet.getString("taunt"));
+                                String prestige = resultSet.getString("prestige_icon");
+                                pData.setPrestigeIcon(prestige != null && !prestige.isEmpty() ? prestige : "icon1");
                                 pData.setSouls(resultSet.getInt("souls"));
                                 pData.setSoulWellUsages(resultSet.getInt("soulwell_usages"));
                                 pData.setSoulWellLegendaries(resultSet.getInt("soulwell_legendaries"));
@@ -252,6 +256,7 @@ public class DataStorage {
                         pData.setKillSound(fc.getString("killsound", "none"));
                         pData.setWinSound(fc.getString("winsound", "none"));
                         pData.setTaunt(fc.getString("taunt", "none"));
+                        pData.setPrestigeIcon(fc.getString("prestige_icon", "icon1"));
                         pData.setSouls(fc.getInt("souls", 0));
                         pData.setSoulWellUsages(fc.getInt("soulwell_usages", 0));
                         pData.setSoulWellLegendaries(fc.getInt("soulwell_legendaries", 0));
@@ -348,6 +353,8 @@ public class DataStorage {
             uuidCfg.set("killsound", legacyCfg.getString("killsound", "none"));
             uuidCfg.set("winsound", legacyCfg.getString("winsound", "none"));
             uuidCfg.set("taunt", legacyCfg.getString("taunt", "none"));
+            uuidCfg.set("prestige_icon", legacyCfg.getString("prestige_icon",
+                    uuidCfg.getString("prestige_icon", "icon1")));
             uuidCfg.set("souls", legacyCfg.getInt("souls", 0));
             uuidCfg.set("soulwell_usages", legacyCfg.getInt("soulwell_usages", 0));
             uuidCfg.set("soulwell_legendaries", legacyCfg.getInt("soulwell_legendaries", 0));

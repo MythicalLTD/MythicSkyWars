@@ -11,6 +11,7 @@ import com.walrusone.skywarsreloaded.managers.GameMapManager;
 import com.walrusone.skywarsreloaded.managers.MatchManager;
 import com.walrusone.skywarsreloaded.managers.PlayerStat;
 import com.walrusone.skywarsreloaded.utilities.LevelManager;
+import com.walrusone.skywarsreloaded.utilities.PrestigeManager;
 import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Util;
 import com.walrusone.skywarsreloaded.utilities.VaultUtils;
@@ -285,6 +286,12 @@ public class ChatListener implements Listener {
         PlayerStat ps = PlayerStat.getPlayerStats(player);
         if (ps != null) {
             int level = LevelManager.get().getLevelForXp(ps.getXp());
+            String prestigePrefix = PrestigeManager.get().isEnabled()
+                    ? PrestigeManager.get().translatePrefixForStat(ps, level, ps.getPrestigeIcon())
+                    : "";
+            if (prestigePrefix == null) {
+                prestigePrefix = "";
+            }
             return new Messaging.MessageFormatter()
                     .setVariable("player", player.getName())
                     .setVariable("displayname", player.getDisplayName())
@@ -295,6 +302,8 @@ public class ChatListener implements Listener {
                     .setVariable("xp", Integer.toString(ps.getXp()))
                     .setVariable("level", String.valueOf(level))
                     .setVariable("level_prefix", LevelManager.get().getPrefixForLevel(level))
+                    .setVariable("prestige_prefix", prestigePrefix)
+                    .setVariable("level_display_prefix", LevelManager.get().getDisplayPrefixForPlayer(ps, player, level))
                     .setVariable("level_progress_bar", LevelManager.get().getProgressBar(ps.getXp()))
                     .setVariable("prefix", vaultPrefix == null ? "" : vaultPrefix)
                     .setVariable("mapname", currentMap == null ? "" : currentMap.getDisplayName())

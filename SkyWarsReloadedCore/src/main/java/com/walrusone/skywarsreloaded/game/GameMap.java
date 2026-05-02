@@ -141,7 +141,7 @@ public class GameMap {
         this.signs = new ArrayList<>();
         this.chests = new ArrayList<>();
         this.centerChests = new ArrayList<>();
-        this.chestPlacementType = ChestPlacementType.NORMAL;
+        this.chestPlacementType = ChestPlacementType.CENTER;
         loadArenaData();
         this.thunder = false;
         this.allowRegen = true;

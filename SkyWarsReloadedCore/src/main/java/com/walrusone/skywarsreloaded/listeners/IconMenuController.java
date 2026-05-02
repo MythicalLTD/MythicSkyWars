@@ -26,8 +26,13 @@ public class IconMenuController
     }
 
     public void create(Player player, ArrayList<Inventory> invs, OptionClickEventHandler optionClickEventHandler) {
+        create(player, invs, optionClickEventHandler, true);
+    }
+
+    public void create(Player player, ArrayList<Inventory> invs, OptionClickEventHandler optionClickEventHandler,
+                       boolean injectDefaultNav) {
         if (player != null) {
-            menu.put(player, new IconMenu(invs, optionClickEventHandler));
+            menu.put(player, new IconMenu(invs, optionClickEventHandler, injectDefaultNav));
         }
     }
 

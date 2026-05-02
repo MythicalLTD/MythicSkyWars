@@ -1,8 +1,8 @@
 chat:
-  lobbychat: '&7[&bSkyWars&7] {level_prefix}&b{displayname}&f: &7{message}'
-  specchat: '&8[&cSpec&8] {level_prefix}&b{displayname}&f: &7{message}'
-  ingamechat: '&8[&7Chat&8] {level_prefix}&b{displayname}&f: &7{message}'
-  teamchat: '&8[&aTeam&8] {level_prefix}&b{displayname}&f: &7{message}'
+  lobbychat: '&7[&bSkyWars&7] {level_display_prefix}&b{displayname}&f: &7{message}'
+  specchat: '&8[&cSpec&8] {level_display_prefix}&b{displayname}&f: &7{message}'
+  ingamechat: '&8[&7Chat&8] {level_display_prefix}&b{displayname}&f: &7{message}'
+  teamchat: '&8[&aTeam&8] {level_display_prefix}&b{displayname}&f: &7{message}'
   externalPrefix: ''
 command:
   select-set: '&aSelected &e{player}&a for &e/sw send <map>&a.'
@@ -435,6 +435,7 @@ menu:
   usetaunt-playermsg: '&aYou selected the taunt &e{taunt}'
   usecolor-menu-title: '&8Cages Menu'
   options-menu-title: '&8SkyWars Options Menu'
+  prestige-title: '&8Prestige'
   stats-menu-title: '&8Your SkyWars Stats'
   stats-menu-profile-name: '&bProfile'
   stats-menu-profile-lore:
@@ -587,6 +588,20 @@ items:
   taunt-sel: '&bTaunts'
   soul-well-sel: '&5&lSoul Well'
   soul-well-open-lore: '&7Spend souls on random rewards'
+  prestige-sel: '&6&lPrestige'
+  prestige-open-lore: '&7Choose your level prefix cosmetic'
+  prestige-close-name: '&cClose'
+  prestige-close-lore:
+    - '&7Return to SkyWars'
+  prestige-prev-page-name: '&ePrevious page'
+  prestige-prev-page-lore:
+    - '&7Page &f{page} &8/ &f{max_page}'
+  prestige-next-page-name: '&eNext page'
+  prestige-next-page-lore:
+    - '&7Page &f{page} &8/ &f{max_page}'
+  prestige-nav-close-material: BARRIER
+  prestige-nav-prev-material: ARROW
+  prestige-nav-next-material: ARROW
   soul-well-spin: '&dSoul Well &8x{rolls}'
   soul-well-buy-souls: '&aSoul Well upgrades'
   soul-well-buy-tier: '&e{tier}'
@@ -625,6 +640,13 @@ soulwell:
   tier-warlock: 'Warlock'
   tier-necromancer: 'Necromancer'
   tier-death-angel: 'Death Angel'
+levels:
+  prestige-disabled: '&cPrestige is disabled or not configured. Enable prestige in levels.yml.'
+  prestige-locked: '&cYou have not unlocked this prestige yet.'
+  prestige-updated: '&aEquipped prestige: &r{prestige}'
+  prestige-status-selected: '&a&lEquipped'
+  prestige-status-unlocked: '&aClick to equip'
+  prestige-status-locked: '&cLocked — see requirements'
 stats:
   header: '&9>>>&3==&1==&3==&1==&3==&1==&3==&1==&3==&1==&9<<<'
   name: '&9>> &cName: &6{player}'
@@ -772,6 +794,7 @@ helpList:
     stats: '&a/sw stats &e[playername] &e- &2Shows a players stats'
     top: '&a/sw top [stat] &e- &2Displays SkyWars leaderboard'
     options: '&a/sw options &e- &2Opens options selection menu'
+    prestige: '&a/sw prestige &e- &2Opens prestige cosmetic selection (&7levels.yml&e)'
     glass: '&a/sw glass &e- &2Opens glass selection menu'
     winsound: '&a/sw winsound &e- &2Opens winsound selection menu'
     killsound: '&a/sw killsound &e- &2Opens killsound selection menu'
