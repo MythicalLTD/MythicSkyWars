@@ -261,6 +261,18 @@ public class Config {
     private List<String> soulWellCageAllowList = Lists.newArrayList();
     private List<String> soulWellCageDenyList = Lists.newArrayList();
     private List<String> soulWellCommandRewards = Lists.newArrayList();
+    private int soulWellWeightKillSound;
+    private int soulWellWeightWinSound;
+    private int soulWellWeightProjectile;
+    private int soulWellWeightTaunt;
+    private List<String> soulWellKillSoundAllowList = Lists.newArrayList();
+    private List<String> soulWellKillSoundDenyList = Lists.newArrayList();
+    private List<String> soulWellWinSoundAllowList = Lists.newArrayList();
+    private List<String> soulWellWinSoundDenyList = Lists.newArrayList();
+    private List<String> soulWellProjectileAllowList = Lists.newArrayList();
+    private List<String> soulWellProjectileDenyList = Lists.newArrayList();
+    private List<String> soulWellTauntAllowList = Lists.newArrayList();
+    private List<String> soulWellTauntDenyList = Lists.newArrayList();
     private boolean playSounds;
     private String countdown;
     private String joinSound;
@@ -540,6 +552,18 @@ public class Config {
             soulWellCageAllowList = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.cage.allow-list");
             soulWellCageDenyList = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.cage.deny-list");
             soulWellCommandRewards = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.command.commands");
+            soulWellWeightKillSound = MythicSkywars.get().getConfig().getInt("soulwell.rewards.killsound.weight", 3);
+            soulWellWeightWinSound = MythicSkywars.get().getConfig().getInt("soulwell.rewards.winsound.weight", 3);
+            soulWellWeightProjectile = MythicSkywars.get().getConfig().getInt("soulwell.rewards.projectile.weight", 3);
+            soulWellWeightTaunt = MythicSkywars.get().getConfig().getInt("soulwell.rewards.taunt.weight", 3);
+            soulWellKillSoundAllowList = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.killsound.allow-list");
+            soulWellKillSoundDenyList = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.killsound.deny-list");
+            soulWellWinSoundAllowList = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.winsound.allow-list");
+            soulWellWinSoundDenyList = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.winsound.deny-list");
+            soulWellProjectileAllowList = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.projectile.allow-list");
+            soulWellProjectileDenyList = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.projectile.deny-list");
+            soulWellTauntAllowList = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.taunt.allow-list");
+            soulWellTauntDenyList = MythicSkywars.get().getConfig().getStringList("soulwell.rewards.taunt.deny-list");
 
             playSounds =            MythicSkywars.get().getConfig().getBoolean("sounds.enabled");
             countdown =             MythicSkywars.get().getConfig().getString("sounds.countdown");
@@ -1309,6 +1333,54 @@ public class Config {
 
     public List<String> getSoulWellCommandRewards() {
         return soulWellCommandRewards;
+    }
+
+    public int getSoulWellWeightKillSound() {
+        return Math.max(0, soulWellWeightKillSound);
+    }
+
+    public int getSoulWellWeightWinSound() {
+        return Math.max(0, soulWellWeightWinSound);
+    }
+
+    public int getSoulWellWeightProjectile() {
+        return Math.max(0, soulWellWeightProjectile);
+    }
+
+    public int getSoulWellWeightTaunt() {
+        return Math.max(0, soulWellWeightTaunt);
+    }
+
+    public List<String> getSoulWellKillSoundAllowList() {
+        return soulWellKillSoundAllowList;
+    }
+
+    public List<String> getSoulWellKillSoundDenyList() {
+        return soulWellKillSoundDenyList;
+    }
+
+    public List<String> getSoulWellWinSoundAllowList() {
+        return soulWellWinSoundAllowList;
+    }
+
+    public List<String> getSoulWellWinSoundDenyList() {
+        return soulWellWinSoundDenyList;
+    }
+
+    public List<String> getSoulWellProjectileAllowList() {
+        return soulWellProjectileAllowList;
+    }
+
+    public List<String> getSoulWellProjectileDenyList() {
+        return soulWellProjectileDenyList;
+    }
+
+    public List<String> getSoulWellTauntAllowList() {
+        return soulWellTauntAllowList;
+    }
+
+    public List<String> getSoulWellTauntDenyList() {
+        return soulWellTauntDenyList;
     }
 
     public boolean economyEnabled() {

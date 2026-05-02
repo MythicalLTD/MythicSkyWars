@@ -170,7 +170,7 @@ public class TauntOption extends PlayerOption {
         return null;
     }
 
-    static ArrayList<PlayerOption> getPlayerOptions() {
+    public static ArrayList<PlayerOption> getPlayerOptions() {
         return playerOptions;
     }
 

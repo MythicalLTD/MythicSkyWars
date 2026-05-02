@@ -7,8 +7,12 @@ import systems.mythical.mythicskywars.managers.MatchManager;
 import systems.mythical.mythicskywars.managers.PlayerStat;
 import systems.mythical.mythicskywars.menus.gameoptions.objects.GameKit;
 import systems.mythical.mythicskywars.menus.playeroptions.GlassColorOption;
+import systems.mythical.mythicskywars.menus.playeroptions.KillSoundOption;
 import systems.mythical.mythicskywars.menus.playeroptions.ParticleEffectOption;
 import systems.mythical.mythicskywars.menus.playeroptions.PlayerOption;
+import systems.mythical.mythicskywars.menus.playeroptions.ProjectileEffectOption;
+import systems.mythical.mythicskywars.menus.playeroptions.TauntOption;
+import systems.mythical.mythicskywars.menus.playeroptions.WinSoundOption;
 import systems.mythical.mythicskywars.utilities.Messaging;
 import systems.mythical.mythicskywars.utilities.SoulWellManager;
 import systems.mythical.mythicskywars.utilities.Util;
@@ -199,6 +203,10 @@ public final class SoulWellService {
         w.put(RewardKind.CAGE, MythicSkywars.getCfg().getSoulWellWeightCage());
         w.put(RewardKind.KIT, MythicSkywars.getCfg().getSoulWellWeightKit());
         w.put(RewardKind.PERK, MythicSkywars.getCfg().getSoulWellWeightPerk());
+        w.put(RewardKind.KILL_SOUND, MythicSkywars.getCfg().getSoulWellWeightKillSound());
+        w.put(RewardKind.WIN_SOUND, MythicSkywars.getCfg().getSoulWellWeightWinSound());
+        w.put(RewardKind.PROJECTILE, MythicSkywars.getCfg().getSoulWellWeightProjectile());
+        w.put(RewardKind.TAUNT, MythicSkywars.getCfg().getSoulWellWeightTaunt());
         w.put(RewardKind.COMMAND, MythicSkywars.getCfg().getSoulWellWeightCommand());
         while (true) {
             int total = 0;
@@ -232,7 +240,7 @@ public final class SoulWellService {
         int lo = MythicSkywars.getCfg().getSoulWellCoinsMin();
         int hi = MythicSkywars.getCfg().getSoulWellCoinsMax();
         int amt = lo + (lo < hi ? RANDOM.nextInt(hi - lo + 1) : 0);
-        return new Reward(RewardKind.COINS, amt, null, null, null, null);
+        return new Reward(RewardKind.COINS, amt, null, null, null, null, null);
     }
 
     private static Reward buildReward(Player player, RewardKind kind) {
@@ -243,31 +251,55 @@ public final class SoulWellService {
                 int xlo = MythicSkywars.getCfg().getSoulWellXpMin();
                 int xhi = MythicSkywars.getCfg().getSoulWellXpMax();
                 int xp = xlo + (xlo < xhi ? RANDOM.nextInt(xhi - xlo + 1) : 0);
-                return new Reward(RewardKind.XP, xp, null, null, null, null);
+                return new Reward(RewardKind.XP, xp, null, null, null, null, null);
             case CAGE:
                 PlayerOption opt = pickRandomGlass(player);
                 if (opt == null) {
                     return null;
                 }
-                return new Reward(RewardKind.CAGE, 0, opt, null, null, null);
+                return new Reward(RewardKind.CAGE, 0, opt, null, null, null, null);
             case KIT:
                 GameKit kit = pickRandomKit(player);
                 if (kit == null) {
                     return null;
                 }
-                return new Reward(RewardKind.KIT, 0, null, kit, null, null);
+                return new Reward(RewardKind.KIT, 0, null, kit, null, null, null);
             case PERK:
                 PlayerOption pe = pickRandomParticle(player);
                 if (pe == null) {
                     return null;
                 }
-                return new Reward(RewardKind.PERK, 0, null, null, pe, null);
+                return new Reward(RewardKind.PERK, 0, null, null, pe, null, null);
+            case KILL_SOUND:
+                PlayerOption ks = pickRandomKillSound(player);
+                if (ks == null) {
+                    return null;
+                }
+                return new Reward(RewardKind.KILL_SOUND, 0, null, null, null, ks, null);
+            case WIN_SOUND:
+                PlayerOption ws = pickRandomWinSound(player);
+                if (ws == null) {
+                    return null;
+                }
+                return new Reward(RewardKind.WIN_SOUND, 0, null, null, null, ws, null);
+            case PROJECTILE:
+                PlayerOption pr = pickRandomProjectile(player);
+                if (pr == null) {
+                    return null;
+                }
+                return new Reward(RewardKind.PROJECTILE, 0, null, null, null, pr, null);
+            case TAUNT:
+                PlayerOption ta = pickRandomTaunt(player);
+                if (ta == null) {
+                    return null;
+                }
+                return new Reward(RewardKind.TAUNT, 0, null, null, null, ta, null);
             case COMMAND:
                 String cmd = pickRandomCommandReward();
                 if (cmd == null) {
                     return null;
                 }
-                return new Reward(RewardKind.COMMAND, 0, null, null, null, cmd);
+                return new Reward(RewardKind.COMMAND, 0, null, null, null, null, cmd);
             default:
                 return randomCoins();
         }
@@ -344,6 +376,82 @@ public final class SoulWellService {
         }
         Collections.shuffle(valid, RANDOM);
         return valid.get(0);
+    }
+
+    private static PlayerOption pickRandomKillSound(Player player) {
+        Set<String> allow = normalizeList(MythicSkywars.getCfg().getSoulWellKillSoundAllowList());
+        Set<String> deny = normalizeList(MythicSkywars.getCfg().getSoulWellKillSoundDenyList());
+        List<PlayerOption> list = new ArrayList<>();
+        for (PlayerOption o : KillSoundOption.getPlayerOptions()) {
+            if (!isPermittedByLists(extractOptionKey(o.getPermission()), o.getPermission(), allow, deny)) {
+                continue;
+            }
+            if (!player.hasPermission(o.getPermission())) {
+                list.add(o);
+            }
+        }
+        if (list.isEmpty()) {
+            return null;
+        }
+        Collections.shuffle(list, RANDOM);
+        return list.get(0);
+    }
+
+    private static PlayerOption pickRandomWinSound(Player player) {
+        Set<String> allow = normalizeList(MythicSkywars.getCfg().getSoulWellWinSoundAllowList());
+        Set<String> deny = normalizeList(MythicSkywars.getCfg().getSoulWellWinSoundDenyList());
+        List<PlayerOption> list = new ArrayList<>();
+        for (PlayerOption o : WinSoundOption.getPlayerOptions()) {
+            if (!isPermittedByLists(extractOptionKey(o.getPermission()), o.getPermission(), allow, deny)) {
+                continue;
+            }
+            if (!player.hasPermission(o.getPermission())) {
+                list.add(o);
+            }
+        }
+        if (list.isEmpty()) {
+            return null;
+        }
+        Collections.shuffle(list, RANDOM);
+        return list.get(0);
+    }
+
+    private static PlayerOption pickRandomProjectile(Player player) {
+        Set<String> allow = normalizeList(MythicSkywars.getCfg().getSoulWellProjectileAllowList());
+        Set<String> deny = normalizeList(MythicSkywars.getCfg().getSoulWellProjectileDenyList());
+        List<PlayerOption> list = new ArrayList<>();
+        for (PlayerOption o : ProjectileEffectOption.getPlayerOptions()) {
+            if (!isPermittedByLists(extractOptionKey(o.getPermission()), o.getPermission(), allow, deny)) {
+                continue;
+            }
+            if (!player.hasPermission(o.getPermission())) {
+                list.add(o);
+            }
+        }
+        if (list.isEmpty()) {
+            return null;
+        }
+        Collections.shuffle(list, RANDOM);
+        return list.get(0);
+    }
+
+    private static PlayerOption pickRandomTaunt(Player player) {
+        Set<String> allow = normalizeList(MythicSkywars.getCfg().getSoulWellTauntAllowList());
+        Set<String> deny = normalizeList(MythicSkywars.getCfg().getSoulWellTauntDenyList());
+        List<PlayerOption> list = new ArrayList<>();
+        for (PlayerOption o : TauntOption.getPlayerOptions()) {
+            if (!isPermittedByLists(extractOptionKey(o.getPermission()), o.getPermission(), allow, deny)) {
+                continue;
+            }
+            if (!player.hasPermission(o.getPermission())) {
+                list.add(o);
+            }
+        }
+        if (list.isEmpty()) {
+            return null;
+        }
+        Collections.shuffle(list, RANDOM);
+        return list.get(0);
     }
 
     private static Set<String> normalizeList(List<String> list) {
@@ -427,6 +535,42 @@ public final class SoulWellService {
                             .format("soulwell.reward-perk"));
                 }
                 break;
+            case KILL_SOUND:
+                ps.addSoulWellRares(1);
+                if (r.cosmeticOption != null) {
+                    ps.addPerm(r.cosmeticOption.getPermission(), true);
+                    player.sendMessage(new Messaging.MessageFormatter()
+                            .setVariable("name", ChatColor.stripColor(r.cosmeticOption.getName()))
+                            .format("soulwell.reward-killsound"));
+                }
+                break;
+            case WIN_SOUND:
+                ps.addSoulWellRares(1);
+                if (r.cosmeticOption != null) {
+                    ps.addPerm(r.cosmeticOption.getPermission(), true);
+                    player.sendMessage(new Messaging.MessageFormatter()
+                            .setVariable("name", ChatColor.stripColor(r.cosmeticOption.getName()))
+                            .format("soulwell.reward-winsound"));
+                }
+                break;
+            case PROJECTILE:
+                ps.addSoulWellRares(1);
+                if (r.cosmeticOption != null) {
+                    ps.addPerm(r.cosmeticOption.getPermission(), true);
+                    player.sendMessage(new Messaging.MessageFormatter()
+                            .setVariable("name", ChatColor.stripColor(r.cosmeticOption.getName()))
+                            .format("soulwell.reward-projectile"));
+                }
+                break;
+            case TAUNT:
+                ps.addSoulWellRares(1);
+                if (r.cosmeticOption != null) {
+                    ps.addPerm(r.cosmeticOption.getPermission(), true);
+                    player.sendMessage(new Messaging.MessageFormatter()
+                            .setVariable("name", ChatColor.stripColor(r.cosmeticOption.getName()))
+                            .format("soulwell.reward-taunt"));
+                }
+                break;
             case COMMAND:
                 if (r.commandReward != null && !r.commandReward.trim().isEmpty()) {
                     String command = r.commandReward.replace("{player}", player.getName());
@@ -442,7 +586,7 @@ public final class SoulWellService {
     }
 
     private enum RewardKind {
-        COINS, XP, CAGE, KIT, PERK, COMMAND
+        COINS, XP, CAGE, KIT, PERK, KILL_SOUND, WIN_SOUND, PROJECTILE, TAUNT, COMMAND
     }
 
     private static final class Reward {
@@ -451,14 +595,16 @@ public final class SoulWellService {
         final PlayerOption glassOption;
         final GameKit kit;
         final PlayerOption perkOption;
+        final PlayerOption cosmeticOption;
         final String commandReward;
 
-        Reward(RewardKind kind, int amount, PlayerOption glassOption, GameKit kit, PlayerOption perkOption, String commandReward) {
+        Reward(RewardKind kind, int amount, PlayerOption glassOption, GameKit kit, PlayerOption perkOption, PlayerOption cosmeticOption, String commandReward) {
             this.kind = kind;
             this.amount = amount;
             this.glassOption = glassOption;
             this.kit = kit;
             this.perkOption = perkOption;
+            this.cosmeticOption = cosmeticOption;
             this.commandReward = commandReward;
         }
 
@@ -474,6 +620,14 @@ public final class SoulWellService {
                     return kit != null && kit.getIcon() != null ? kit.getIcon().clone() : icon(Material.DIAMOND_SWORD, "&a&lKit");
                 case PERK:
                     return perkOption != null ? perkOption.getItem().clone() : icon(Material.BLAZE_POWDER, "&e&lPerk");
+                case KILL_SOUND:
+                    return cosmeticOption != null ? cosmeticOption.getItem().clone() : icon(Material.NOTE_BLOCK, "&c&lKill Sound");
+                case WIN_SOUND:
+                    return cosmeticOption != null ? cosmeticOption.getItem().clone() : icon(Material.NOTE_BLOCK, "&d&lWin Sound");
+                case PROJECTILE:
+                    return cosmeticOption != null ? cosmeticOption.getItem().clone() : icon(Material.ARROW, "&b&lProjectile Trail");
+                case TAUNT:
+                    return cosmeticOption != null ? cosmeticOption.getItem().clone() : icon(Material.SHIELD, "&6&lTaunt");
                 case COMMAND:
                     return icon(commandBlockMaterial(), "&c&lSpecial Reward");
                 default:

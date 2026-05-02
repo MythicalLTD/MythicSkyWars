@@ -307,6 +307,22 @@ soulwell:
       weight: 5
       allow-list: []
       deny-list: []
+    killsound:
+      weight: 3
+      allow-list: []
+      deny-list: []
+    winsound:
+      weight: 3
+      allow-list: []
+      deny-list: []
+    projectile:
+      weight: 3
+      allow-list: []
+      deny-list: []
+    taunt:
+      weight: 3
+      allow-list: []
+      deny-list: []
     command:
       weight: 0
       commands:
