@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
@@ -56,6 +57,15 @@ public class CreateCmd extends systems.mythical.mythicskywars.commands.BaseCmd {
             if (gMap != null) {
                 gMap.setEditing(true);
                 resultWorld.setAutoSave(true);
+
+                // Disable mob spawning and clear all existing entities
+                MythicSkywars.getNMS().setGameRule(resultWorld, "doMobSpawning", "false");
+                for (Entity entity : resultWorld.getEntities()) {
+                    if (!(entity instanceof Player)) {
+                        entity.remove();
+                    }
+                }
+
                 resultWorld.getBlockAt(0, 75, 0).setType(Material.STONE);
                 Util.get().clear(player);
                 player.setGameMode(GameMode.CREATIVE);
