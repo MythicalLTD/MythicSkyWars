@@ -465,7 +465,7 @@ menu:
     - '&7Kills/Deaths: &a{kills}&7/&c{deaths}'
     - '&7K/D Ratio: &e{killdeath}'
     - '&7Level: &b{level}'
-    - '&7XP: &b{xp}'
+    - '&7Total XP: &b{xp}'
   stats-menu-economy-name: '&6Economy'
   stats-menu-economy-lore:
     - '&7Balance: &a${balance}'

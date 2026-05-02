@@ -475,27 +475,16 @@ public class Util {
     }
 
     public void setPlayerExperience(Player player, int amount) {
-        if (amount <= 352) {
-            int level = (int) Math.floor(quadraticEquationRoot(1, 6, -amount));
-            double nextLevel = 2 * level + 7;
-            double levelExp = (level * level) + 6 * level;
-            double leftOver = amount - levelExp;
-            player.setLevel(level);
-            player.setExp((float) (leftOver / nextLevel));
-        } else if (amount <= 1507) {
-            int level = (int) Math.floor(quadraticEquationRoot(2.5, -40.5, 360 - amount));
-            double nextLevel = 5 * level - 38;
-            double levelExp = (int) (2.5 * (level * level) - 40.5 * level + 360);
-            double leftOver = amount - levelExp;
-            player.setLevel(level);
-            player.setExp((float) (leftOver / nextLevel));
+        // Show SkyWars level on the XP bar (not vanilla XP formula)
+        int swLevel = LevelManager.get().getLevelForXp(amount);
+        player.setLevel(swLevel);
+        // Show progress to next level as the XP bar fill
+        int required = LevelManager.get().getXpRequiredForCurrentLevel(amount);
+        int into = LevelManager.get().getXpIntoCurrentLevel(amount);
+        if (required > 0) {
+            player.setExp(Math.min(0.99f, (float) into / (float) required));
         } else {
-            int level = (int) Math.floor(quadraticEquationRoot(4.5, -162.5, 2220 - amount));
-            double nextLevel = 9 * level - 158;
-            double levelExp = (int) (4.5 * (level * level) - 162.5 * level + 2220);
-            double leftOver = amount - levelExp;
-            player.setLevel(level);
-            player.setExp((float) (leftOver / nextLevel));
+            player.setExp(0f);
         }
     }
 
@@ -525,17 +514,12 @@ public class Util {
     }
 
     public int getPlayerLevel(Player player, boolean checkForActualEXP) {
-        if (MythicSkywars.getCfg().displayPlayerExeperience() && checkForActualEXP) {
-            return player.getLevel();
-        } else {
-            PlayerStat ps = PlayerStat.getPlayerStats(player);
-            if (ps != null) {
-                int amount = ps.getXp();
-                return LevelManager.get().getLevelForXp(amount);
-            } else {
-                return 0;
-            }
+        // Always use LevelManager for consistent level display
+        PlayerStat ps = PlayerStat.getPlayerStats(player);
+        if (ps != null) {
+            return LevelManager.get().getLevelForXp(ps.getXp());
         }
+        return 0;
     }
 
     public String getFormattedTime(int x) {

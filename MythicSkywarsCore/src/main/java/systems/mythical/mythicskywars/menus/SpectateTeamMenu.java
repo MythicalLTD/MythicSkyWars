@@ -39,6 +39,14 @@ public class SpectateTeamMenu {
                 return;
             }
 
+            // Search button
+            if (org.bukkit.ChatColor.stripColor(name).equalsIgnoreCase("Search")) {
+                player.closeInventory();
+                player.sendMessage(org.bukkit.ChatColor.GREEN + "[SkyWars] " + org.bukkit.ChatColor.GRAY + "Type a map name to search (or 'cancel' to cancel):");
+                MapSearchListener.startSearch(player, "team");
+                return;
+            }
+
             if (!JoinTeamMenu.arenaSlots.containsKey(event.getSlot())) {
                 return;
             }

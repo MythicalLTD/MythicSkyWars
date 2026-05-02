@@ -434,7 +434,6 @@ public class JoinSingleMenu {
                         i++;
                     }
                 }
-                placeAutojoinSoloButton(invs1);
                 placeNavButtons(invs1);
             }
         };
@@ -457,11 +456,6 @@ public class JoinSingleMenu {
                 player.closeInventory();
                 player.sendMessage(ChatColor.GREEN + "[SkyWars] " + ChatColor.GRAY + "Type a map name to search (or 'cancel' to cancel):");
                 MapSearchListener.startSearch(player, "solo");
-                return;
-            }
-
-            if (name.equalsIgnoreCase(MythicSkywars.getNMS().getItemName(createAutojoinSoloItem()))) {
-                performAutojoinSolo(player);
                 return;
             }
 
@@ -551,7 +545,7 @@ public class JoinSingleMenu {
                 }
             }
         });
-        placeAutojoinSoloButton(MythicSkywars.getIC().getMenu("joinsinglemenu").getInventories());
+        placeNavButtons(MythicSkywars.getIC().getMenu("joinsinglemenu").getInventories());
         MythicSkywars.getIC().getMenu("joinsinglemenu").setUpdate(update);
     }
 }

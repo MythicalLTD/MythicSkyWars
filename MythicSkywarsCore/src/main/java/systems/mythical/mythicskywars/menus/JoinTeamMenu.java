@@ -391,7 +391,6 @@ public class JoinTeamMenu {
                         i++;
                     }
                 }
-                placeAutojoinTeamButton(invs1);
                 placeNavButtons(invs1);
             }
         };
@@ -414,11 +413,6 @@ public class JoinTeamMenu {
                 player.closeInventory();
                 player.sendMessage(org.bukkit.ChatColor.GREEN + "[SkyWars] " + org.bukkit.ChatColor.GRAY + "Type a map name to search (or 'cancel' to cancel):");
                 MapSearchListener.startSearch(player, "team");
-                return;
-            }
-
-            if (name.equalsIgnoreCase(MythicSkywars.getNMS().getItemName(createAutojoinTeamItem()))) {
-                performAutojoinTeam(player);
                 return;
             }
 
@@ -503,7 +497,7 @@ public class JoinTeamMenu {
                 }
             }
         });
-        placeAutojoinTeamButton(MythicSkywars.getIC().getMenu("jointeammenu").getInventories());
+        placeNavButtons(MythicSkywars.getIC().getMenu("jointeammenu").getInventories());
         MythicSkywars.getIC().getMenu("jointeammenu").setUpdate(update);
     }
 }

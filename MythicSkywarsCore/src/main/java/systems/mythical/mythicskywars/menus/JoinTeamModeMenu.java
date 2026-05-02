@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.enums.GameType;
 import systems.mythical.mythicskywars.game.GameMap;
+import systems.mythical.mythicskywars.utilities.LuckyBlockHook;
 import systems.mythical.mythicskywars.utilities.Messaging;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -26,13 +27,20 @@ public class JoinTeamModeMenu {
 
     /** Currently selected team filter per player (0 = all). */
     private static final Map<UUID, Integer> teamSizeFilter = new ConcurrentHashMap<>();
+    private static final Set<UUID> luckyTeamSelection = ConcurrentHashMap.newKeySet();
+    private static final int LUCKY_SLOT = 22;
 
     public static int getTeamSizeFilter(Player player) {
         return teamSizeFilter.getOrDefault(player.getUniqueId(), 0);
     }
 
+    public static boolean wantsLuckyTeam(Player player) {
+        return luckyTeamSelection.contains(player.getUniqueId());
+    }
+
     public static void clearFilter(Player player) {
         teamSizeFilter.remove(player.getUniqueId());
+        luckyTeamSelection.remove(player.getUniqueId());
     }
 
     public JoinTeamModeMenu() {
@@ -61,9 +69,20 @@ public class JoinTeamModeMenu {
                     int teamSize = clicked.getAmount();
                     if (teamSize >= 2) {
                         teamSizeFilter.put(player.getUniqueId(), teamSize);
+                        luckyTeamSelection.remove(player.getUniqueId());
                         openTeamMenu(player);
                     }
                 }
+            }
+
+            // Lucky Teams button
+            if (slot == LUCKY_SLOT) {
+                if (!LuckyBlockHook.isAvailable()) {
+                    return;
+                }
+                teamSizeFilter.put(player.getUniqueId(), 0);
+                luckyTeamSelection.add(player.getUniqueId());
+                openTeamMenu(player);
             }
         });
 
@@ -125,6 +144,18 @@ public class JoinTeamModeMenu {
             ItemStack item = new ItemStack(icon, teamSize);
             inv.setItem(slot, MythicSkywars.getNMS().getItemStack(item, lore,
                     ChatColor.translateAlternateColorCodes('&', modeName)));
+        }
+
+        // Lucky Teams button (bottom row, slot 22)
+        if (LuckyBlockHook.isAvailable()) {
+            List<String> luckyLore = new ArrayList<>();
+            luckyLore.add(ChatColor.GRAY + "Lucky Block team mode");
+            luckyLore.add(ChatColor.YELLOW + "Chests replaced by LuckyBlocks");
+            luckyLore.add("");
+            luckyLore.add(ChatColor.GREEN + "Click to browse!");
+            inv.setItem(LUCKY_SLOT, MythicSkywars.getNMS().getItemStack(
+                    new ItemStack(Material.GOLD_BLOCK, 1), luckyLore,
+                    ChatColor.GOLD + "Lucky Teams"));
         }
     }
 
