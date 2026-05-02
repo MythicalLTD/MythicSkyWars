@@ -393,10 +393,10 @@ public class JoinSingleMenu {
                     ArrayList<Inventory> specs = MythicSkywars.getIC().getMenu("spectatesinglemenu").getInventories();
                     int i = 0;
                     for (Inventory inv : invs1) {
-                        if (specs.get(i) == null) {
+                        if (i >= specs.size()) {
                             specs.add(Bukkit.createInventory(null, menuSize, new Messaging.MessageFormatter().format("menu.spectatesinglegame-menu-title")));
                         }
-                        specs.get(0).setContents(inv.getContents());
+                        specs.get(i).setContents(inv.getContents());
                         i++;
                     }
                 }

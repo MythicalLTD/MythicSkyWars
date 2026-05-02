@@ -170,3 +170,21 @@ jobs:
             -F "data=${DATA}" \
             -F "file=@${JAR_FILE}" \
             --fail-with-body
+
+      - name: Update Modrinth project description
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_API_KEY }}
+          MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+        run: |
+          # Read the README.md as the project body
+          BODY_CONTENT=$(cat README.md)
+
+          # Build the JSON payload with jq
+          PAYLOAD=$(jq -n --arg body "$BODY_CONTENT" '{ body: $body }')
+
+          curl -X PATCH "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}" \
+            -H "Authorization: ${MODRINTH_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: MythicalSystems/MythicSkywars/${{ steps.version.outputs.version }} (github-actions)" \
+            -d "$PAYLOAD" \
+            --fail-with-body
