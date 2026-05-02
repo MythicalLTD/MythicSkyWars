@@ -1113,6 +1113,17 @@ public class GameMap {
             if (swrConfig.debugEnabled()) {
                 MythicSkywars.get().getLogger().info(this.getClass().getName() + "#loadMap: world null ? " + (worldLoaded == null));
             }
+
+            // Remove all entities (mobs, animals, dropped items, etc.) from the arena
+            for (org.bukkit.entity.Entity entity : worldLoaded.getEntities()) {
+                if (!(entity instanceof Player)) {
+                    entity.remove();
+                }
+            }
+
+            // Disable mob spawning in the arena
+            MythicSkywars.getNMS().setGameRule(worldLoaded, "doMobSpawning", "false");
+
             // Avoid vanilla spawn protection
             worldLoaded.setSpawnLocation(5000, 0, 5000);
             // Setup border if enabled
