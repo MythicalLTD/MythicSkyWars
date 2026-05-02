@@ -38,6 +38,7 @@ public class MapCmdManager implements CommandExecutor, SWRCmdManagerAPI {
         mapcmds.add(new CheckChestTypeCmd("map"));
         mapcmds.add(new LegacyLoadCmd("map"));
         mapcmds.add(new LeaveCmd("map"));
+        mapcmds.add(new CopySoloAsDuoCmd("map"));
     }
 
     public static List<BaseCmd> getCommands() { return mcm.mapcmds; }

@@ -817,6 +817,7 @@ helpList:
     top: '&a/sw top [stat] &e- &2Displays SkyWars leaderboard'
     options: '&a/sw options &e- &2Opens options selection menu'
     prestige: '&a/sw prestige &e- &2Opens prestige cosmetic selection (&7levels.yml&e)'
+    perks: '&a/sw perks &e- &2Opens the perks menu'
     glass: '&a/sw glass &e- &2Opens glass selection menu'
     winsound: '&a/sw winsound &e- &2Opens winsound selection menu'
     killsound: '&a/sw killsound &e- &2Opens killsound selection menu'
@@ -861,6 +862,7 @@ helpList:
     legacyload: '&a/swmap legacyload &e[mapname] &e- &2Loads the chests and player
       spawns of a map using the SWR Legacy Map Loader. Should only be used when pasting
       schematics. Do not run more than once per map!!'
+    copyasduo: '&a/swmap copyasduo &e[mapname] [teamSize] &e- &2Copies a solo map as a teams map (default team size: 2)'
   swkit:
     header1: '&7-----------------[&aKit Commands&7]-----------------'
     create: '&a/swkit create &e[kitname] &e- &2Create a kit using the items in your

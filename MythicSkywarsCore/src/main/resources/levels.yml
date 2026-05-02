@@ -73,17 +73,70 @@ levels:
 #      - '/sw stat <player> souls add 1'
 
 # Options menu slot: inventory index 0–26 (-1 disables the star button).
-#prestige:
-#  enabled: false
-#  options-menu-slot: -1
-#  menu-size: 36
-#  icon1:
-#    enabled: true
-#    slot: 10
-#    page: 1
-#    name: '&7Default'
-#    material: GOLD_NUGGET
-#    prefix: '&7✫ '
-#    requirements:
-#      level: 1
-#      angelDeath: 0
+prestige:
+  enabled: true
+  options-menu-slot: 24
+  menu-size: 36
+  icon1:
+    enabled: true
+    slot: 10
+    page: 1
+    name: '&7Default'
+    material: GOLD_NUGGET
+    prefix: '&7[{level}✫] '
+    requirements:
+      level: 1
+  icon2:
+    enabled: true
+    slot: 11
+    page: 1
+    name: '&eGold'
+    material: GOLD_INGOT
+    prefix: '&e[{level}✫] '
+    requirements:
+      level: 10
+  icon3:
+    enabled: true
+    slot: 12
+    page: 1
+    name: '&aEmerald'
+    material: EMERALD
+    prefix: '&a[{level}✫] '
+    requirements:
+      level: 25
+  icon4:
+    enabled: true
+    slot: 13
+    page: 1
+    name: '&bDiamond'
+    material: DIAMOND
+    prefix: '&b[{level}✫] '
+    requirements:
+      level: 50
+  icon5:
+    enabled: true
+    slot: 14
+    page: 1
+    name: '&dAmethyst'
+    material: NETHER_STAR
+    prefix: '&d[{level}✫] '
+    requirements:
+      level: 75
+  icon6:
+    enabled: true
+    slot: 15
+    page: 1
+    name: '&cRuby'
+    material: REDSTONE
+    prefix: '&c[{level}✫] '
+    requirements:
+      level: 100
+  icon7:
+    enabled: true
+    slot: 16
+    page: 1
+    name: '&6&lMythic'
+    material: DRAGON_EGG
+    prefix: '&6&l[{level}✫] '
+    requirements:
+      level: 150

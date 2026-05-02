@@ -45,6 +45,7 @@ public class MainCmdManager implements CommandExecutor, SWRCmdManagerAPI {
         pcmds.add(new SWTopCmd("sw"));
         pcmds.add(new SWOptionsCmd("sw"));
         pcmds.add(new SWPrestigeCmd("sw"));
+        pcmds.add(new SWPerksCmd("sw"));
         pcmds.add(new SWSpectateCmd("sw"));
         pcmds.add(new SWLobbyTeleportCmd("sw"));
         pcmds.add(new SWBypassLobbySlotsCmd("sw"));
