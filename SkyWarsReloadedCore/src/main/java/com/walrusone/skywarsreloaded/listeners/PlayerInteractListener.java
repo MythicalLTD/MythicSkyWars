@@ -25,9 +25,6 @@ import com.walrusone.skywarsreloaded.utilities.Messaging;
 import com.walrusone.skywarsreloaded.utilities.Party;
 import com.walrusone.skywarsreloaded.utilities.SWRServer;
 import com.walrusone.skywarsreloaded.utilities.Util;
-import me.gaagjescraft.network.team.skywarsreloaded.extension.NoArenaAction;
-import me.gaagjescraft.network.team.skywarsreloaded.extension.SWExtension;
-import me.gaagjescraft.network.team.skywarsreloaded.extension.menus.SingleJoinMenu;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -602,38 +599,6 @@ public class PlayerInteractListener implements Listener {
                 player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join"));
             }
             return;
-        }
-        if (Bukkit.getPluginManager().isPluginEnabled("Skywars-Extension")) {
-            if (SWExtension.get().getConfig().getBoolean("override_item_join_actions")) {
-                NoArenaAction action = NoArenaAction.valueOf(SWExtension.get().getConfig().getString("no_arena_specified_action"));
-                if (action == NoArenaAction.OPEN_CUSTOM_JOIN_MENU) {
-                    new SingleJoinMenu().openMenu(player, 1);
-                } else if (action == NoArenaAction.JOIN_RANDOM) {
-                    List<GameMap> maps = Lists.newArrayList();
-                    for (GameMap map : SkyWarsReloaded.getGameMapMgr().getMapsCopy()) {
-                        if ((map.getMatchState() == MatchState.WAITINGSTART || map.getMatchState() == MatchState.WAITINGLOBBY) && map.canAddPlayer(player)) {
-                            maps.add(map);
-                        }
-                    }
-
-                    if (maps.isEmpty()) {
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', SWExtension.get().getConfig().getString("no_solo_arenas")));
-                        return;
-                    } else {
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', SWExtension.get().getConfig().getString("solo_join")));
-                        GameMap map;
-                        Random r = new Random();
-                        map = maps.get(r.nextInt(maps.size()));
-
-                        boolean b = map.addPlayers(null, player);
-                        if (b) {
-                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', SWExtension.get().getConfig().getString("joined_arena").replace("%name%", map.getName())));
-                        } else {
-                            player.sendMessage((new Messaging.MessageFormatter()).format("error.could-not-join2"));
-                        }
-                    }
-                }
-            }
         }
         if (SkyWarsReloaded.getGameMapMgr().getPlayableArenas(GameType.TEAM).isEmpty()) {
             if (LuckyBlockHook.isAvailable()) {

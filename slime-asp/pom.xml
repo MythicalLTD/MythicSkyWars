@@ -30,16 +30,12 @@
             <url>https://repo.titanvale.net/releases/</url>
         </repository>
         <repository>
-            <id>bukkitmc</id>
-            <url>https://nexuslite.gcnt.net/repos/bukkit/</url>
-        </repository>
-        <repository>
-            <id>gcnt-other</id>
-            <url>https://nexuslite.gcnt.net/repos/other/</url>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
             <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
         </repository>
         <repository>
             <id>minecraft-libraries</id>
@@ -47,12 +43,8 @@
             <url>https://libraries.minecraft.net</url>
         </repository>
         <repository>
-            <id>rapture-releases</id>
-            <url>https://repo.rapture.pw/repository/maven-releases/</url>
-        </repository>
-        <repository>
-            <id>rapture-snapshots</id>
-            <url>https://repo.rapture.pw/repository/maven-snapshots/</url>
+            <id>glaremasters-for-swm</id>
+            <url>https://repo.glaremasters.me/repository/concuncan/</url>
         </repository>
         <!-- InfernalSuite RELEASE -->
         <repository>

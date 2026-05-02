@@ -1,6 +1,4 @@
-# SkyWarsReloaded Fork
-
-*Forked by Rexi666.*
+# MythicSkywars (Fork of SkywarsReloaded)
 
 The most popular Skywars plugin ever built for Spigot and Bukkit!
 
@@ -31,13 +29,3 @@ We will continue to maintain this version until further notice, and community co
 
 * List of available commands [*[here]*](https://github.com/TechnicallyCoded/SkywarsReloadedWiki/wiki/commands)
 * List of permissions [*[here]*](https://github.com/TechnicallyCoded/SkywarsReloadedWiki/wiki/permissions)
-
-## CHANGED:
-- added default-kit on config, you can add a default kit so if a new player joins without picking a kit, it will be automatically assinged
-- Messages added to config
-- New command `/sw joinmenu <solo/team>`. permission: `sw.joinmenu` (default). Players can open join menu
-- New Placeholders `%swr_players_playing%` (players ingame) `%swr_players_waiting%` (players waiting)
-- Added those placeholders by game type `%swr_players_playing_solo%`, `%swr_players_waiting_solo%`, `%swr_players_playing_team%`, `%swr_players_waiting_team%`
-- Spectators can now teleport to players
-- Error "Chat validation error" fixed
-- Losses count fixed

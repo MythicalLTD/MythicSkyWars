@@ -41,7 +41,7 @@ public class NMSUtils {
                                 "It seems like we have not validated this newer version of Spigot/Bukkit (" + version + ").\n" +
                                 "We will try to load the plugin with the latest supported version: " + selectedNMSVersion.name() + ", with handler: " + selectedNMSVersion.getNmsImplVersion() + ".\n" +
                                 "Some features may not work as intended. However, this should be relatively stable on 1.19+\n" +
-                                "If you experience any issues, please join our Discord server (https://www.gcnt.net/discord) and wait for an official release with proper support.\n" +
+                                "If you experience any issues, please join our Discord server (https://discord.mythical.systems) and wait for an official release with proper support.\n" +
                                 "===================");
             }
         }
@@ -62,7 +62,7 @@ public class NMSUtils {
                 "===================\n" +
                         "It seems like we do not support this version of Spigot/Bukkit (" + versionLabel + ").\n" +
                         "If you are on a supported version but see ClassNotFoundException for NMSHandler, deploy the shaded jar built from module skywars-assembly (SWR-*.jar under the repo target folder), not the SkyWarsReloadedCore jar alone.\n" +
-                        "If you feel like this is a mistake, please join our Discord server (https://www.gcnt.net/discord).\n" +
+                        "If you feel like this is a mistake, please join our Discord server (https://discord.mythical.systems).\n" +
                         "===================");
         return null;
     }

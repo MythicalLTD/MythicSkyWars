@@ -20,16 +20,12 @@
 
     <repositories>
         <repository>
-            <id>gcnt-bukkit</id>
-            <url>https://nexuslite.gcnt.net/repos/bukkit/</url>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
         </repository>
         <repository>
-            <id>gcnt-other</id>
-            <url>https://nexuslite.gcnt.net/repos/other/</url>
-        </repository>
-        <repository>
-            <id>gcnt-gcnt</id>
-            <url>https://nexuslite.gcnt.net/repos/gcnt/</url>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
             <id>codemc-repo</id>
@@ -49,11 +45,7 @@
         </repository>
         <repository>
             <id>rapture-releases</id>
-            <url>https://repo.rapture.pw/repository/maven-releases/</url>
-        </repository>
-        <repository>
-            <id>rapture-snapshots</id>
-            <url>https://repo.rapture.pw/repository/maven-snapshots/</url>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>
         <!--<repository>
             <id>simonsators-repo</id>
@@ -71,9 +63,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.12.2</version>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.12.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -94,12 +86,7 @@
             <version>1.0.90</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>me.ebonjaeger.perworldinventory</groupId>
-            <artifactId>perworldinventory-kt</artifactId>
-            <version>2.3.2</version>
-            <scope>provided</scope>
-        </dependency>
+
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
@@ -134,12 +121,7 @@
             <version>1.7</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>net.gcnt</groupId>
-            <artifactId>SkyWarsReloaded-Extension</artifactId>
-            <version>1.7.15</version>
-            <scope>provided</scope>
-        </dependency>
+
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit-bukkit</artifactId>

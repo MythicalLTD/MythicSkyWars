@@ -21,7 +21,6 @@
     <modules>
         <module>SkyWarsReloadedCore</module>
         <module>slime-asp</module>
-        <module>slime-legacy</module>
         <module>v1_8_R3</module>
         <module>v1_9_R1</module>
         <module>v1_9_R2</module>
@@ -93,7 +92,6 @@
             </activation>
             <modules>
                 <module>slime-asp</module>
-                <module>slime-legacy</module>
                 <module>v1_18_R2</module>
                 <module>v1_19_R1</module>
                 <module>v1_20_R1</module>
@@ -129,8 +127,12 @@
 
     <repositories>
         <repository>
-            <id>bukkitmc</id>
-            <url>https://nexuslite.gcnt.net/repos/bukkit/</url>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
     </repositories>
 

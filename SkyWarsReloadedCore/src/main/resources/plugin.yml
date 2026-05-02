@@ -22,7 +22,7 @@ commands:
   skywars:
     description: This is the main plugin command.
     aliases: [sw]
-    usage: /<command> [args]. Get this error? Then check your console as there was an error somewhere. Please report it here https://gcnt.net/discord !
+    usage: /<command> [args]. Get this error? Then check your console as there was an error somewhere. Please report it here https://discord.mythical.systems !
   leave:
     description: Leave the current SkyWars match (same as /sw quit).
     usage: /leave
@@ -32,15 +32,15 @@ commands:
   swparty:
     description: This is the main party command.
     aliases: [swp]
-    usage: /<command> [args]. Get this error? Then check your console as there was an error somewhere. Please report it here https://gcnt.net/discord !
+    usage: /<command> [args]. Get this error? Then check your console as there was an error somewhere. Please report it here https://discord.mythical.systems !
   swkit:
     description: This is the main party command.
     aliases: [swk]
-    usage: /<command> [args]. Get this error? Then check your console as there was an error somewhere. Please report it here https://gcnt.net/discord !
+    usage: /<command> [args]. Get this error? Then check your console as there was an error somewhere. Please report it here https://discord.mythical.systems !
   swmap:
     description: This is the main party command.
     aliases: [swm]
-    usage: /<command> [args]. Get this error? Then check your console as there was an error somewhere. Please report it here https://gcnt.net/discord !
+    usage: /<command> [args]. Get this error? Then check your console as there was an error somewhere. Please report it here https://discord.mythical.systems !
 permissions:
   sw.*:
     description: Gives access to all sw commands

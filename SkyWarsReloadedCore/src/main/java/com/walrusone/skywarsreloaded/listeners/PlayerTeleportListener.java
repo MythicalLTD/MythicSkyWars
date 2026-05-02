@@ -53,10 +53,10 @@ public class PlayerTeleportListener implements org.bukkit.event.Listener {
                     setPlayerOnCooldown(player, true);
                     Bukkit.getScheduler().runTaskLaterAsynchronously(SkyWarsReloaded.get(), () -> setPlayerOnCooldown(player, false), 5);
                     com.walrusone.skywarsreloaded.managers.PlayerStat.updatePlayer(player.getUniqueId().toString());
-                    if (SkyWarsReloaded.get().getUpdater().getUpdateStatus() == 1 && (player.isOp() || player.hasPermission("sw.admin"))) {
-                        //player.spigot().sendMessage(base);
-                        SkyWarsReloaded.getNMS().sendJSON(player, "[\"\",{\"text\":\"§d§l[SkyWarsReloaded] §aA new update has been found: §b" + SkyWarsReloaded.get().getUpdater().getLatestVersion() + "§a. Click here to update!\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + SkyWarsReloaded.get().getUpdater().getUpdateURL() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"§7Click here to update to the latest version!\"}]}}}]");
-                    }
+                    //if (SkyWarsReloaded.get().getUpdater().getUpdateStatus() == 1 && (player.isOp() || player.hasPermission("sw.admin"))) {
+                    //    //player.spigot().sendMessage(base);
+                    //    SkyWarsReloaded.getNMS().sendJSON(player, "[\"\",{\"text\":\"§d§l[SkyWarsReloaded] §aA new update has been found: §b" + SkyWarsReloaded.get().getUpdater().getLatestVersion() + "§a. Click here to update!\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + SkyWarsReloaded.get().getUpdater().getUpdateURL() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"§7Click here to update to the latest version!\"}]}}}]");
+                    //}
                     return;
                 }
 

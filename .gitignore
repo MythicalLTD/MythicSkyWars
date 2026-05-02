@@ -8,3 +8,6 @@ SWR.iml
 dependency-reduced-pom.xml
 settings.xml
 .run/
+
+# BuildTools working directory
+BuildTools/

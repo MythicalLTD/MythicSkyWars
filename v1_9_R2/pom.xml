@@ -18,16 +18,16 @@
 
     <repositories>
         <repository>
-            <id>bukkitmc</id>
-            <url>https://nexuslite.gcnt.net/repos/bukkit/</url>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
         </repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>org.bukkit</groupId>
-<artifactId>bukkit</artifactId>
-            <version>1.9.4</version>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot</artifactId>
+            <version>1.9.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
