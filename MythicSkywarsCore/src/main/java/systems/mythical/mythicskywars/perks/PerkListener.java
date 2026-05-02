@@ -286,7 +286,13 @@ public class PerkListener implements Listener {
             if (pl == null) continue;
             if (ThreadLocalRandom.current().nextInt(100) < pl.getPercent()) {
                 // Drop one extra of the block's drops
-                for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
+                ItemStack tool;
+                try {
+                    tool = player.getInventory().getItemInMainHand();
+                } catch (NoSuchMethodError e) {
+                    tool = player.getItemInHand();
+                }
+                for (ItemStack drop : block.getDrops(tool)) {
                     block.getWorld().dropItemNaturally(block.getLocation(), drop);
                     break; // Only one extra
                 }

@@ -317,8 +317,13 @@ public final class ArenaSetupMenu {
                 }
                 return true;
             case 32:
-                // Set map icon to item in hand
-                ItemStack handItem = player.getInventory().getItemInMainHand();
+                // Set map icon to item in hand (version-safe: getItemInMainHand doesn't exist on 1.8)
+                ItemStack handItem;
+                try {
+                    handItem = player.getInventory().getItemInMainHand();
+                } catch (NoSuchMethodError e) {
+                    handItem = player.getItemInHand();
+                }
                 if (handItem == null || handItem.getType() == Material.AIR) {
                     player.sendMessage(ChatColor.RED + "Hold an item in your main hand to set it as the map icon!");
                 } else {
