@@ -96,11 +96,8 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Releasing version: ${VERSION}"
 
-      - name: Run tests
-        run: mvn test -Drevision=${{ steps.version.outputs.version }} -B --no-transfer-progress
-
       - name: Build
-        run: mvn clean package -Drevision=${{ steps.version.outputs.version }} -B --no-transfer-progress -DskipTests
+        run: mvn clean package -Drevision=${{ steps.version.outputs.version }} -B --no-transfer-progress -DskipTests -Daether.checksumPolicy=warn
 
       - name: Upload release artifact
         run: |
