@@ -175,7 +175,7 @@ public class JoinTeamMenu {
         invs.add(menu);
 
         Runnable update = () -> {
-            if ((MythicSkywars.getIC().hasViewers("jointeammenu") || MythicSkywars.getIC().hasViewers("spectateteam"))) {
+            if ((MythicSkywars.getIC().hasViewers("jointeammenu") || MythicSkywars.getIC().hasViewers("spectateteammenu"))) {
                 ArrayList<GameMap> normalGames = MythicSkywars.getGameMapMgr().getPlayableArenas(GameType.TEAM);
                 ArrayList<SWRServer> bungeeGames = Lists.newArrayList();
                 

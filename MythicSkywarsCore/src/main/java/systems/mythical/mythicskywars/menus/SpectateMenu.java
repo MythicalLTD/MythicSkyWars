@@ -64,14 +64,12 @@ public class SpectateMenu {
             }
 
             if (event.getSlot() == MythicSkywars.getCfg().getTeamSlot()) {
-                if (!MythicSkywars.getIC().hasViewers("jointeammenu")) {
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            MythicSkywars.getIC().getMenu("jointeammenu").update();
-                        }
-                    }.runTaskLater(MythicSkywars.get(), 5);
-                }
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        MythicSkywars.getIC().getMenu("jointeammenu").update();
+                    }
+                }.runTaskLater(MythicSkywars.get(), 3);
                 MythicSkywars.getIC().show(player, "spectateteammenu");
             }
         });

@@ -562,6 +562,11 @@ public class JoinSingleMenu {
             }
         });
         placeNavButtons(MythicSkywars.getIC().getMenu("joinsinglemenu").getInventories());
+        // Initial autojoin button
+        ItemStack initAutoBtn = createAutojoinSoloItem();
+        for (Inventory initInv : MythicSkywars.getIC().getMenu("joinsinglemenu").getInventories()) {
+            initInv.setItem(initInv.getSize() - AUTOJOIN_SLOT_FROM_END, initAutoBtn.clone());
+        }
         MythicSkywars.getIC().getMenu("joinsinglemenu").setUpdate(update);
     }
 }

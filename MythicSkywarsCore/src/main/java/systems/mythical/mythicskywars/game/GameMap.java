@@ -994,36 +994,11 @@ public class GameMap {
                     return 3;
                 }
                 if (waitingLobbySpawn == null && teamSize > 1) {
-                    // Auto-generate a waiting lobby platform at Y=100 with barrier walls
-                    MythicSkywars.get().getLogger().info("Map " + name + " has no waiting lobby spawn. Generating barrier platform at Y=100...");
-                    waitingLobbySpawn = new CoordLoc(0, 100, 0);
-                    World w = getCurrentWorld();
-                    if (w != null) {
-                        // Create a 5x5 diamond block floor at Y=100
-                        for (int x = -2; x <= 2; x++) {
-                            for (int z = -2; z <= 2; z++) {
-                                w.getBlockAt(x, 100, z).setType(org.bukkit.Material.DIAMOND_BLOCK);
-                            }
-                        }
-                        // Create barrier walls around the platform (3 blocks high)
-                        for (int y = 101; y <= 103; y++) {
-                            for (int x = -3; x <= 3; x++) {
-                                w.getBlockAt(x, y, -3).setType(org.bukkit.Material.BARRIER);
-                                w.getBlockAt(x, y, 3).setType(org.bukkit.Material.BARRIER);
-                            }
-                            for (int z = -3; z <= 3; z++) {
-                                w.getBlockAt(-3, y, z).setType(org.bukkit.Material.BARRIER);
-                                w.getBlockAt(3, y, z).setType(org.bukkit.Material.BARRIER);
-                            }
-                        }
-                        // Barrier ceiling
-                        for (int x = -3; x <= 3; x++) {
-                            for (int z = -3; z <= 3; z++) {
-                                w.getBlockAt(x, 104, z).setType(org.bukkit.Material.BARRIER);
-                            }
-                        }
-                    }
-                    MythicSkywars.get().getLogger().info("Generated waiting lobby for map " + name + " at 0, 101, 0");
+                    // Auto-generate a waiting lobby high above the map
+                    MythicSkywars.get().getLogger().info("Map " + name + " has no waiting lobby spawn. Generating platform at Y=200...");
+                    waitingLobbySpawn = new CoordLoc(0, 200, 0);
+                    generateWaitingLobbyIfNeeded();
+                    MythicSkywars.get().getLogger().info("Generated waiting lobby for map " + name + " at 0, 200, 0 (above the arena)");
                 }
 
                 registered = true;
@@ -1295,6 +1270,7 @@ public class GameMap {
                                 } else {
                                     setMatchState(MatchState.WAITINGSTART);
                                 }
+                                generateWaitingLobbyIfNeeded();
                                 gameboard.updateScoreboard();
                                 MatchManager.get().start(gMap);
                                 update();
@@ -1307,6 +1283,7 @@ public class GameMap {
                     } else {
                         setMatchState(MatchState.WAITINGSTART);
                     }
+                    generateWaitingLobbyIfNeeded();
                     gameboard.updateScoreboard();
                     MatchManager.get().start(gMap);
                     update();
@@ -2366,6 +2343,49 @@ public class GameMap {
 
     public CoordLoc getWaitingLobbySpawn() {
         return waitingLobbySpawn;
+    }
+
+    /**
+     * If this is a team map with an auto-generated waiting lobby,
+     * place a high-up barrier platform so players can see the map below.
+     * Center block is diamond, rest is barrier (invisible).
+     */
+    private void generateWaitingLobbyIfNeeded() {
+        if (teamSize <= 1 || waitingLobbySpawn == null) return;
+        if (waitingLobbySpawn.getX() != 0 || waitingLobbySpawn.getZ() != 0) return;
+        // Only for auto-generated spawns at high Y
+        if (waitingLobbySpawn.getY() < 190) return;
+        World w = getCurrentWorld();
+        if (w == null) return;
+        int floorY = waitingLobbySpawn.getY() - 1;
+        if (w.getBlockAt(0, floorY, 0).getType() == Material.DIAMOND_BLOCK) return;
+        // 7x7 barrier floor with diamond center — players can see through it
+        for (int x = -3; x <= 3; x++) {
+            for (int z = -3; z <= 3; z++) {
+                if (x == 0 && z == 0) {
+                    w.getBlockAt(x, floorY, z).setType(Material.DIAMOND_BLOCK);
+                } else {
+                    w.getBlockAt(x, floorY, z).setType(Material.BARRIER);
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes the auto-generated waiting lobby platform when the game starts.
+     */
+    public void removeWaitingLobbyPlatform() {
+        if (teamSize <= 1 || waitingLobbySpawn == null) return;
+        if (waitingLobbySpawn.getX() != 0 || waitingLobbySpawn.getZ() != 0) return;
+        if (waitingLobbySpawn.getY() < 190) return;
+        World w = getCurrentWorld();
+        if (w == null) return;
+        int floorY = waitingLobbySpawn.getY() - 1;
+        for (int x = -3; x <= 3; x++) {
+            for (int z = -3; z <= 3; z++) {
+                w.getBlockAt(x, floorY, z).setType(Material.AIR);
+            }
+        }
     }
 
     public boolean isLuckyModeEnabled() {

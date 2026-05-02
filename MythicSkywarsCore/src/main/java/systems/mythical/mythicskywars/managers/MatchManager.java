@@ -763,6 +763,7 @@ public class MatchManager {
             LuckyBlockBreakAttachment.refreshAlivePlayers(gameMap);
         }
         gameMap.getCage().removeSpawnHousing(gameMap);
+        gameMap.removeWaitingLobbyPlatform();
         gameMap.getWaitingPlayers().clear();
 
         if (MythicSkywars.getCfg().getEnablePVPTimer() && MythicSkywars.getCfg().getPVPTimerTime() >= 1) {
