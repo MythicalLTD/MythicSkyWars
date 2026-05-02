@@ -127,6 +127,10 @@
 
     <repositories>
         <repository>
+            <id>mythical-snapshots</id>
+            <url>https://nexus.mythical.systems/repository/maven-snapshots/</url>
+        </repository>
+        <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
         </repository>
