@@ -1,0 +1,34 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: WOOD_SWORD
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_BOOTS
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_LEGGINGS
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_CHESTPLATE
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_HELMET
+requirePermission: false
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_HELMET
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 1
+page: 2
+name: Rookie
+enabled: true
+lores:
+  unlocked:
+  - '&7Start with full leather armor'
+  - '&7and a wooden sword'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Rookie

@@ -1,0 +1,39 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: IRON_SWORD
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      DAMAGE_ALL: 1
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: IRON_HELMET
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: IRON_SWORD
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 9
+page: 2
+name: Swordman
+enabled: true
+lores:
+  unlocked:
+  - '&7Start with a sharpness iron sword'
+  - '&7and an iron helmet for combat'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Swordman

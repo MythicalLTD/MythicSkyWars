@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -25,8 +26,6 @@ import java.util.UUID;
 public class LobbyWaterPortalManager {
 
     private final SkyWarsReloaded plugin;
-    private final File file;
-    private YamlConfiguration cfg;
     private final Map<String, PortalRegion> portals = new HashMap<>();
     private final Map<UUID, Long> playerCooldown = new HashMap<>();
     /** Prevents move-spam and overlapping delayed join retries for the same player. */
@@ -36,34 +35,62 @@ public class LobbyWaterPortalManager {
 
     public LobbyWaterPortalManager(SkyWarsReloaded plugin) {
         this.plugin = plugin;
-        this.file = new File(plugin.getDataFolder(), "lobby-water-portals.yml");
+        migrateOldFile();
         reload();
     }
 
-    public void reload() {
-        if (!file.exists()) {
-            try {
-                if (!file.createNewFile()) {
-                    plugin.getLogger().warning("Could not create lobby-water-portals.yml");
+    /**
+     * Migrates data from the old lobby-water-portals.yml file into config.yml and deletes the old file.
+     */
+    private void migrateOldFile() {
+        File oldFile = new File(plugin.getDataFolder(), "lobby-water-portals.yml");
+        if (oldFile.exists()) {
+            plugin.getLogger().info("Migrating lobby-water-portals.yml into config.yml...");
+            FileConfiguration oldCfg = YamlConfiguration.loadConfiguration(oldFile);
+            ConfigurationSection oldPortals = oldCfg.getConfigurationSection("portals");
+
+            if (oldPortals != null) {
+                FileConfiguration config = plugin.getConfig();
+                for (String nameKey : oldPortals.getKeys(false)) {
+                    String oldBase = "portals." + nameKey;
+                    String newBase = "lobby-water-portals." + nameKey;
+                    config.set(newBase + ".world", oldCfg.getString(oldBase + ".world"));
+                    config.set(newBase + ".type", oldCfg.getString(oldBase + ".type", "ALL"));
+                    config.set(newBase + ".x1", oldCfg.getInt(oldBase + ".x1"));
+                    config.set(newBase + ".y1", oldCfg.getInt(oldBase + ".y1"));
+                    config.set(newBase + ".z1", oldCfg.getInt(oldBase + ".z1"));
+                    config.set(newBase + ".x2", oldCfg.getInt(oldBase + ".x2"));
+                    config.set(newBase + ".y2", oldCfg.getInt(oldBase + ".y2"));
+                    config.set(newBase + ".z2", oldCfg.getInt(oldBase + ".z2"));
+                    config.set(newBase + ".pos1Set", oldCfg.getBoolean(oldBase + ".pos1Set", false));
+                    config.set(newBase + ".pos2Set", oldCfg.getBoolean(oldBase + ".pos2Set", false));
+                    config.set(newBase + ".luckyMode", oldCfg.getBoolean(oldBase + ".luckyMode", false));
                 }
-            } catch (IOException e) {
-                plugin.getLogger().warning("Could not create lobby-water-portals.yml: " + e.getMessage());
+                plugin.saveConfig();
+            }
+
+            if (oldFile.delete()) {
+                plugin.getLogger().info("Successfully migrated lobby-water-portals.yml into config.yml and deleted old file.");
+            } else {
+                plugin.getLogger().warning("Migrated lobby-water-portals.yml data but failed to delete old file.");
             }
         }
-        cfg = YamlConfiguration.loadConfiguration(file);
-        portals.clear();
+    }
 
-        ConfigurationSection sec = cfg.getConfigurationSection("portals");
+    public void reload() {
+        portals.clear();
+        FileConfiguration config = plugin.getConfig();
+        ConfigurationSection sec = config.getConfigurationSection("lobby-water-portals");
         if (sec == null) {
             return;
         }
         for (String nameKey : sec.getKeys(false)) {
-            String base = "portals." + nameKey;
-            String world = cfg.getString(base + ".world");
+            String base = "lobby-water-portals." + nameKey;
+            String world = config.getString(base + ".world");
             if (world == null || world.isEmpty()) {
                 continue;
             }
-            String typeRaw = cfg.getString(base + ".type", "ALL");
+            String typeRaw = config.getString(base + ".type", "ALL");
             GameType type;
             try {
                 type = GameType.valueOf(typeRaw.toUpperCase(Locale.ROOT));
@@ -71,25 +98,27 @@ public class LobbyWaterPortalManager {
                 type = GameType.ALL;
             }
             PortalRegion p = new PortalRegion(nameKey, world, type);
-            p.x1 = cfg.getInt(base + ".x1");
-            p.y1 = cfg.getInt(base + ".y1");
-            p.z1 = cfg.getInt(base + ".z1");
-            p.x2 = cfg.getInt(base + ".x2");
-            p.y2 = cfg.getInt(base + ".y2");
-            p.z2 = cfg.getInt(base + ".z2");
-            p.pos1Set = cfg.getBoolean(base + ".pos1Set", false);
-            p.pos2Set = cfg.getBoolean(base + ".pos2Set", false);
-            p.luckyMode = cfg.getBoolean(base + ".luckyMode", false);
+            p.x1 = config.getInt(base + ".x1");
+            p.y1 = config.getInt(base + ".y1");
+            p.z1 = config.getInt(base + ".z1");
+            p.x2 = config.getInt(base + ".x2");
+            p.y2 = config.getInt(base + ".y2");
+            p.z2 = config.getInt(base + ".z2");
+            p.pos1Set = config.getBoolean(base + ".pos1Set", false);
+            p.pos2Set = config.getBoolean(base + ".pos2Set", false);
+            p.luckyMode = config.getBoolean(base + ".luckyMode", false);
             portals.put(nameKey.toLowerCase(Locale.ROOT), p);
         }
     }
 
     private void saveNow() {
-        try {
-            cfg.save(file);
-        } catch (IOException e) {
-            plugin.getLogger().warning("Could not save lobby-water-portals.yml: " + e.getMessage());
+        FileConfiguration config = plugin.getConfig();
+        // Clear existing section and rewrite
+        config.set("lobby-water-portals", null);
+        for (PortalRegion p : portals.values()) {
+            writePortal(p);
         }
+        plugin.saveConfig();
     }
 
     public PortalRegion create(String name, String worldName) {
@@ -110,7 +139,6 @@ public class LobbyWaterPortalManager {
         if (removed == null) {
             return false;
         }
-        cfg.set("portals." + removed.name, null);
         saveNow();
         return true;
     }
@@ -172,18 +200,19 @@ public class LobbyWaterPortalManager {
     }
 
     private void writePortal(PortalRegion p) {
-        String base = "portals." + p.name;
-        cfg.set(base + ".world", p.world);
-        cfg.set(base + ".type", p.type.name());
-        cfg.set(base + ".x1", p.x1);
-        cfg.set(base + ".y1", p.y1);
-        cfg.set(base + ".z1", p.z1);
-        cfg.set(base + ".x2", p.x2);
-        cfg.set(base + ".y2", p.y2);
-        cfg.set(base + ".z2", p.z2);
-        cfg.set(base + ".pos1Set", p.pos1Set);
-        cfg.set(base + ".pos2Set", p.pos2Set);
-        cfg.set(base + ".luckyMode", p.luckyMode);
+        FileConfiguration config = plugin.getConfig();
+        String base = "lobby-water-portals." + p.name;
+        config.set(base + ".world", p.world);
+        config.set(base + ".type", p.type.name());
+        config.set(base + ".x1", p.x1);
+        config.set(base + ".y1", p.y1);
+        config.set(base + ".z1", p.z1);
+        config.set(base + ".x2", p.x2);
+        config.set(base + ".y2", p.y2);
+        config.set(base + ".z2", p.z2);
+        config.set(base + ".pos1Set", p.pos1Set);
+        config.set(base + ".pos2Set", p.pos2Set);
+        config.set(base + ".luckyMode", p.luckyMode);
     }
 
     public void tryEnterPortal(Player player) {

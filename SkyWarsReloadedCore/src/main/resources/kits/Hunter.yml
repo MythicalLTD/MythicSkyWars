@@ -1,0 +1,41 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: BOW
+- ==: org.bukkit.inventory.ItemStack
+  type: ARROW
+  amount: 8
+- ==: org.bukkit.inventory.ItemStack
+  type: COOKED_BEEF
+  amount: 2
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_LEGGINGS
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_HELMET
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BOW
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 1
+page: 1
+name: Hunter
+enabled: true
+lores:
+  unlocked:
+  - '&7Receive a normal bow and have the instant'
+  - '&7ability of knocking other players'
+  - '&7when the game starts'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Hunter

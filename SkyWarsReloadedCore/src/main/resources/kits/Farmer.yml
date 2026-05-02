@@ -1,0 +1,56 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: DIAMOND_HOE
+- ==: org.bukkit.inventory.ItemStack
+  type: WHEAT
+  amount: 12
+- ==: org.bukkit.inventory.ItemStack
+  type: INK_SACK
+  damage: 15
+  amount: 32
+- ==: org.bukkit.inventory.ItemStack
+  type: EGG
+  amount: 16
+- ==: org.bukkit.inventory.ItemStack
+  type: MONSTER_EGG
+  damage: 93
+  amount: 10
+- ==: org.bukkit.inventory.ItemStack
+  type: WATER_BUCKET
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: CHAINMAIL_CHESTPLATE
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      PROTECTION_PROJECTILE: 2
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: DIAMOND_HOE
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 20
+page: 1
+name: Farmer
+enabled: true
+lores:
+  unlocked:
+  - '&7Start with many items that will'
+  - '&7help you produce food to survive and'
+  - '&7eggs to protect your self'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Farmer

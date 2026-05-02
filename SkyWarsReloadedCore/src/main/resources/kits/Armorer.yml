@@ -1,0 +1,36 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: BREAD
+  amount: 2
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_LEGGINGS
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_CHESTPLATE
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_CHESTPLATE
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 21
+page: 1
+name: Armorer
+enabled: true
+lores:
+  unlocked:
+  - '&7Receive a leather chest and leggings'
+  - '&7that will help you stay alive'
+  - '&7in the early stages'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Armorer

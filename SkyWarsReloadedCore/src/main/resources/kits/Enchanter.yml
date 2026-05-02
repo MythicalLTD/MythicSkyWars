@@ -1,0 +1,37 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: ENCHANTMENT_TABLE
+- ==: org.bukkit.inventory.ItemStack
+  type: EXP_BOTTLE
+  amount: 10
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: IRON_HELMET
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: ENCHANTMENT_TABLE
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 15
+page: 1
+name: Enchanter
+enabled: true
+lores:
+  unlocked:
+  - '&7Receive an enchanting table and'
+  - '&7start enchanting to protect your self'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Enchanter

@@ -1,0 +1,43 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: FISHING_ROD
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      DURABILITY: 3
+      KNOCKBACK: 1
+- ==: org.bukkit.inventory.ItemStack
+  type: COOKED_FISH
+  amount: 10
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_CHESTPLATE
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_HELMET
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: FISHING_ROD
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 10
+page: 1
+name: Fisherman
+enabled: true
+lores:
+  unlocked:
+  - '&7Start with a knockback fishing rod'
+  - '&7and some of your cooked fishes'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Fisherman

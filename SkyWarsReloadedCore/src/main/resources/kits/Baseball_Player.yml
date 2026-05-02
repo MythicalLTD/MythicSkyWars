@@ -1,0 +1,44 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: WOOD_SWORD
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      DAMAGE_ALL: 1
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: IRON_HELMET
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      PROTECTION_ENVIRONMENTAL: 1
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: IRON_HELMET
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 2
+page: 2
+name: Baseball Player
+enabled: true
+lores:
+  unlocked:
+  - '&7Knock your enemies away with'
+  - '&7a sharpness sword and protected helmet'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Baseball_Player

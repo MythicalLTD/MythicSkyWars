@@ -276,6 +276,9 @@ soulwell:
   animation-ticks-per-frame: 2
   animation-frames: 24
   options-menu-slot: 22
+  # Soul Well block location - set in-game with /sw soulwell set
+  well-location: ""
+  click-debug-enabled: false
   buy:
     warlock:
       souls: 5
@@ -352,3 +355,18 @@ disable-commands-spectate:
   - sw quit
   - leave
   enabled: true
+
+# Lobby water portal regions - set in-game with /sw portal commands
+# lobby-water-portals:
+#   example:
+#     world: world
+#     type: ALL
+#     x1: 0
+#     y1: 0
+#     z1: 0
+#     x2: 0
+#     y2: 0
+#     z2: 0
+#     pos1Set: false
+#     pos2Set: false
+#     luckyMode: false

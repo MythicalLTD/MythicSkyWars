@@ -1,0 +1,35 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: BRICK
+  amount: 20
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: false
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BRICK
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 0
+page: 2
+name: Default
+enabled: true
+lores:
+  unlocked:
+  - '&7Receive 20 bricks to start'
+  - '&7your game with basic materials'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Default

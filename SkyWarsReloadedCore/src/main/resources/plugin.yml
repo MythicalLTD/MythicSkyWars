@@ -2,8 +2,8 @@ name: Skywars
 main: com.walrusone.skywarsreloaded.SkyWarsReloaded
 version: ${revision}
 api-version: 1.13
-website: https://gcnt.net/
-author: Reloaded by NaysKutzu
+website: https://mythical.systems
+author: New updated fork of Skywars Reloaded.
 softdepend:
   - Vault
   - Essentials

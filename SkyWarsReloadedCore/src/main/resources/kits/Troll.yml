@@ -1,0 +1,38 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: WEB
+  amount: 15
+- ==: org.bukkit.inventory.ItemStack
+  type: LAVA_BUCKET
+  amount: 5
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: IRON_CHESTPLATE
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: WEB
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 3
+page: 1
+name: Troll
+enabled: true
+lores:
+  unlocked:
+  - '&7Trap players inside your'
+  - '&7webs and drown them in lava'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Troll

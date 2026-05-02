@@ -1,0 +1,43 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: CACTUS
+  amount: 16
+- ==: org.bukkit.inventory.ItemStack
+  type: SAND
+  amount: 8
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_CHESTPLATE
+  meta:
+    ==: ItemMeta
+    meta-type: LEATHER_ARMOR
+    enchants:
+      THORNS: 5
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: CACTUS
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 5
+page: 2
+name: Cactus
+enabled: true
+lores:
+  unlocked:
+  - '&7Place cactus traps and wear'
+  - '&7thorns armor to damage attackers'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Cactus

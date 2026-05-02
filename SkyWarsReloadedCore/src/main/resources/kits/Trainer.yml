@@ -1,0 +1,40 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: MONSTER_EGG
+  damage: 95
+  amount: 2
+- ==: org.bukkit.inventory.ItemStack
+  type: BONE
+  amount: 10
+- ==: org.bukkit.inventory.ItemStack
+  type: BREAD
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_CHESTPLATE
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BONE
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 8
+page: 1
+name: Trainer
+enabled: true
+lores:
+  unlocked:
+  - '&7Tame some wolfs that will protect you'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Trainer

@@ -1,0 +1,45 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: WOOD_SPADE
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      DIG_SPEED: 2
+- ==: org.bukkit.inventory.ItemStack
+  type: PUMPKIN
+  amount: 2
+- ==: org.bukkit.inventory.ItemStack
+  type: SNOW_BLOCK
+  amount: 4
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: CHAINMAIL_CHESTPLATE
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: SNOW_BALL
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 17
+page: 1
+name: Snowman
+enabled: true
+lores:
+  unlocked:
+  - '&7Build snowmen that will produce'
+  - '&7snow balls for you to farm'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Snowman

@@ -1,0 +1,45 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: IRON_AXE
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      DIG_SPEED: 3
+- ==: org.bukkit.inventory.ItemStack
+  type: LOG
+  amount: 16
+- ==: org.bukkit.inventory.ItemStack
+  type: BREAD
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: IRON_HELMET
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: IRON_AXE
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 2
+page: 1
+name: Lumberjack
+enabled: true
+lores:
+  unlocked:
+  - '&7Start with an enchanted axe and'
+  - '&7lots of wood that will help you'
+  - '&7reach the middle'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Lumberjack

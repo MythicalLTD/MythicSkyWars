@@ -1,0 +1,48 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: TNT
+  amount: 16
+- ==: org.bukkit.inventory.ItemStack
+  type: REDSTONE
+  amount: 32
+- ==: org.bukkit.inventory.ItemStack
+  type: WATER_BUCKET
+- ==: org.bukkit.inventory.ItemStack
+  type: WOOD_PLATE
+  amount: 8
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: CHAINMAIL_CHESTPLATE
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      PROTECTION_EXPLOSIONS: 3
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: TNT
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 16
+page: 1
+name: Cannoneer
+enabled: true
+lores:
+  unlocked:
+  - '&7Create tnt cannons on the fly'
+  - '&7with your starter resources'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Cannoneer

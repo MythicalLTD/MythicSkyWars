@@ -1,0 +1,43 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: FLINT_AND_STEEL
+- ==: org.bukkit.inventory.ItemStack
+  type: LAVA_BUCKET
+  amount: 2
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_CHESTPLATE
+  meta:
+    ==: ItemMeta
+    meta-type: LEATHER_ARMOR
+    enchants:
+      PROTECTION_FIRE: 5
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: FLINT_AND_STEEL
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 0
+page: 1
+name: Pyro
+enabled: true
+lores:
+  unlocked:
+  - '&7Set everyone on fire and'
+  - '&7watch them burn while'
+  - '&7you laugh and swim in lava'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Pyro

@@ -1,0 +1,47 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: BOW
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      ARROW_FIRE: 1
+- ==: org.bukkit.inventory.ItemStack
+  type: ARROW
+  amount: 20
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: GOLD_HELMET
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      PROTECTION_ENVIRONMENTAL: 1
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: YELLOW_FLOWER
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 10
+page: 2
+name: Princess
+enabled: true
+lores:
+  unlocked:
+  - '&7Set enemies on fire from afar'
+  - '&7with a flame bow and protected helmet'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Princess

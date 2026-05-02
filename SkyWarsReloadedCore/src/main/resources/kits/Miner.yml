@@ -1,0 +1,54 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: STONE_PICKAXE
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      DIG_SPEED: 1
+      DURABILITY: 3
+- ==: org.bukkit.inventory.ItemStack
+  type: COOKED_BEEF
+  amount: 2
+- ==: org.bukkit.inventory.ItemStack
+  type: TNT
+- ==: org.bukkit.inventory.ItemStack
+  type: REDSTONE_TORCH_ON
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: IRON_HELMET
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      PROTECTION_EXPLOSIONS: 2
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: STONE_PICKAXE
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 11
+page: 1
+name: Miner
+enabled: true
+lores:
+  unlocked:
+  - '&7Your enchanted pickaxe will help'
+  - '&7you mine faster than any one'
+  - '&7giving you the advantage to get'
+  - '&7decent gear and trap others'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Miner

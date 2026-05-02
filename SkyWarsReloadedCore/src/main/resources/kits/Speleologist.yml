@@ -1,0 +1,42 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: STONE
+  amount: 16
+- ==: org.bukkit.inventory.ItemStack
+  type: IRON_PICKAXE
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      DIG_SPEED: 3
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: IRON_PICKAXE
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 6
+page: 2
+name: Speleologist
+enabled: true
+lores:
+  unlocked:
+  - '&7Mine blocks quickly with an'
+  - '&7efficiency III iron pickaxe'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Speleologist

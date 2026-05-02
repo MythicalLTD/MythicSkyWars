@@ -1,0 +1,39 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: WOOD_SWORD
+- ==: org.bukkit.inventory.ItemStack
+  type: WOOL
+  damage: 14
+  amount: 64
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_HELMET
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: WOOL
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 4
+page: 1
+name: Builder
+enabled: true
+lores:
+  unlocked:
+  - '&7Begin with simple building material'
+  - '&7to build towards the middle'
+  - '&7or build creative traps'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Builder

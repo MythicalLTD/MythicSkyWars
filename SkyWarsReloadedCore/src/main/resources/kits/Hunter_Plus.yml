@@ -1,0 +1,45 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: BOW
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    enchants:
+      ARROW_DAMAGE: 1
+- ==: org.bukkit.inventory.ItemStack
+  type: ARROW
+  amount: 16
+- ==: org.bukkit.inventory.ItemStack
+  type: BREAD
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_LEGGINGS
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_HELMET
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BOW
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 6
+page: 1
+name: Hunter+
+enabled: true
+lores:
+  unlocked:
+  - '&7Receive a strong bow and have the instant'
+  - '&7ability of knocking other players'
+  - '&7when the game starts'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Hunter_Plus

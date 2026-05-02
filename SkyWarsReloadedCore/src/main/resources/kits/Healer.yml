@@ -1,0 +1,38 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: POTION
+  damage: 16453
+- ==: org.bukkit.inventory.ItemStack
+  type: POTION
+  damage: 16385
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: CAKE
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 11
+page: 2
+name: Healer
+enabled: true
+lores:
+  unlocked:
+  - '&7Start with splash potions of'
+  - '&7healing and regeneration'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Healer

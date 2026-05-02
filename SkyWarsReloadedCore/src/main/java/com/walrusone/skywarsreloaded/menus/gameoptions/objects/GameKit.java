@@ -218,6 +218,8 @@ public class GameKit {
             if (!kitsDirectory.mkdirs()) {
                 return;
             }
+            // Copy default kits from resources on first run
+            copyDefaultKits(kitsDirectory);
         }
 
         File[] kitsFiles = kitsDirectory.listFiles();
@@ -236,6 +238,30 @@ public class GameKit {
                 kits.add(new GameKit(kitFile));
             }
         }
+    }
+
+    private static void copyDefaultKits(File kitsDirectory) {
+        String[] defaultKits = {
+                "Armorer_Plus.yml", "Armorer.yml", "Baseball_Player.yml", "Blaze.yml",
+                "Builder.yml", "Cactus.yml", "Cannoneer.yml", "Default.yml",
+                "Ecologist.yml", "Enchanter.yml", "Farmer.yml", "Fisherman.yml",
+                "Griefer.yml", "Healer.yml", "Hunter_Plus.yml", "Hunter.yml",
+                "Knight.yml", "Lumberjack.yml", "Magician.yml", "Miner_Plus.yml",
+                "Miner.yml", "Necromancer.yml", "Princess.yml", "Pyro.yml",
+                "Rookie.yml", "Scout.yml", "Smith.yml", "Snowman.yml",
+                "Speleologist.yml", "Swordman.yml", "Tactician.yml", "Tank.yml",
+                "Trainer.yml", "Troll.yml", "Vengeance.yml"
+        };
+
+        SkyWarsReloaded.get().getLogger().info("Copying default kits to kits folder...");
+        for (String kitName : defaultKits) {
+            try {
+                SkyWarsReloaded.get().saveResource("kits/" + kitName, false);
+            } catch (Exception e) {
+                SkyWarsReloaded.get().getLogger().warning("Failed to copy default kit: " + kitName);
+            }
+        }
+        SkyWarsReloaded.get().getLogger().info("Default kits copied successfully!");
     }
 
     public static ArrayList<GameKit> getAvailableKits() {

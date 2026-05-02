@@ -18,42 +18,54 @@ public class SoulWellManager {
 
     private static final String HOLO_ID = "swr_soulwell_holo";
     private final SkyWarsReloaded plugin;
-    private final File file;
-    private FileConfiguration cfg;
     private Location wellLocation;
     private boolean clickDebugEnabled;
 
     public SoulWellManager(SkyWarsReloaded plugin) {
         this.plugin = plugin;
-        this.file = new File(plugin.getDataFolder(), "soulwell.yml");
+        migrateOldFile();
         reload();
     }
 
-    public void reload() {
-        if (!file.exists()) {
-            try {
-                if (!file.createNewFile()) {
-                    plugin.getLogger().warning("Could not create soulwell.yml");
-                }
-            } catch (IOException e) {
-                plugin.getLogger().warning("Could not create soulwell.yml: " + e.getMessage());
+    /**
+     * Migrates data from the old soulwell.yml file into config.yml and deletes the old file.
+     */
+    private void migrateOldFile() {
+        File oldFile = new File(plugin.getDataFolder(), "soulwell.yml");
+        if (oldFile.exists()) {
+            plugin.getLogger().info("Migrating soulwell.yml into config.yml...");
+            FileConfiguration oldCfg = YamlConfiguration.loadConfiguration(oldFile);
+            String serialized = oldCfg.getString("well-location", "");
+            boolean debug = oldCfg.getBoolean("click-debug-enabled", false);
+
+            FileConfiguration config = plugin.getConfig();
+            if (serialized != null && !serialized.isEmpty()) {
+                config.set("soulwell.well-location", serialized);
+            }
+            config.set("soulwell.click-debug-enabled", debug);
+            plugin.saveConfig();
+
+            if (oldFile.delete()) {
+                plugin.getLogger().info("Successfully migrated soulwell.yml into config.yml and deleted old file.");
+            } else {
+                plugin.getLogger().warning("Migrated soulwell.yml data but failed to delete old file.");
             }
         }
-        cfg = YamlConfiguration.loadConfiguration(file);
-        String serialized = cfg.getString("well-location", "");
+    }
+
+    public void reload() {
+        FileConfiguration config = plugin.getConfig();
+        String serialized = config.getString("soulwell.well-location", "");
         wellLocation = serialized == null || serialized.isEmpty() ? null : Util.get().stringToLocation(serialized);
-        clickDebugEnabled = cfg.getBoolean("click-debug-enabled", false);
+        clickDebugEnabled = config.getBoolean("soulwell.click-debug-enabled", false);
         refreshHologram();
     }
 
     public void save() {
-        cfg.set("well-location", wellLocation == null ? null : Util.get().locationToString(wellLocation));
-        cfg.set("click-debug-enabled", clickDebugEnabled);
-        try {
-            cfg.save(file);
-        } catch (IOException e) {
-            plugin.getLogger().warning("Could not save soulwell.yml: " + e.getMessage());
-        }
+        FileConfiguration config = plugin.getConfig();
+        config.set("soulwell.well-location", wellLocation == null ? null : Util.get().locationToString(wellLocation));
+        config.set("soulwell.click-debug-enabled", clickDebugEnabled);
+        plugin.saveConfig();
     }
 
     public Location getWellLocation() {

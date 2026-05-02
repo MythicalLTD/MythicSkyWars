@@ -1,0 +1,40 @@
+inventory:
+- ==: org.bukkit.inventory.ItemStack
+  type: WOOD_SWORD
+- ==: org.bukkit.inventory.ItemStack
+  type: SPONGE
+  amount: 6
+- ==: org.bukkit.inventory.ItemStack
+  type: POTION
+  damage: 8262
+armor:
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+- ==: org.bukkit.inventory.ItemStack
+  type: LEATHER_CHESTPLATE
+- ==: org.bukkit.inventory.ItemStack
+  type: AIR
+requirePermission: true
+icon:
+  ==: org.bukkit.inventory.ItemStack
+  type: WOOD_SWORD
+lockedIcon:
+  ==: org.bukkit.inventory.ItemStack
+  type: BARRIER
+position: 7
+page: 1
+name: Tactician
+enabled: true
+lores:
+  unlocked:
+  - '&7Start with a set of items'
+  - '&7that will help you eliminate the others'
+  locked: '&cA permission is required to unlock this kit!'
+gameSettings:
+  noRegen: false
+  noPvp: false
+  soupPvp: false
+  noFallDamage: false
+filename: Tactician
