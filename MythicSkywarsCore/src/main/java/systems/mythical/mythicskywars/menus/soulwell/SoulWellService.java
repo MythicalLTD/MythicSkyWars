@@ -13,6 +13,8 @@ import systems.mythical.mythicskywars.menus.playeroptions.PlayerOption;
 import systems.mythical.mythicskywars.menus.playeroptions.ProjectileEffectOption;
 import systems.mythical.mythicskywars.menus.playeroptions.TauntOption;
 import systems.mythical.mythicskywars.menus.playeroptions.WinSoundOption;
+import systems.mythical.mythicskywars.perks.Perk;
+import systems.mythical.mythicskywars.perks.PerkManager;
 import systems.mythical.mythicskywars.utilities.Messaging;
 import systems.mythical.mythicskywars.utilities.SoulWellManager;
 import systems.mythical.mythicskywars.utilities.Util;
@@ -51,6 +53,95 @@ public final class SoulWellService {
     };
 
     private SoulWellService() {
+    }
+
+    /**
+     * Validates Soul Well reward configuration on startup.
+     * Logs warnings for allow-list entries that don't match any loaded cosmetic.
+     */
+    public static void validateRewardsOnStartup() {
+        if (!MythicSkywars.getCfg().isSoulWellEnabled()) {
+            return;
+        }
+        java.util.logging.Logger log = MythicSkywars.get().getLogger();
+        log.info("[Soul Well] Validating reward configuration...");
+
+        int totalWeight = MythicSkywars.getCfg().getSoulWellWeightCoins()
+                + MythicSkywars.getCfg().getSoulWellWeightXp()
+                + MythicSkywars.getCfg().getSoulWellWeightCage()
+                + MythicSkywars.getCfg().getSoulWellWeightKit()
+                + MythicSkywars.getCfg().getSoulWellWeightPerk()
+                + MythicSkywars.getCfg().getSoulWellWeightKillSound()
+                + MythicSkywars.getCfg().getSoulWellWeightWinSound()
+                + MythicSkywars.getCfg().getSoulWellWeightProjectile()
+                + MythicSkywars.getCfg().getSoulWellWeightTaunt()
+                + MythicSkywars.getCfg().getSoulWellWeightCommand();
+
+        if (totalWeight <= 0) {
+            log.warning("[Soul Well] All reward weights are 0! Players will only receive coins as fallback.");
+        } else {
+            log.info("[Soul Well] Total reward weight: " + totalWeight);
+        }
+
+        // Validate cage allow-list
+        validateAllowList(log, "cage", MythicSkywars.getCfg().getSoulWellCageAllowList(),
+                extractKeys(GlassColorOption.getPlayerOptions()));
+        // Validate perk (particle) allow-list
+        validateAllowList(log, "perk (particle)", MythicSkywars.getCfg().getSoulWellPerkAllowList(),
+                extractKeys(ParticleEffectOption.getPlayerOptions()));
+        // Validate kill sound allow-list
+        validateAllowList(log, "killsound", MythicSkywars.getCfg().getSoulWellKillSoundAllowList(),
+                extractKeys(KillSoundOption.getPlayerOptions()));
+        // Validate win sound allow-list
+        validateAllowList(log, "winsound", MythicSkywars.getCfg().getSoulWellWinSoundAllowList(),
+                extractKeys(WinSoundOption.getPlayerOptions()));
+        // Validate projectile allow-list
+        validateAllowList(log, "projectile", MythicSkywars.getCfg().getSoulWellProjectileAllowList(),
+                extractKeys(ProjectileEffectOption.getPlayerOptions()));
+        // Validate taunt allow-list
+        validateAllowList(log, "taunt", MythicSkywars.getCfg().getSoulWellTauntAllowList(),
+                extractKeys(TauntOption.getPlayerOptions()));
+
+        // Check coins range
+        if (MythicSkywars.getCfg().getSoulWellCoinsMin() > MythicSkywars.getCfg().getSoulWellCoinsMax()) {
+            log.warning("[Soul Well] coins.min (" + MythicSkywars.getCfg().getSoulWellCoinsMin()
+                    + ") > coins.max (" + MythicSkywars.getCfg().getSoulWellCoinsMax() + ")! Using min as both.");
+        }
+        if (MythicSkywars.getCfg().getSoulWellXpMin() > MythicSkywars.getCfg().getSoulWellXpMax()) {
+            log.warning("[Soul Well] xp.min (" + MythicSkywars.getCfg().getSoulWellXpMin()
+                    + ") > xp.max (" + MythicSkywars.getCfg().getSoulWellXpMax() + ")! Using min as both.");
+        }
+
+        log.info("[Soul Well] Reward validation complete.");
+    }
+
+    private static Set<String> extractKeys(java.util.ArrayList<PlayerOption> options) {
+        Set<String> keys = new HashSet<>();
+        for (PlayerOption o : options) {
+            String perm = o.getPermission();
+            int dot = perm.lastIndexOf('.');
+            if (dot >= 0 && dot < perm.length() - 1) {
+                keys.add(perm.substring(dot + 1).toLowerCase(Locale.ENGLISH));
+            }
+            if (o.getKey() != null) {
+                keys.add(o.getKey().toLowerCase(Locale.ENGLISH));
+            }
+        }
+        return keys;
+    }
+
+    private static void validateAllowList(java.util.logging.Logger log, String category,
+                                           List<String> allowList, Set<String> validKeys) {
+        if (allowList == null || allowList.isEmpty()) return;
+        for (String entry : allowList) {
+            if (entry == null || entry.trim().isEmpty()) continue;
+            String normalized = entry.trim().toLowerCase(Locale.ENGLISH);
+            if ("*".equals(normalized)) continue;
+            if (!validKeys.contains(normalized)) {
+                log.warning("[Soul Well] " + category + " allow-list entry '" + entry
+                        + "' does not match any loaded cosmetic. Check spelling in config.yml.");
+            }
+        }
     }
 
     public static boolean isSpinning(Player player) {
@@ -207,6 +298,7 @@ public final class SoulWellService {
         w.put(RewardKind.WIN_SOUND, MythicSkywars.getCfg().getSoulWellWeightWinSound());
         w.put(RewardKind.PROJECTILE, MythicSkywars.getCfg().getSoulWellWeightProjectile());
         w.put(RewardKind.TAUNT, MythicSkywars.getCfg().getSoulWellWeightTaunt());
+        w.put(RewardKind.GAME_PERK, MythicSkywars.getCfg().getSoulWellWeightGamePerk());
         w.put(RewardKind.COMMAND, MythicSkywars.getCfg().getSoulWellWeightCommand());
         while (true) {
             int total = 0;
@@ -294,6 +386,12 @@ public final class SoulWellService {
                     return null;
                 }
                 return new Reward(RewardKind.TAUNT, 0, null, null, null, ta, null);
+            case GAME_PERK:
+                String perkResult = pickRandomGamePerk(player);
+                if (perkResult == null) {
+                    return null;
+                }
+                return new Reward(RewardKind.GAME_PERK, 0, null, null, null, null, perkResult);
             case COMMAND:
                 String cmd = pickRandomCommandReward();
                 if (cmd == null) {
@@ -454,6 +552,32 @@ public final class SoulWellService {
         return list.get(0);
     }
 
+    /**
+     * Picks a random game perk level the player hasn't unlocked yet.
+     * Returns a string in format "perkKey:level" or null if nothing available.
+     */
+    private static String pickRandomGamePerk(Player player) {
+        if (!PerkManager.get().isEnabled()) {
+            return null;
+        }
+        List<String> candidates = new ArrayList<>();
+        for (Perk perk : PerkManager.get().getAllPerks()) {
+            if (perk.isDisabled()) continue;
+            // Find the next level the player doesn't have
+            for (int lvl = 1; lvl <= perk.getMaxLevel(); lvl++) {
+                if (!player.hasPermission(perk.getPermission(lvl))) {
+                    candidates.add(perk.getKey() + ":" + lvl);
+                    break; // Only offer the next level up
+                }
+            }
+        }
+        if (candidates.isEmpty()) {
+            return null;
+        }
+        Collections.shuffle(candidates, RANDOM);
+        return candidates.get(0);
+    }
+
     private static Set<String> normalizeList(List<String> list) {
         Set<String> out = new HashSet<>();
         if (list == null) {
@@ -571,6 +695,23 @@ public final class SoulWellService {
                             .format("soulwell.reward-taunt"));
                 }
                 break;
+            case GAME_PERK:
+                ps.addSoulWellLegendaries(1);
+                if (r.commandReward != null && r.commandReward.contains(":")) {
+                    String[] parts = r.commandReward.split(":", 2);
+                    String perkKey = parts[0];
+                    int perkLevel = 1;
+                    try { perkLevel = Integer.parseInt(parts[1]); } catch (NumberFormatException ignored) {}
+                    Perk perk = PerkManager.get().getPerk(perkKey);
+                    if (perk != null) {
+                        ps.addPerm(perk.getPermission(perkLevel), true);
+                        player.sendMessage(new Messaging.MessageFormatter()
+                                .setVariable("perk", ChatColor.translateAlternateColorCodes('&', perk.getName()))
+                                .setVariable("level", "" + perkLevel)
+                                .format("soulwell.reward-gameperk"));
+                    }
+                }
+                break;
             case COMMAND:
                 if (r.commandReward != null && !r.commandReward.trim().isEmpty()) {
                     String command = r.commandReward.replace("{player}", player.getName());
@@ -586,7 +727,7 @@ public final class SoulWellService {
     }
 
     private enum RewardKind {
-        COINS, XP, CAGE, KIT, PERK, KILL_SOUND, WIN_SOUND, PROJECTILE, TAUNT, COMMAND
+        COINS, XP, CAGE, KIT, PERK, KILL_SOUND, WIN_SOUND, PROJECTILE, TAUNT, GAME_PERK, COMMAND
     }
 
     private static final class Reward {
@@ -628,6 +769,8 @@ public final class SoulWellService {
                     return cosmeticOption != null ? cosmeticOption.getItem().clone() : icon(Material.ARROW, "&b&lProjectile Trail");
                 case TAUNT:
                     return cosmeticOption != null ? cosmeticOption.getItem().clone() : icon(Material.SHIELD, "&6&lTaunt");
+                case GAME_PERK:
+                    return icon(Material.BEACON, "&5&lGame Perk");
                 case COMMAND:
                     return icon(commandBlockMaterial(), "&c&lSpecial Reward");
                 default:

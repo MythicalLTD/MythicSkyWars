@@ -652,6 +652,7 @@ soulwell:
   reward-winsound: '&dSoul Well: unlocked win sound &f{name}'
   reward-projectile: '&bSoul Well: unlocked projectile trail &f{name}'
   reward-taunt: '&6Soul Well: unlocked taunt &f{name}'
+  reward-gameperk: '&5Soul Well: unlocked perk &e{perk} &5level &e{level}!'
   reward-command: '&cSoul Well: special reward granted!'
   xezbeth-granted: '&dXezbeth Luck: &7your next &ex1 &7Soul Well spin costs no souls.'
   tier-warlock: 'Warlock'

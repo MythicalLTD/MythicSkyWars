@@ -964,6 +964,14 @@ public class MatchManager {
                             winnerData.setSoulWellXezbethFreeRollPending(true);
                             pWinner.sendMessage(new Messaging.MessageFormatter().format("soulwell.xezbeth-granted"));
                         }
+                        if (MythicSkywars.getCfg().isSoulWellEnabled()) {
+                            int soulsPerWin = Math.max(0, MythicSkywars.getCfg().getSoulWellSoulsPerWin());
+                            if (soulsPerWin > 0) {
+                                final int winMultiplier = Util.get().getMultiplier(pWinner);
+                                winnerData.addSouls(soulsPerWin * winMultiplier);
+                                winnerData.addSoulWellSoulsGathered(soulsPerWin * winMultiplier);
+                            }
+                        }
                         final int multiplier = Util.get().getMultiplier(pWinner);
                         int winXp = LevelManager.get().getXpReward("game-win", 100);
                         winnerData.addXp(pWinner, multiplier * winXp);

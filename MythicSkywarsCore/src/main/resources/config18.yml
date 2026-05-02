@@ -266,10 +266,11 @@ rejoin:
   enabled: true
   windowSeconds: 180
 soulwell:
-  enabled: false
+  enabled: true
   souls-per-kill: 1
+  souls-per-win: 3
   souls-per-spin: 10
-  max-spins-at-once: 4
+  max-spins-at-once: 5
   xezbeth-permission: "sw.soulwell.xezbethluck"
   animation-ticks-per-frame: 2
   animation-frames: 24
@@ -279,50 +280,164 @@ soulwell:
   buy:
     warlock:
       souls: 5
-      cost: 100
+      cost: 50
     necromancer:
-      souls: 10
-      cost: 250
+      souls: 15
+      cost: 200
     deathangel:
       souls: 50
-      cost: 1000
+      cost: 750
   rewards:
     coins:
-      weight: 40
-      min: 5
-      max: 30
-    xp:
       weight: 30
-      min: 5
-      max: 20
+      min: 10
+      max: 50
+    xp:
+      weight: 25
+      min: 10
+      max: 35
     cage:
-      weight: 15
-      allow-list: []
-      deny-list: []
+      weight: 12
+      allow-list:
+      - white
+      - orange
+      - magenta
+      - lightblue
+      - yellow
+      - lime
+      - pink
+      - gray
+      - lightgray
+      - cyan
+      - purple
+      - blue
+      - brown
+      - green
+      - red
+      - black
+      - lapis
+      - redstone
+      - emerald
+      - diamond
+      deny-list:
+      - none
     kit:
-      weight: 10
+      weight: 3
       allow-list: []
       deny-list: []
     perk:
       weight: 5
-      allow-list: []
-      deny-list: []
+      allow-list:
+      - water
+      - flame
+      - smoke
+      - critical
+      - slime
+      - snow
+      - magic
+      - music
+      - happy
+      - angry
+      - potion
+      - poison
+      - alphabet
+      - lava
+      - lava_drip
+      - heart
+      - redstone
+      - sparks
+      - portal
+      - colourful
+      deny-list:
+      - none
     killsound:
-      weight: 3
-      allow-list: []
-      deny-list: []
+      weight: 8
+      allow-list:
+      - pigdeath
+      - catdeath
+      - muledeath
+      - lightning
+      - cathiss
+      - explosion
+      - ghastwarn
+      - wolfgrowl
+      - guardiancurse
+      - zombiehorsedeath
+      - zombieconverted
+      - zombiedeath
+      - blazedeath
+      - guardiandeath
+      - endermandeath
+      - ghasthurt
+      - golemdeath
+      - skeletonhorsedeath
+      - witherdeath
+      - dragongrowl
+      deny-list:
+      - none
     winsound:
-      weight: 3
-      allow-list: []
-      deny-list: []
+      weight: 7
+      allow-list:
+      - thunder
+      - witherambient
+      - gamemusic
+      - credits
+      - witherspawn
+      - "11"
+      - dragon
+      - menu
+      - "13"
+      - enderdragondeath
+      - mall
+      - mellohi
+      - cat
+      - stal
+      - far
+      - blocks
+      - wait
+      - chirp
+      - ward
+      - strad
+      deny-list:
+      - none
     projectile:
-      weight: 3
-      allow-list: []
-      deny-list: []
+      weight: 6
+      allow-list:
+      - water
+      - flame
+      - smoke
+      - critical
+      - slime
+      - snow
+      - magic
+      - music
+      - happy
+      - angry
+      - potion
+      - poison
+      - alphabet
+      - lava
+      - lava_drip
+      - heart
+      - redstone
+      - sparks
+      - portal
+      - clouds
+      deny-list:
+      - none
     taunt:
-      weight: 3
-      allow-list: []
-      deny-list: []
+      weight: 4
+      allow-list:
+      - playwithfire
+      - chicken
+      - pig
+      - dragon
+      - seekdestroy
+      - comeoutplay
+      deny-list:
+      - none
+    gameperk:
+      weight: 4
     command:
       weight: 0
       commands:

@@ -238,6 +238,7 @@ public class Config {
     private boolean tauntsMenuEnabled;
     private boolean soulWellEnabled;
     private int soulWellSoulsPerKill;
+    private int soulWellSoulsPerWin;
     private int soulWellSoulsPerSpin;
     private int soulWellMaxSpinsAtOnce;
     private String soulWellXezbethPermission;
@@ -250,6 +251,7 @@ public class Config {
     private int soulWellWeightKit;
     private int soulWellWeightPerk;
     private int soulWellWeightCommand;
+    private int soulWellWeightGamePerk;
     private int soulWellCoinsMin;
     private int soulWellCoinsMax;
     private int soulWellXpMin;
@@ -529,8 +531,9 @@ public class Config {
 
             soulWellEnabled = MythicSkywars.get().getConfig().getBoolean("soulwell.enabled", true);
             soulWellSoulsPerKill = MythicSkywars.get().getConfig().getInt("soulwell.souls-per-kill", 1);
+            soulWellSoulsPerWin = MythicSkywars.get().getConfig().getInt("soulwell.souls-per-win", 3);
             soulWellSoulsPerSpin = MythicSkywars.get().getConfig().getInt("soulwell.souls-per-spin", 10);
-            soulWellMaxSpinsAtOnce = MythicSkywars.get().getConfig().getInt("soulwell.max-spins-at-once", 4);
+            soulWellMaxSpinsAtOnce = MythicSkywars.get().getConfig().getInt("soulwell.max-spins-at-once", 5);
             soulWellXezbethPermission = MythicSkywars.get().getConfig().getString("soulwell.xezbeth-permission", "sw.soulwell.xezbethluck");
             soulWellAnimTicksPerFrame = MythicSkywars.get().getConfig().getInt("soulwell.animation-ticks-per-frame", 2);
             soulWellAnimFrames = MythicSkywars.get().getConfig().getInt("soulwell.animation-frames", 24);
@@ -541,6 +544,7 @@ public class Config {
             soulWellWeightKit = MythicSkywars.get().getConfig().getInt("soulwell.rewards.kit.weight", 10);
             soulWellWeightPerk = MythicSkywars.get().getConfig().getInt("soulwell.rewards.perk.weight", 5);
             soulWellWeightCommand = MythicSkywars.get().getConfig().getInt("soulwell.rewards.command.weight", 0);
+            soulWellWeightGamePerk = MythicSkywars.get().getConfig().getInt("soulwell.rewards.gameperk.weight", 4);
             soulWellCoinsMin = MythicSkywars.get().getConfig().getInt("soulwell.rewards.coins.min", 5);
             soulWellCoinsMax = MythicSkywars.get().getConfig().getInt("soulwell.rewards.coins.max", 30);
             soulWellXpMin = MythicSkywars.get().getConfig().getInt("soulwell.rewards.xp.min", 5);
@@ -1243,6 +1247,10 @@ public class Config {
         return soulWellSoulsPerKill;
     }
 
+    public int getSoulWellSoulsPerWin() {
+        return soulWellSoulsPerWin;
+    }
+
     public int getSoulWellSoulsPerSpin() {
         return soulWellSoulsPerSpin;
     }
@@ -1289,6 +1297,10 @@ public class Config {
 
     public int getSoulWellWeightCommand() {
         return Math.max(0, soulWellWeightCommand);
+    }
+
+    public int getSoulWellWeightGamePerk() {
+        return Math.max(0, soulWellWeightGamePerk);
     }
 
     public int getSoulWellCoinsMin() {

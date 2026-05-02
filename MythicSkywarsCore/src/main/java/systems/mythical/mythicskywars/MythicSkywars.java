@@ -321,6 +321,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         this.getServer().getPluginManager().registerEvents(new LobbyListener(), this);
         this.getServer().getPluginManager().registerEvents(new LobbyWaterPortalListener(), this);
         this.getServer().getPluginManager().registerEvents(new SoulWellListener(), this);
+        this.getServer().getPluginManager().registerEvents(new systems.mythical.mythicskywars.perks.PerkListener(), this);
         this.getServer().getPluginManager().registerEvents(new SpectateListener(), this);
         this.getServer().getPluginManager().registerEvents(new ChatListener(), this);
         this.getServer().getPluginManager().registerEvents(new ProjectileSpleefListener(), this);
@@ -522,6 +523,8 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         pom = new PlayerOptionsManager();
         lobbyWaterPortalManager = new LobbyWaterPortalManager(this);
         soulWellManager = new SoulWellManager(this);
+        systems.mythical.mythicskywars.perks.PerkManager.get().reload();
+        systems.mythical.mythicskywars.menus.soulwell.SoulWellService.validateRewardsOnStartup();
 
         if (gameMapManager == null) gameMapManager = new GameMapManager(this);
 
