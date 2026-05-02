@@ -247,7 +247,8 @@ public final class LevelManager {
         if (pfx == null || pfx.isEmpty()) {
             return levelPart;
         }
-        return ChatColor.translateAlternateColorCodes('&', pfx) + levelPart;
+        // Prestige prefix already contains the level info, don't append levelPart again
+        return ChatColor.translateAlternateColorCodes('&', pfx);
     }
 
     public synchronized String getProgressBar(int xp) {

@@ -994,9 +994,36 @@ public class GameMap {
                     return 3;
                 }
                 if (waitingLobbySpawn == null && teamSize > 1) {
-                    MythicSkywars.get().getLogger().info("Could Not Register Map: " + name + " - No waiting lobby spawn has been set. This is required for team games. Set it using '/swm spawn lobby'");
-                    registered = false;
-                    return 4;
+                    // Auto-generate a waiting lobby platform at Y=100 with barrier walls
+                    MythicSkywars.get().getLogger().info("Map " + name + " has no waiting lobby spawn. Generating barrier platform at Y=100...");
+                    waitingLobbySpawn = new CoordLoc(0, 100, 0);
+                    World w = getCurrentWorld();
+                    if (w != null) {
+                        // Create a 5x5 diamond block floor at Y=100
+                        for (int x = -2; x <= 2; x++) {
+                            for (int z = -2; z <= 2; z++) {
+                                w.getBlockAt(x, 100, z).setType(org.bukkit.Material.DIAMOND_BLOCK);
+                            }
+                        }
+                        // Create barrier walls around the platform (3 blocks high)
+                        for (int y = 101; y <= 103; y++) {
+                            for (int x = -3; x <= 3; x++) {
+                                w.getBlockAt(x, y, -3).setType(org.bukkit.Material.BARRIER);
+                                w.getBlockAt(x, y, 3).setType(org.bukkit.Material.BARRIER);
+                            }
+                            for (int z = -3; z <= 3; z++) {
+                                w.getBlockAt(-3, y, z).setType(org.bukkit.Material.BARRIER);
+                                w.getBlockAt(3, y, z).setType(org.bukkit.Material.BARRIER);
+                            }
+                        }
+                        // Barrier ceiling
+                        for (int x = -3; x <= 3; x++) {
+                            for (int z = -3; z <= 3; z++) {
+                                w.getBlockAt(x, 104, z).setType(org.bukkit.Material.BARRIER);
+                            }
+                        }
+                    }
+                    MythicSkywars.get().getLogger().info("Generated waiting lobby for map " + name + " at 0, 101, 0");
                 }
 
                 registered = true;

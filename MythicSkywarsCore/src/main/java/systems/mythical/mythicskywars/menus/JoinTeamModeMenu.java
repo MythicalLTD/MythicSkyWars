@@ -1,11 +1,9 @@
 package systems.mythical.mythicskywars.menus;
 
 import systems.mythical.mythicskywars.MythicSkywars;
-import systems.mythical.mythicskywars.utilities.LuckyBlockHook;
 import systems.mythical.mythicskywars.utilities.Messaging;
 import systems.mythical.mythicskywars.utilities.Util;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -21,9 +19,7 @@ import java.util.List;
 public class JoinTeamModeMenu {
 
     private static final String MENU_ID = "jointeammodemenu";
-    private static final int SLOT_DUOS = 10;
-    private static final int SLOT_SQUADS = 13;
-    private static final int SLOT_LUCKY = 16;
+    private static final int SLOT_DUOS = 13;
 
     /** Currently selected team filter per player (0 = all). */
     private static final java.util.Map<java.util.UUID, Integer> teamSizeFilter = new java.util.concurrent.ConcurrentHashMap<>();
@@ -58,38 +54,6 @@ public class JoinTeamModeMenu {
                 new Messaging.MessageFormatter().format("items.jointeam-duos"));
         menu.setItem(SLOT_DUOS, duos);
 
-        // Squads button
-        List<String> squadsLore = new ArrayList<>();
-        squadsLore.add(new Messaging.MessageFormatter().format("menu.jointeam-mode-squads-lore1"));
-        squadsLore.add(new Messaging.MessageFormatter().format("menu.jointeam-mode-squads-lore2"));
-        Material squadsIcon;
-        try {
-            squadsIcon = Material.valueOf("SHIELD");
-        } catch (IllegalArgumentException e) {
-            squadsIcon = Material.IRON_CHESTPLATE;
-        }
-        ItemStack squads = MythicSkywars.getNMS().getItemStack(
-                new ItemStack(squadsIcon, 1),
-                squadsLore,
-                new Messaging.MessageFormatter().format("items.jointeam-squads"));
-        menu.setItem(SLOT_SQUADS, squads);
-
-        // Lucky Teams button
-        List<String> luckyLore = new ArrayList<>();
-        luckyLore.add(new Messaging.MessageFormatter().format("menu.jointeam-mode-lucky-lore1"));
-        luckyLore.add(new Messaging.MessageFormatter().format("menu.jointeam-mode-lucky-lore2"));
-        boolean luckyAvailable = LuckyBlockHook.isAvailable();
-        ItemStack lucky;
-        if (luckyAvailable) {
-            lucky = MythicSkywars.getNMS().getItemStack(
-                    new ItemStack(Material.GOLD_BLOCK, 1),
-                    luckyLore,
-                    new Messaging.MessageFormatter().format("items.jointeam-lucky"));
-        } else {
-            lucky = new ItemStack(Material.AIR, 1);
-        }
-        menu.setItem(SLOT_LUCKY, lucky);
-
         MythicSkywars.getIC().create(MENU_ID, invs, event -> {
             Player player = event.getPlayer();
             int slot = event.getSlot();
@@ -97,24 +61,6 @@ public class JoinTeamModeMenu {
             if (slot == SLOT_DUOS) {
                 teamSizeFilter.put(player.getUniqueId(), 2);
                 luckyTeamSelection.remove(player.getUniqueId());
-                openTeamMenu(player);
-                return;
-            }
-            if (slot == SLOT_SQUADS) {
-                // Squads = team size 3 or 4 (show all non-duo team maps)
-                teamSizeFilter.put(player.getUniqueId(), 4);
-                luckyTeamSelection.remove(player.getUniqueId());
-                openTeamMenu(player);
-                return;
-            }
-            if (slot == SLOT_LUCKY) {
-                if (!LuckyBlockHook.isAvailable()) {
-                    Util.get().playSound(player, player.getLocation(), MythicSkywars.getCfg().getErrorSound(), 1, 1);
-                    player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
-                    return;
-                }
-                teamSizeFilter.put(player.getUniqueId(), 0); // All team sizes for lucky
-                luckyTeamSelection.add(player.getUniqueId());
                 openTeamMenu(player);
                 return;
             }
