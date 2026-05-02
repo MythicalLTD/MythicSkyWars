@@ -65,6 +65,24 @@ public class UpdateChecker {
     }
 
     /**
+     * Performs an immediate update check. Can be called from commands.
+     */
+    public void checkNow() {
+        check();
+    }
+
+    /**
+     * Downloads the update immediately. Returns true if successful.
+     * Can be called from commands.
+     */
+    public boolean downloadUpdateNow() {
+        if (downloadUrl == null) return false;
+        if (updateDownloaded) return true;
+        downloadUpdate(downloadUrl, latestVersion);
+        return updateDownloaded;
+    }
+
+    /**
      * Performs the update check against GitHub Releases API.
      */
     private void check() {

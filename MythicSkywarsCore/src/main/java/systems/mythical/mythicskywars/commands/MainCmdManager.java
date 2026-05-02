@@ -35,6 +35,8 @@ public class MainCmdManager implements CommandExecutor, SWRCmdManagerAPI {
         admincmds.add(new LobbyWaterPortalCmd("sw"));
         admincmds.add(new SoulWellCmd("sw"));
         admincmds.add(new MigrateUSWCmd("sw"));
+        admincmds.add(new CheckUpdatesCmd("sw"));
+        admincmds.add(new UpdateCmd("sw"));
 
         pcmds.add(new SWJoinCmd("sw"));
         pcmds.add(new SWJoinMenuCmd("sw"));
