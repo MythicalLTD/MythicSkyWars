@@ -21,6 +21,7 @@ public final class PerkManager {
     private boolean enabled;
     private int menuSize;
     private String menuTitle;
+    private int optionsMenuSlot;
 
     private PerkManager() {
     }
@@ -42,6 +43,7 @@ public final class PerkManager {
         enabled = cfg.getBoolean("enabled", true);
         menuSize = cfg.getInt("menuSize", 45);
         menuTitle = cfg.getString("menuTitle", "&5&lSkyWars Perks");
+        optionsMenuSlot = cfg.getInt("options-menu-slot", 20);
 
         Logger log = MythicSkywars.get().getLogger();
         ConfigurationSection perksSection = cfg.getConfigurationSection("perks");
@@ -126,6 +128,10 @@ public final class PerkManager {
 
     public String getMenuTitle() {
         return menuTitle;
+    }
+
+    public int getOptionsMenuSlot() {
+        return optionsMenuSlot;
     }
 
     public Perk getPerk(String key) {

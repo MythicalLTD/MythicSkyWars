@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.enums.PlayerOptions;
 import systems.mythical.mythicskywars.menus.soulwell.SoulWellMenu;
+import systems.mythical.mythicskywars.perks.PerkManager;
+import systems.mythical.mythicskywars.perks.PerksMenu;
 import systems.mythical.mythicskywars.utilities.Messaging;
 import systems.mythical.mythicskywars.utilities.PrestigeManager;
 import systems.mythical.mythicskywars.utilities.Util;
@@ -69,6 +71,20 @@ public class OptionsSelectionMenu {
             }
         }
 
+        if (PerkManager.get().isEnabled()
+                && MythicSkywars.get().getConfig().getBoolean("enabledMenus.perks", true)
+                && player.hasPermission("sw.perks")) {
+            int perkSlot = PerkManager.get().getOptionsMenuSlot();
+            if (perkSlot >= 0 && perkSlot < menuSize) {
+                ItemStack perkIcon = new ItemStack(perksIconMaterial(), 1);
+                List<String> perkLore = Lists.newArrayList();
+                perkLore.add(new Messaging.MessageFormatter().format("items.perks-open-lore"));
+                String perkName = new Messaging.MessageFormatter().format("items.perks-sel");
+                inv.setItem(perkSlot, MythicSkywars.getNMS().getItemStack(perkIcon, perkLore,
+                        ChatColor.translateAlternateColorCodes('&', perkName)));
+            }
+        }
+
         ArrayList<Inventory> invs = new ArrayList<>();
         invs.add(inv);
 
@@ -104,6 +120,11 @@ public class OptionsSelectionMenu {
                     PrestigeMenu.open(player);
                     Util.get().playSound(player, player.getLocation(), MythicSkywars.getCfg().getOpenOptionsMenuSound(), 1, 1);
                 }
+            } else if (name.equalsIgnoreCase(new Messaging.MessageFormatter().format("items.perks-sel"))) {
+                if (PerkManager.get().isEnabled() && player.hasPermission("sw.perks")) {
+                    PerksMenu.open(player);
+                    Util.get().playSound(player, player.getLocation(), MythicSkywars.getCfg().getOpenOptionsMenuSound(), 1, 1);
+                }
             } else if (name.equalsIgnoreCase(new Messaging.MessageFormatter().format("items.exit-menu-item"))) {
                 player.closeInventory();
             }
@@ -122,6 +143,14 @@ public class OptionsSelectionMenu {
             return Material.valueOf("END_PORTAL_FRAME");
         } catch (IllegalArgumentException e) {
             return Material.NETHER_STAR;
+        }
+    }
+
+    private static Material perksIconMaterial() {
+        try {
+            return Material.valueOf("BEACON");
+        } catch (IllegalArgumentException e) {
+            return Material.DIAMOND;
         }
     }
 }

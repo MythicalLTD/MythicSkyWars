@@ -603,6 +603,8 @@ items:
   soul-well-open-lore: '&7Spend souls on random rewards'
   prestige-sel: '&6&lPrestige'
   prestige-open-lore: '&7Choose your level prefix cosmetic'
+  perks-sel: '&5&lPerks'
+  perks-open-lore: '&7View and upgrade game perks'
   prestige-close-name: '&cClose'
   prestige-close-lore:
     - '&7Return to SkyWars'

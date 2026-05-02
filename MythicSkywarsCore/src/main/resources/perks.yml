@@ -18,6 +18,7 @@
 enabled: true
 menuSize: 45
 menuTitle: '&5&lSkyWars Perks'
+options-menu-slot: 20
 
 messages:
   unlocked: '&aUNLOCKED!'

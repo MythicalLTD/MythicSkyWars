@@ -247,6 +247,7 @@ enabledMenus:
   killsound: true
   winsound: true
   taunts: true
+  perks: true
 stats-menu:
   enabled: true
   size: 27
