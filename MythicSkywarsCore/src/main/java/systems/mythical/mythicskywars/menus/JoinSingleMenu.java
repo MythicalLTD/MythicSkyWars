@@ -464,7 +464,7 @@ public class JoinSingleMenu {
             // Search button clicked
             if (ChatColor.stripColor(name).equalsIgnoreCase("Search")) {
                 player.closeInventory();
-                player.sendMessage(ChatColor.GREEN + "[SkyWars] " + ChatColor.GRAY + "Type a map name to search (or 'cancel' to cancel):");
+                player.sendMessage(new Messaging.MessageFormatter().format("items.search-prompt"));
                 MapSearchListener.startSearch(player, "solo");
                 return;
             }

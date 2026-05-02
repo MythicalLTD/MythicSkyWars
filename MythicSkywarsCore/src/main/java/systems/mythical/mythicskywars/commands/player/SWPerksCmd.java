@@ -16,7 +16,7 @@ public class SWPerksCmd extends systems.mythical.mythicskywars.commands.BaseCmd 
 
     public boolean run(CommandSender sender, Player player, String[] args) {
         if (!PerkManager.get().isEnabled()) {
-            player.sendMessage("§cPerks are currently disabled.");
+            player.sendMessage(new systems.mythical.mythicskywars.utilities.Messaging.MessageFormatter().format("perks.disabled"));
             return true;
         }
         PerksMenu.open(player);

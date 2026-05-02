@@ -110,7 +110,7 @@ public final class PerksMenu {
 
             if (nextLvl > clickedPerk.getMaxLevel()) {
                 // Already maxed
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6This perk is already at max level!"));
+                player.sendMessage(new Messaging.MessageFormatter().format("perks.maxed"));
                 Util.get().playSound(player, player.getLocation(), MythicSkywars.getCfg().getErrorSound(), 1, 1);
                 return;
             }
@@ -120,7 +120,7 @@ public final class PerksMenu {
 
             // Check if economy is enabled for purchasing
             if (!MythicSkywars.getCfg().economyEnabled()) {
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cPurchasing is disabled. Unlock perks via the Soul Well!"));
+                player.sendMessage(new Messaging.MessageFormatter().format("perks.economy-disabled"));
                 Util.get().playSound(player, player.getLocation(), MythicSkywars.getCfg().getErrorSound(), 1, 1);
                 return;
             }
@@ -145,8 +145,11 @@ public final class PerksMenu {
             }
 
             String perkName = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', clickedPerk.getName()));
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&aUnlocked &e" + perkName + " &alevel &e" + nextLvl + " &afor &6" + cost + " coins!"));
+            player.sendMessage(new Messaging.MessageFormatter()
+                    .setVariable("perk", perkName)
+                    .setVariable("level", "" + nextLvl)
+                    .setVariable("cost", "" + cost)
+                    .format("perks.purchased"));
             Util.get().playSound(player, player.getLocation(), MythicSkywars.getCfg().getConfirmeSelctionSound(), 1, 1);
 
             // Reopen menu to show updated state

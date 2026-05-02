@@ -422,7 +422,7 @@ public class JoinTeamMenu {
             // Search button clicked
             if (org.bukkit.ChatColor.stripColor(name).equalsIgnoreCase("Search")) {
                 player.closeInventory();
-                player.sendMessage(org.bukkit.ChatColor.GREEN + "[SkyWars] " + org.bukkit.ChatColor.GRAY + "Type a map name to search (or 'cancel' to cancel):");
+                player.sendMessage(new systems.mythical.mythicskywars.utilities.Messaging.MessageFormatter().format("items.search-prompt"));
                 MapSearchListener.startSearch(player, "team");
                 return;
             }

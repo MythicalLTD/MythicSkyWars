@@ -232,7 +232,7 @@ public final class ArenaSetupMenu {
                 return true;
             case 16:
                 // Waiting lobby is now auto-generated, no manual setup needed
-                player.sendMessage(ChatColor.GREEN + "Waiting lobby is auto-generated for team maps! No setup needed.");
+                player.sendMessage(new Messaging.MessageFormatter().format("maps.waiting-lobby-auto"));
                 return true;
             case 20:
                 if (clickType == ClickType.RIGHT) {

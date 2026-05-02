@@ -55,7 +55,7 @@ public class MapSearchListener implements Listener {
         String query = event.getMessage().trim();
 
         if (query.equalsIgnoreCase("cancel")) {
-            player.sendMessage(ChatColor.YELLOW + "[SkyWars] Search cancelled.");
+            player.sendMessage(new Messaging.MessageFormatter().format("items.search-cancelled"));
             return;
         }
 
@@ -88,7 +88,7 @@ public class MapSearchListener implements Listener {
         }
 
         if (results.isEmpty()) {
-            player.sendMessage(ChatColor.RED + "[SkyWars] No maps found matching '" + query + "'.");
+            player.sendMessage(new Messaging.MessageFormatter().setVariable("query", query).format("items.search-no-results"));
             return;
         }
 
@@ -170,7 +170,7 @@ public class MapSearchListener implements Listener {
         });
 
         MythicSkywars.getIC().show(player, null);
-        player.sendMessage(ChatColor.GREEN + "[SkyWars] Found " + results.size() + " map(s) matching '" + query + "'.");
+        player.sendMessage(new Messaging.MessageFormatter().setVariable("count", "" + results.size()).setVariable("query", query).format("items.search-results"));
     }
 
     private static ChatColor getStateColor(MatchState state) {
