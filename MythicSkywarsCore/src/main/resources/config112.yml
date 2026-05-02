@@ -467,15 +467,15 @@ soulwell:
       cost: 750
   rewards:
     coins:
-      weight: 30
-      min: 10
-      max: 50
+      weight: 20
+      min: 15
+      max: 75
     xp:
-      weight: 25
-      min: 10
-      max: 35
+      weight: 15
+      min: 15
+      max: 50
     cage:
-      weight: 12
+      weight: 14
       allow-list:
       - white
       - orange
@@ -500,11 +500,11 @@ soulwell:
       deny-list:
       - none
     kit:
-      weight: 3
+      weight: 5
       allow-list: []
       deny-list: []
     perk:
-      weight: 5
+      weight: 8
       allow-list:
       - water
       - flame
@@ -529,7 +529,7 @@ soulwell:
       deny-list:
       - none
     killsound:
-      weight: 8
+      weight: 10
       allow-list:
       - pigdeath
       - catdeath
@@ -554,7 +554,7 @@ soulwell:
       deny-list:
       - none
     winsound:
-      weight: 7
+      weight: 9
       allow-list:
       - thunder
       - witherambient
@@ -579,7 +579,7 @@ soulwell:
       deny-list:
       - none
     projectile:
-      weight: 6
+      weight: 8
       allow-list:
       - water
       - flame
@@ -604,7 +604,7 @@ soulwell:
       deny-list:
       - none
     taunt:
-      weight: 4
+      weight: 5
       allow-list:
       - playwithfire
       - chicken
@@ -615,7 +615,7 @@ soulwell:
       deny-list:
       - none
     gameperk:
-      weight: 4
+      weight: 6
     command:
       weight: 0
       commands:

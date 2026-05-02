@@ -411,7 +411,7 @@ public final class SoulWellService {
             if (!isPermittedByLists(extractOptionKey(o.getPermission()), o.getPermission(), allow, deny)) {
                 continue;
             }
-            if (!player.hasPermission(o.getPermission())) {
+            if (!hasActuallyUnlocked(player, o.getPermission())) {
                 list.add(o);
             }
         }
@@ -431,7 +431,11 @@ public final class SoulWellService {
             if (!isPermittedByLists(k.getFilename(), perm, allow, deny)) {
                 continue;
             }
-            if (k.needPermission() && !player.hasPermission(perm)) {
+            // Only offer kits that require permission and the player hasn't unlocked yet
+            if (!k.needPermission()) {
+                continue;
+            }
+            if (!hasActuallyUnlocked(player, perm)) {
                 list.add(k);
             }
         }
@@ -450,7 +454,7 @@ public final class SoulWellService {
             if (!isPermittedByLists(extractOptionKey(o.getPermission()), o.getPermission(), allow, deny)) {
                 continue;
             }
-            if (!player.hasPermission(o.getPermission())) {
+            if (!hasActuallyUnlocked(player, o.getPermission())) {
                 list.add(o);
             }
         }
@@ -484,7 +488,7 @@ public final class SoulWellService {
             if (!isPermittedByLists(extractOptionKey(o.getPermission()), o.getPermission(), allow, deny)) {
                 continue;
             }
-            if (!player.hasPermission(o.getPermission())) {
+            if (!hasActuallyUnlocked(player, o.getPermission())) {
                 list.add(o);
             }
         }
@@ -503,7 +507,7 @@ public final class SoulWellService {
             if (!isPermittedByLists(extractOptionKey(o.getPermission()), o.getPermission(), allow, deny)) {
                 continue;
             }
-            if (!player.hasPermission(o.getPermission())) {
+            if (!hasActuallyUnlocked(player, o.getPermission())) {
                 list.add(o);
             }
         }
@@ -522,7 +526,7 @@ public final class SoulWellService {
             if (!isPermittedByLists(extractOptionKey(o.getPermission()), o.getPermission(), allow, deny)) {
                 continue;
             }
-            if (!player.hasPermission(o.getPermission())) {
+            if (!hasActuallyUnlocked(player, o.getPermission())) {
                 list.add(o);
             }
         }
@@ -541,7 +545,7 @@ public final class SoulWellService {
             if (!isPermittedByLists(extractOptionKey(o.getPermission()), o.getPermission(), allow, deny)) {
                 continue;
             }
-            if (!player.hasPermission(o.getPermission())) {
+            if (!hasActuallyUnlocked(player, o.getPermission())) {
                 list.add(o);
             }
         }
@@ -589,6 +593,26 @@ public final class SoulWellService {
             }
         }
         return out;
+    }
+
+    /**
+     * Checks if a player has actually unlocked a permission through the Soul Well / purchase system,
+     * rather than just having it via OP or wildcard permissions.
+     * If the player is NOT op and doesn't have a wildcard, falls back to normal hasPermission check.
+     * If the player IS op, checks the PermissionAttachment for explicit grants.
+     */
+    private static boolean hasActuallyUnlocked(Player player, String permission) {
+        // If not OP and no wildcard, use normal permission check
+        if (!player.isOp() && !player.hasPermission("sw.*")) {
+            return player.hasPermission(permission);
+        }
+        // Player is OP or has wildcard - check if they explicitly have it in their attachment
+        PlayerStat ps = PlayerStat.getPlayerStats(player);
+        if (ps == null || ps.getPerms() == null) {
+            return false;
+        }
+        Map<String, Boolean> explicit = ps.getPerms().getPermissions();
+        return explicit.containsKey(permission) && explicit.get(permission);
     }
 
     private static boolean isPermittedByLists(String key, String fullPermission, Set<String> allow, Set<String> deny) {
