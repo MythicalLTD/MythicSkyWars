@@ -2,7 +2,7 @@
 
 A modern, high-performance SkyWars plugin built for Spigot and Paper servers, supporting Minecraft versions from 1.8 up to 26.1.2.
 
-This project started as a hard fork of SkyWarsReloaded but has evolved into a fully independent and heavily extended solution focused on performance, scalability, and modern features.
+This project started as a hard fork of MythicSkywars but has evolved into a fully independent and heavily extended solution focused on performance, scalability, and modern features.
 
 ---
 
@@ -400,12 +400,12 @@ cd MythicSkyWars
 mvn clean package -DskipTests
 ```
 
-Output: `target/SWR-<version>.jar`
+Output: `target/MythicSkywars-<version>.jar`
 
 ## 📁 Project Structure
 
 ```
-SkyWarsReloadedCore/    Main plugin logic
+MythicSkywarsCore/    Main plugin logic
 v1_8_R3/                NMS 1.8.8
 v1_9_R1/                NMS 1.9.2
 v1_9_R2/                NMS 1.9.4
@@ -424,7 +424,7 @@ v1_19_R1/               NMS 1.19
 v1_20_R1/               NMS 1.20.6
 v1_21_R1/               NMS 1.21.1
 v26_1_R1/               NMS 26.1.2
-skywars-assembly/       Shaded build module
+mythicskywars-assembly/       Shaded build module
 build.bat               Build + deploy to server
 deploy-to-nexus.ps1     Upload BuildTools artifacts to Nexus
 ```
@@ -433,4 +433,4 @@ deploy-to-nexus.ps1     Upload BuildTools artifacts to Nexus
 
 ## 📜 License
 
-This project originates from SkyWarsReloaded. All original code remains under its respective license. New modifications and additions are maintained independently by the Mythical team.
+This project originates from MythicSkywars. All original code remains under its respective license. New modifications and additions are maintained independently by the Mythical team.

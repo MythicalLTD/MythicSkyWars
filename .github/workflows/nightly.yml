@@ -2,7 +2,7 @@ name: Nightly Build
 
 on:
   push:
-    branches: [ main, master, dev ]
+    branches: [ develop ]
   workflow_dispatch:
 
 permissions:
@@ -114,9 +114,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: nightly
-          name: "Nightly Build #${{ github.run_number }} (${{ steps.version.outputs.version }})"
+          name: "MythicSkywars Nightly #${{ github.run_number }} (${{ steps.version.outputs.version }})"
           body: |
-            ## Nightly Build
+            ## MythicSkywars Nightly Build
 
             **Version:** `${{ steps.version.outputs.version }}`
             **Commit:** ${{ github.sha }}
@@ -131,4 +131,4 @@ jobs:
             ${{ github.event.head_commit.message }}
           prerelease: true
           files: |
-            target/SWR-${{ steps.version.outputs.version }}.jar
+            target/MythicSkywars-${{ steps.version.outputs.version }}.jar

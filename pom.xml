@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.walrusone</groupId>
-    <artifactId>SkyWarsReloaded</artifactId>
+    <groupId>systems.mythical</groupId>
+    <artifactId>MythicSkywars</artifactId>
     <packaging>pom</packaging>
     <version>${revision}</version>
 
@@ -19,7 +19,7 @@
     </properties>
 
     <modules>
-        <module>SkyWarsReloadedCore</module>
+        <module>MythicSkywarsCore</module>
         <module>v1_8_R3</module>
         <module>v1_9_R1</module>
         <module>v1_9_R2</module>
@@ -38,7 +38,7 @@
         <module>v1_20_R1</module>
         <module>v1_21_R1</module>
         <module>v26_1_R1</module>
-        <module>skywars-assembly</module>
+        <module>mythicskywars-assembly</module>
     </modules>
 
     <profiles>
@@ -52,7 +52,7 @@
                 <jdk>1.8</jdk>
             </activation>
             <modules>
-                <module>SkyWarsReloadedCore</module>
+                <module>MythicSkywarsCore</module>
                 <module>v1_8_R3</module>
                 <module>v1_9_R1</module>
                 <module>v1_9_R2</module>
@@ -141,8 +141,8 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.walrusone</groupId>
-                <artifactId>SkyWarsReloadedCore</artifactId>
+                <groupId>systems.mythical</groupId>
+                <artifactId>MythicSkywarsCore</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>

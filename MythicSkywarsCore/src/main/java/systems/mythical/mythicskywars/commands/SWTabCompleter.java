@@ -1,0 +1,190 @@
+package systems.mythical.mythicskywars.commands;
+
+import com.google.common.collect.Lists;
+import systems.mythical.mythicskywars.MythicSkywars;
+import systems.mythical.mythicskywars.enums.ChestType;
+import systems.mythical.mythicskywars.enums.LeaderType;
+import systems.mythical.mythicskywars.game.GameMap;
+import systems.mythical.mythicskywars.managers.GameMapManager;
+import systems.mythical.mythicskywars.menus.gameoptions.objects.GameKit;
+import systems.mythical.mythicskywars.utilities.Util;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+
+import java.util.List;
+
+public class SWTabCompleter implements TabCompleter {
+
+
+    public SWTabCompleter() {
+    }
+
+    private void addMapNamesForAction(List<String> possibilities, String action) {
+        GameMapManager mapMgr = MythicSkywars.getGameMapMgr();
+        if (mapMgr == null) {
+            return;
+        }
+        for (GameMap map : mapMgr.getMapsCopy()) {
+            if (map == null) {
+                continue;
+            }
+            if ("register".equalsIgnoreCase(action) && map.isRegistered()) {
+                continue;
+            }
+            if (("unregister".equalsIgnoreCase(action) || "refresh".equalsIgnoreCase(action)) && !map.isRegistered()) {
+                continue;
+            }
+            possibilities.add(map.getName());
+        }
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
+        List<String> possibilities = Lists.newArrayList();
+        List<String> responses = Lists.newArrayList();
+
+        if (command.getName().equalsIgnoreCase("swmap")) {
+            if (args.length == 1) {
+                for (BaseCmd cmd : MapCmdManager.getCommands()) {
+                    if (Util.get().hasPerm(cmd.getType(), commandSender, cmd.cmdName)) {
+                        possibilities.add(cmd.cmdName);
+                    }
+                }
+            } else if (args.length == 2) {
+                if (args[0].equalsIgnoreCase("edit") || args[0].equalsIgnoreCase("register") || args[0].equalsIgnoreCase("unregister") ||
+                        args[0].equalsIgnoreCase("refresh") || args[0].equalsIgnoreCase("teamsize") ||
+                        args[0].equalsIgnoreCase("name") || args[0].equalsIgnoreCase("delete") ||
+                        args[0].equalsIgnoreCase("min") || args[0].equalsIgnoreCase("creator") ||
+                        args[0].equalsIgnoreCase("debug") || args[0].equalsIgnoreCase("legacyload")) {
+                    if (Util.get().hasPerm("map", commandSender, args[0].toLowerCase())) {
+                        addMapNamesForAction(possibilities, args[0]);
+                    }
+                } else if (args[0].equalsIgnoreCase("spawn") && Util.get().hasPerm("map", commandSender, "spawn")) {
+                    possibilities = Lists.newArrayList("player", "spec", "look", "lobby", "deathmatch");
+                }
+            }
+        }
+        else if (command.getName().equalsIgnoreCase("swkit")) {
+            if (args.length == 1) {
+                for (BaseCmd cmd : KitCmdManager.getCommands()) {
+                    if (Util.get().hasPerm(cmd.getType(), commandSender, cmd.cmdName)) {
+                        possibilities.add(cmd.cmdName);
+                    }
+                }
+            } else if (args.length == 2) {
+                if (args[0].equalsIgnoreCase("enable") || args[0].equalsIgnoreCase("icon") ||
+                        args[0].equalsIgnoreCase("lockicon") || args[0].equalsIgnoreCase("load") || args[0].equalsIgnoreCase("lore") ||
+                        args[0].equalsIgnoreCase("name") || args[0].equalsIgnoreCase("position") || args[0].equalsIgnoreCase("perm") ||
+                        args[0].equalsIgnoreCase("update")) {
+                    if (Util.get().hasPerm("kit", commandSender, args[0].toLowerCase())) {
+                        for (GameKit kit : GameKit.getKits()) {
+                            possibilities.add(kit.getName());
+                        }
+                    }
+
+                }
+            } else if (args.length == 3) {
+                if (args[0].equalsIgnoreCase("lore") && Util.get().hasPerm("kit", commandSender, "lore")) {
+                    possibilities = Lists.newArrayList("locked", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17");
+                }
+            }
+        }
+        else if (command.getName().equalsIgnoreCase("skywars")) {
+
+            if (args.length == 1) {
+                for (BaseCmd cmd : MainCmdManager.getCommands()) {
+                    if (Util.get().hasPerm(cmd.getType(), commandSender, cmd.cmdName)) {
+                        possibilities.add(cmd.cmdName);
+                    }
+                }
+            } else if (args.length == 2) {
+                if (args[0].equalsIgnoreCase("join") && Util.get().hasPerm("sw", commandSender, "join")) {
+                    possibilities.add("solo");
+                    possibilities.add("single");
+                    possibilities.add("team");
+                    for (GameMap map : MythicSkywars.getGameMapMgr().getMapsCopy()) {
+                        if (map.isRegistered()) {
+                            possibilities.add(map.getName());
+                        }
+                    }
+                } else if ((args[0].equalsIgnoreCase("chestadd") || args[0].equalsIgnoreCase("chestedit")) && Util.get().hasPerm("sw", commandSender, args[0].toLowerCase())) {
+                    for (ChestType ct : ChestType.values()) {
+                        possibilities.add(ct.toString().toLowerCase());
+                    }
+                } else if ((args[0].equalsIgnoreCase("stats") || args[0].equalsIgnoreCase("stat") ||
+                        args[0].equalsIgnoreCase("clearstats")) && Util.get().hasPerm("sw", commandSender, args[0].toLowerCase())) {
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        possibilities.add(p.getName());
+                    }
+                } else if ((args[0].equalsIgnoreCase("top") || args[0].equalsIgnoreCase("hologram")) && Util.get().hasPerm("sw", commandSender, args[0].toLowerCase())) {
+                    for (String leaderType : MythicSkywars.get().getLeaderTypes()) {
+                        possibilities.add(leaderType.toLowerCase());
+                    }
+                } else if (args[0].equalsIgnoreCase("migrateusw") && Util.get().hasPerm("sw", commandSender, "migrateusw")) {
+                    possibilities.add("overwrite");
+                } else if (args[0].equalsIgnoreCase("select") && Util.get().hasPerm("sw", commandSender, "select")) {
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        possibilities.add(p.getName());
+                    }
+                } else if (args[0].equalsIgnoreCase("send") && Util.get().hasPerm("sw", commandSender, "send")) {
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        possibilities.add(p.getName());
+                    }
+                    for (GameMap map : MythicSkywars.getGameMapMgr().getMapsCopy()) {
+                        possibilities.add(map.getName());
+                    }
+                }
+            } else if (args.length == 3) {
+                if (args[0].equalsIgnoreCase("chestadd") && Util.get().hasPerm("sw", commandSender, "chestadd")) {
+                    possibilities = Lists.newArrayList("hand", "inv");
+                } else if (args[0].equalsIgnoreCase("stat") && Util.get().hasPerm("sw", commandSender, "stat")) {
+                    possibilities = Lists.newArrayList("wins", "losses", "kills", "deaths", "xp", "pareffect", "proeffect", "glasscolor", "killsound", "winsound");
+                } else if (args[0].equalsIgnoreCase("hologram") && Util.get().hasPerm("sw", commandSender, "hologram")) {
+                    LeaderType lt = LeaderType.matchType(args[1].toUpperCase());
+                    if (lt != null && MythicSkywars.getHoloManager() != null && MythicSkywars.getHoloManager().getFormats(lt) != null) {
+                        possibilities = MythicSkywars.getHoloManager().getFormats(lt);
+                    }
+                } else if (args[0].equalsIgnoreCase("send") && Util.get().hasPerm("sw", commandSender, "send")) {
+                    for (GameMap map : MythicSkywars.getGameMapMgr().getMapsCopy()) {
+                        possibilities.add(map.getName());
+                    }
+                } else if (args[0].equalsIgnoreCase("join") && Util.get().hasPerm("sw", commandSender, "join")) {
+                    String mode = args[1].toLowerCase();
+                    if ("solo".equals(mode) || "single".equals(mode)) {
+                        for (GameMap map : MythicSkywars.getGameMapMgr().getMapsCopy()) {
+                            if (map.isRegistered() && map.getTeamSize() == 1) {
+                                possibilities.add(map.getName());
+                            }
+                        }
+                    } else if ("team".equals(mode)) {
+                        for (GameMap map : MythicSkywars.getGameMapMgr().getMapsCopy()) {
+                            if (map.isRegistered() && map.getTeamSize() > 1) {
+                                possibilities.add(map.getName());
+                            }
+                        }
+                    }
+                }
+            } else if (args.length == 4) {
+                if (args[0].equalsIgnoreCase("stat") && Util.get().hasPerm("sw", commandSender, "stat")) {
+                    possibilities = Lists.newArrayList("set", "add", "remove");
+                }
+            }
+        }
+        else {
+            return null;
+        }
+
+        String currentUserInput = args[args.length - 1].toLowerCase();
+        if (currentUserInput.equals("")) {
+            responses = possibilities;
+        } else {
+            for (String possibility : possibilities) {
+                if (possibility.toLowerCase().startsWith(currentUserInput)) responses.add(possibility);
+            }
+        }
+        return responses;
+    }
+}

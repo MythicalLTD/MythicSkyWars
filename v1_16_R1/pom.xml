@@ -3,8 +3,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>SkyWarsReloaded</artifactId>
-        <groupId>com.walrusone</groupId>
+        <artifactId>MythicSkywars</artifactId>
+        <groupId>systems.mythical</groupId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -31,8 +31,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.walrusone</groupId>
-            <artifactId>SkyWarsReloadedCore</artifactId>
+            <groupId>systems.mythical</groupId>
+            <artifactId>MythicSkywarsCore</artifactId>
             <version>${revision}</version>
             <scope>provided</scope>
         </dependency>
@@ -42,7 +42,7 @@
             <version>17.0.0</version>
         </dependency>
         <dependency>
-            <groupId>com.walrusone</groupId>
+            <groupId>systems.mythical</groupId>
             <artifactId>v1_15_R1</artifactId>
             <version>${revision}</version>
         </dependency>

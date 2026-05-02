@@ -105,7 +105,7 @@ jobs:
       - name: Upload release artifact
         run: |
           gh release upload "${{ github.event.release.tag_name }}" \
-            "target/SWR-${{ steps.version.outputs.version }}.jar" \
+            "target/MythicSkywars-${{ steps.version.outputs.version }}.jar" \
             --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
