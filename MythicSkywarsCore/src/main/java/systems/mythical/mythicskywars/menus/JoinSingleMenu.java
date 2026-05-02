@@ -396,7 +396,9 @@ public class JoinSingleMenu {
                         if (i >= specs.size()) {
                             specs.add(Bukkit.createInventory(null, menuSize, new Messaging.MessageFormatter().format("menu.spectatesinglegame-menu-title")));
                         }
-                        specs.get(i).setContents(inv.getContents());
+                        for (int slot = 0; slot < menuSize; slot++) {
+                            specs.get(i).setItem(slot, inv.getItem(slot));
+                        }
                         i++;
                     }
                 }
