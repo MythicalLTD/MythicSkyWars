@@ -97,6 +97,39 @@ $failed = 0
 $deployed = 0
 $skipped = 0
 
+# Deploy spigot-parent pom first (required by spigot artifacts)
+$parentPom = "$env:USERPROFILE\.m2\repository\org\spigotmc\spigot-parent\dev-SNAPSHOT\spigot-parent-dev-SNAPSHOT.pom"
+if (Test-Path $parentPom) {
+    Write-Host "=== Deploying spigot-parent ===" -ForegroundColor Cyan
+    $parentDst = "$TEMP_DIR\spigot-parent-dev-SNAPSHOT.pom"
+    Copy-Item $parentPom $parentDst -Force
+    & mvn deploy:deploy-file -DgroupId=org.spigotmc -DartifactId=spigot-parent -Dversion=dev-SNAPSHOT -Dpackaging=pom -Dfile="$parentDst" -DrepositoryId=$REPO_ID -Durl=$NEXUS_URL --no-transfer-progress -N 2>&1 | Select-String -Pattern "(BUILD|ERROR|Uploaded)" | ForEach-Object { Write-Host $_.Line }
+    if ($LASTEXITCODE -eq 0) { Write-Host "=== spigot-parent deployed ===" -ForegroundColor Green; $deployed++ }
+    else { Write-Host "WARNING: spigot-parent failed" -ForegroundColor Red; $failed++ }
+    Write-Host ""
+}
+
+# Deploy minecraft-server jars (needed by 1.17+ spigot)
+$msDir = "$env:USERPROFILE\.m2\repository\org\spigotmc\minecraft-server"
+if (Test-Path $msDir) {
+    Get-ChildItem $msDir -Directory | ForEach-Object {
+        $msVer = $_.Name
+        $msJar = "$($_.FullName)\minecraft-server-$msVer.jar"
+        $msPom = "$($_.FullName)\minecraft-server-$msVer.pom"
+        if (Test-Path $msJar) {
+            Write-Host "=== Deploying minecraft-server-$msVer ===" -ForegroundColor Cyan
+            $msDst = "$TEMP_DIR\minecraft-server-$msVer.jar"
+            Copy-Item $msJar $msDst -Force
+            $msMvnArgs = @("deploy:deploy-file", "-DgroupId=org.spigotmc", "-DartifactId=minecraft-server", "-Dversion=$msVer", "-Dpackaging=jar", "-Dfile=$msDst", "-DrepositoryId=$REPO_ID", "-Durl=$NEXUS_URL", "--no-transfer-progress", "-N")
+            if (Test-Path $msPom) { $pomDst2 = "$TEMP_DIR\minecraft-server-$msVer.pom"; Copy-Item $msPom $pomDst2 -Force; $msMvnArgs += "-DpomFile=$pomDst2" }
+            & mvn $msMvnArgs 2>&1 | Select-String -Pattern "(BUILD|ERROR|Uploaded)" | ForEach-Object { Write-Host $_.Line }
+            if ($LASTEXITCODE -eq 0) { Write-Host "=== minecraft-server-$msVer deployed ===" -ForegroundColor Green; $deployed++ }
+            else { Write-Host "WARNING: minecraft-server-$msVer failed" -ForegroundColor Red; $failed++ }
+            Write-Host ""
+        }
+    }
+}
+
 foreach ($ver in $versionMap.Keys) {
     $snapshotVer = "$ver-R0.1-SNAPSHOT"
     $jarSrc = "$M2\$snapshotVer\spigot-$snapshotVer.jar"
