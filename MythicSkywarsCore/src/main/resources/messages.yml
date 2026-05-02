@@ -417,6 +417,13 @@ menu:
   joinsolo-mode-lucky-lore1: '&7Solo Lucky mode'
   joinsolo-mode-lucky-lore2: '&eChests are replaced by LuckyBlocks'
   joinsolo-mode-lucky-lore3: '&aClick to open lucky arenas'
+  jointeam-mode-menu-title: '&8Team Queue Mode'
+  jointeam-mode-duos-lore1: '&7Teams of 2 players'
+  jointeam-mode-duos-lore2: '&aClick to browse duo arenas'
+  jointeam-mode-squads-lore1: '&7Teams of 3-4 players'
+  jointeam-mode-squads-lore2: '&aClick to browse squad arenas'
+  jointeam-mode-lucky-lore1: '&7Lucky Block team mode'
+  jointeam-mode-lucky-lore2: '&eChests replaced by LuckyBlocks'
   team_select_menu:
     item_title: '&eTeam {team} &7- {playercount}/{teamsize}'
     lore:
@@ -587,6 +594,9 @@ items:
   joinsingle: '&aSolo Player Arenas'
   joinsolo-normal: '&aSolo Normal'
   joinsolo-lucky: '&6Solo Lucky Mode'
+  jointeam-duos: '&aDuos'
+  jointeam-squads: '&bSquads'
+  jointeam-lucky: '&6Lucky Teams'
   jointeam: '&aTeam Arenas'
   spectatemenu: '&aSpectate Menu'
   skywars-options: '&bSkyWars Options Menu'

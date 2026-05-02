@@ -573,6 +573,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
             new JoinMenu();
             new JoinSoloModeMenu();
             new JoinSingleMenu();
+            new JoinTeamModeMenu();
             new JoinTeamMenu();
         }
         if (MythicSkywars.getCfg().spectateMenuEnabled()) {

@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,15 +70,7 @@ public class JoinMenu {
             }
 
             if (event.getSlot() == MythicSkywars.getCfg().getTeamSlot()) {
-                if (!MythicSkywars.getIC().hasViewers("jointeammenu")) {
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            MythicSkywars.getIC().getMenu("jointeammenu").update();
-                        }
-                    }.runTaskLater(MythicSkywars.get(), 5);
-                }
-                MythicSkywars.getIC().show(player, "jointeammenu");
+                JoinTeamModeMenu.showFor(player);
                 return;
             }
 

@@ -60,7 +60,12 @@ public class TeamCard {
                 if (useSeparateCages) {
                     playerSpawn = new CoordLoc(playerSpawn.getX() + i, playerSpawn.getY(), playerSpawn.getZ() + i);
                 } else {
-                    playerSpawn = spawns.get(i);
+                    if (i < spawns.size()) {
+                        playerSpawn = spawns.get(i);
+                    } else {
+                        // Not enough spawns defined — offset from first spawn to avoid crash
+                        playerSpawn = new CoordLoc(playerSpawn.getX() + i, playerSpawn.getY(), playerSpawn.getZ() + i);
+                    }
                 }
                 playerCards.add(new PlayerCard(this, null, playerSpawn));
             }

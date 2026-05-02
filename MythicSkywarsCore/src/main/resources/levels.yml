@@ -64,13 +64,37 @@ levels:
     rankup-cost: 15000
 
 # Commands run once per crossed level when XP increases (Soul Well wins, kills, minute XP all use addXp).
-# Example:
-#level-up-rewards:
-#  enabled: true
-#  levelRewards:
-#    '5':
-#      - 'eco give <player> 100'
-#      - '/sw stat <player> souls add 1'
+level-up-rewards:
+  enabled: true
+  levelRewards:
+    '5':
+    - 'sw stat <player> souls add 5'
+    '10':
+    - 'sw stat <player> souls add 10'
+    - 'eco give <player> 200'
+    '15':
+    - 'sw stat <player> souls add 10'
+    '20':
+    - 'sw stat <player> souls add 15'
+    - 'eco give <player> 500'
+    '25':
+    - 'sw stat <player> souls add 20'
+    - 'eco give <player> 750'
+    '30':
+    - 'sw stat <player> souls add 25'
+    - 'eco give <player> 1000'
+    '40':
+    - 'sw stat <player> souls add 30'
+    - 'eco give <player> 1500'
+    '50':
+    - 'sw stat <player> souls add 50'
+    - 'eco give <player> 2500'
+    '75':
+    - 'sw stat <player> souls add 75'
+    - 'eco give <player> 5000'
+    '100':
+    - 'sw stat <player> souls add 100'
+    - 'eco give <player> 10000'
 
 # Options menu slot: inventory index 0–26 (-1 disables the star button).
 prestige:

@@ -31,7 +31,7 @@ public class CopySoloAsDuoCmd extends systems.mythical.mythicskywars.commands.Ba
         type = t;
         forcePlayer = false;
         cmdName = "copyasduo";
-        alias = new String[]{"copySoloAsDuo", "soloasduo", "clone"};
+        alias = new String[]{"copySoloAsDuo", "copyasteam", "soloasduo", "clone"};
         argLength = 2;
     }
 
