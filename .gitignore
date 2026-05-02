@@ -11,3 +11,5 @@ settings.xml
 
 # BuildTools working directory
 BuildTools/
+
+deploy.bat
