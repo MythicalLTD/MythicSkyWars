@@ -125,24 +125,38 @@ public class UpdateChecker {
 
             if (checkBeta) {
                 // Array response — find the release with the highest version
-                String bestTag = null;
+                String bestVersion = null;
                 String bestHtml = null;
                 int searchFrom = 0;
                 while (true) {
                     String tag = extractJsonStringFrom(json, "tag_name", searchFrom);
                     if (tag == null) break;
-                    String stripped = tag.startsWith("v") ? tag.substring(1) : tag;
-                    if (bestTag == null || isNewerVersion(stripped, bestTag.startsWith("v") ? bestTag.substring(1) : bestTag)) {
-                        bestTag = tag;
-                        // Find the html_url near this tag
-                        int tagPos = json.indexOf("\"tag_name\":\"" + tag + "\"", searchFrom);
+                    int tagPos = json.indexOf("\"tag_name\":\"" + tag + "\"", searchFrom);
+
+                    // Determine the version: use tag_name, or extract from "name" field if tag is generic
+                    String version = tag.startsWith("v") ? tag.substring(1) : tag;
+                    if ("nightly".equalsIgnoreCase(tag) || !version.contains(".")) {
+                        // Tag is generic (e.g., "nightly") — extract version from release name
+                        // Name format: "MythicSkywars Nightly #17 (5.6.40-nightly.17+e0bb71c)"
+                        String releaseName = extractJsonStringFrom(json, "name", Math.max(0, tagPos - 100));
+                        if (releaseName != null) {
+                            int parenStart = releaseName.indexOf('(');
+                            int parenEnd = releaseName.indexOf(')', parenStart);
+                            if (parenStart >= 0 && parenEnd > parenStart) {
+                                version = releaseName.substring(parenStart + 1, parenEnd);
+                            }
+                        }
+                    }
+
+                    if (bestVersion == null || isNewerVersion(version, bestVersion)) {
+                        bestVersion = version;
                         bestHtml = extractJsonStringFrom(json, "html_url", Math.max(0, tagPos - 200));
                     }
-                    searchFrom = json.indexOf("\"tag_name\":\"" + tag + "\"", searchFrom) + 1;
+                    searchFrom = tagPos + 1;
                     if (searchFrom <= 0) break;
                 }
-                if (bestTag != null) {
-                    tagName = bestTag;
+                if (bestVersion != null) {
+                    tagName = bestVersion;
                     htmlUrl = bestHtml;
                 }
             } else {
