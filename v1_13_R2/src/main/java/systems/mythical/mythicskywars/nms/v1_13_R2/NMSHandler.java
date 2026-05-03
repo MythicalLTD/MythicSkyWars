@@ -109,7 +109,6 @@ public class NMSHandler extends systems.mythical.mythicskywars.nms.v1_12_R1.NMSH
             } catch (Exception ignored) {
             }
         }
-        }
     }
 
     public boolean headCheck(Block h1) {

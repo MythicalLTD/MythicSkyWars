@@ -261,7 +261,7 @@ holograms:
 ##################
 chests:
   # The maximum amount of items in a chest
-  maxItemsChest: 26
+  maxItemsChest: 38
   # The maximum amount of items in a double chest
   maxItemsDoubleChest: 53
   refill:

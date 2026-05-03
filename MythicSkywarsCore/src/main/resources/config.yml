@@ -97,7 +97,7 @@ holograms:
   enabled: true
 chests:
   loadTrappedChestsAsCenter: false
-  maxItemsChest: 26
+  maxItemsChest: 38
   maxItemsDoubleChest: 53
   # Global automatic chest refill during matches (in seconds).
   refill:
