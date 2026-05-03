@@ -80,24 +80,35 @@ public class NMSHandler extends systems.mythical.mythicskywars.nms.v1_12_R1.NMSH
             try {
                 valueInt = Integer.parseInt(value);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                // Not a number, skip
             }
         }
-        // Apply
+        // Apply - try modern API first, fall back to legacy string-based API
         try {
             if (valueBool == null) {
                 GameRule<Integer> gameRule = (GameRule<Integer>) GameRule.getByName(ruleName);
-                if (gameRule == null || valueInt == null)
-                    throw new Exception("Invalid GameRule or value provided: " + ruleName + " -> " + value);
+                if (gameRule == null || valueInt == null) {
+                    // Fallback: try legacy string-based setGameRule
+                    world.setGameRuleValue(ruleName, value);
+                    return;
+                }
                 world.setGameRule(gameRule, valueInt);
             } else {
                 GameRule<Boolean> gameRule = (GameRule<Boolean>) GameRule.getByName(ruleName);
-                if (gameRule == null)
-                    throw new Exception("Invalid GameRule: " + ruleName);
+                if (gameRule == null) {
+                    // Fallback: try legacy string-based setGameRule
+                    world.setGameRuleValue(ruleName, value);
+                    return;
+                }
                 world.setGameRule(gameRule, valueBool);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            // Last resort: try legacy API silently
+            try {
+                world.setGameRuleValue(ruleName, value);
+            } catch (Exception ignored) {
+            }
+        }
         }
     }
 
