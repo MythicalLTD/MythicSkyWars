@@ -72,9 +72,9 @@ public class ChatListener implements Listener {
                         @Override
                         public void run() {
                             gMap.update();
+                            ArenaSetupMenu.open(player, gMap);
                         }
                     }.runTask(MythicSkywars.get());
-                    ArenaSetupMenu.open(player, gMap);
                 } else if (gMap != null && setting.equalsIgnoreCase("creator")) {
                     gMap.setCreator(variable);
                     player.sendMessage(new Messaging.MessageFormatter()
@@ -85,9 +85,9 @@ public class ChatListener implements Listener {
                         @Override
                         public void run() {
                             gMap.update();
+                            ArenaSetupMenu.open(player, gMap);
                         }
                     }.runTask(MythicSkywars.get());
-                    ArenaSetupMenu.open(player, gMap);
                 }
                 ChatListener.toChange.remove(uuid);
             } else {

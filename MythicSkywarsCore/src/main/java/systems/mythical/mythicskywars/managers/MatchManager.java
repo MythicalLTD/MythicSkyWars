@@ -1491,8 +1491,10 @@ public class MatchManager {
     }
 
     private boolean isSolidOrLiquid(Material material) {
-        return material != null && (material.isSolid() || material == Material.WATER || material == Material.STATIONARY_WATER
-                || material == Material.LAVA || material == Material.STATIONARY_LAVA);
+        if (material == null) return false;
+        if (material.isSolid()) return true;
+        String name = material.name();
+        return name.contains("WATER") || name.contains("LAVA");
     }
 
     private int getGameTime() {
