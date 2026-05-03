@@ -118,9 +118,38 @@ public class UpdateChecker {
 
             String json = response.toString();
 
-            // Parse release info
-            String tagName = extractJsonString(json, "tag_name");
-            String htmlUrl = extractJsonString(json, "html_url");
+            // Parse release info — find the newest version from all releases
+            String tagName = null;
+            String htmlUrl = null;
+            String jarDownloadUrl = null;
+
+            if (checkBeta) {
+                // Array response — find the release with the highest version
+                String bestTag = null;
+                String bestHtml = null;
+                int searchFrom = 0;
+                while (true) {
+                    String tag = extractJsonStringFrom(json, "tag_name", searchFrom);
+                    if (tag == null) break;
+                    String stripped = tag.startsWith("v") ? tag.substring(1) : tag;
+                    if (bestTag == null || isNewerVersion(stripped, bestTag.startsWith("v") ? bestTag.substring(1) : bestTag)) {
+                        bestTag = tag;
+                        // Find the html_url near this tag
+                        int tagPos = json.indexOf("\"tag_name\":\"" + tag + "\"", searchFrom);
+                        bestHtml = extractJsonStringFrom(json, "html_url", Math.max(0, tagPos - 200));
+                    }
+                    searchFrom = json.indexOf("\"tag_name\":\"" + tag + "\"", searchFrom) + 1;
+                    if (searchFrom <= 0) break;
+                }
+                if (bestTag != null) {
+                    tagName = bestTag;
+                    htmlUrl = bestHtml;
+                }
+            } else {
+                // Single release response
+                tagName = extractJsonString(json, "tag_name");
+                htmlUrl = extractJsonString(json, "html_url");
+            }
 
             if (tagName == null) {
                 if (MythicSkywars.getCfg().debugEnabled()) {
@@ -133,7 +162,7 @@ public class UpdateChecker {
             String remoteVersion = tagName.startsWith("v") ? tagName.substring(1) : tagName;
 
             // Find the jar download URL from assets
-            String jarDownloadUrl = extractJarAssetUrl(json);
+            jarDownloadUrl = extractJarAssetUrl(json);
 
             // Compare versions
             if (isNewerVersion(remoteVersion, currentVersion)) {
@@ -391,8 +420,12 @@ public class UpdateChecker {
      * Finds the first occurrence of "key":"value" in the JSON string.
      */
     private String extractJsonString(String json, String key) {
+        return extractJsonStringFrom(json, key, 0);
+    }
+
+    private String extractJsonStringFrom(String json, String key, int fromIndex) {
         String search = "\"" + key + "\":\"";
-        int start = json.indexOf(search);
+        int start = json.indexOf(search, fromIndex);
         if (start == -1) return null;
         start += search.length();
         int end = json.indexOf("\"", start);
