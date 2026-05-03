@@ -115,6 +115,9 @@ public final class Messaging {
 
             if (MythicSkywars.getMessaging().getMessage(message) != null) {
                 message = MythicSkywars.getMessaging().getMessage(message);
+            } else if (message.contains(".") && !message.contains(" ")) {
+                // Looks like an unresolved message key — log it once
+                MythicSkywars.get().getLogger().warning("[Messages] Missing translation key: " + message);
             }
 
             if (message == null) {

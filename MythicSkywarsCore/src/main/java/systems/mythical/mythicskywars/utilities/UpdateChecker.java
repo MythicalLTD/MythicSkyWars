@@ -410,6 +410,17 @@ public class UpdateChecker {
         return updateDownloaded;
     }
 
+    /**
+     * Clears the download state so a forced re-check can re-download if needed.
+     */
+    public void clearDownloadState() {
+        updateDownloaded = false;
+        updateAvailable = false;
+        latestVersion = null;
+        downloadUrl = null;
+        releaseUrl = null;
+    }
+
     public String getLatestVersion() {
         return latestVersion;
     }

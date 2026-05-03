@@ -23,10 +23,19 @@ public class CheckUpdatesCmd extends systems.mythical.mythicskywars.commands.Bas
             return true;
         }
 
-        sender.sendMessage(new Messaging.MessageFormatter().format("command.update.checking"));
+        boolean force = args.length > 1 && (args[1].equalsIgnoreCase("--force") || args[1].equalsIgnoreCase("-f"));
+
+        if (force) {
+            sender.sendMessage(new Messaging.MessageFormatter().format("command.update.force-checking"));
+        } else {
+            sender.sendMessage(new Messaging.MessageFormatter().format("command.update.checking"));
+        }
 
         // Run the check async, then report back on the main thread
         org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(MythicSkywars.get(), () -> {
+            if (force) {
+                updater.clearDownloadState();
+            }
             updater.checkNow();
 
             // Report result on main thread

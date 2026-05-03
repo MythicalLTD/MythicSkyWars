@@ -45,6 +45,7 @@ command:
   update:
     unavailable: '&cUpdate checker is not available.'
     checking: '&7Checking for updates...'
+    force-checking: '&7Force re-checking for updates (clearing cache)...'
     available: '&aA new update is available! &eCurrent: &7v{current} &e→ New: &bv{version}'
     up-to-date: '&aYou are running the latest version! &7(v{version})'
     already-downloaded: '&aThe update has already been downloaded and is ready to apply.'
@@ -774,10 +775,6 @@ scoreboards:
       - '&b&lSKYWARS'
       - ''
       - '&6Solo Stats'
-      - ' &eKills: &b{kills}'
-      - ' &eWins: &b{wins}'
-      - ''
-      - '&6Team Stats'
       - ' &eKills: &b{kills}'
       - ' &eWins: &b{wins}'
       - ''

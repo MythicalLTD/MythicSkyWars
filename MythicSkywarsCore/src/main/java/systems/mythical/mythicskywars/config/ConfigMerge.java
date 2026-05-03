@@ -29,6 +29,7 @@ public final class ConfigMerge {
      */
     private static final Set<String> RUNTIME_MANAGED_ROOT_KEYS = new HashSet<String>() {{
         add("spawn");
+        add("lobby-water-portals");
     }};
 
     private ConfigMerge() {
