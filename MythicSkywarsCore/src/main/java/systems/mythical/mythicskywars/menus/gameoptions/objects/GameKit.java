@@ -93,7 +93,8 @@ public class GameKit {
 
     public static GameKit getKit(String filename) {
         for (GameKit kit : GameKit.getKits()) {
-            if (kit.getFilename().equalsIgnoreCase(filename) || kit.getColorName().equals(filename) || kit.getColorName().equals(ChatColor.translateAlternateColorCodes('&', filename))) {
+            String kitFilename = kit.getFilename();
+            if ((kitFilename != null && kitFilename.equalsIgnoreCase(filename)) || kit.getColorName().equals(filename) || kit.getColorName().equals(ChatColor.translateAlternateColorCodes('&', filename))) {
                 return kit;
             }
         }
@@ -380,7 +381,8 @@ public class GameKit {
 
     public static GameKit getKitByName(String name) {
         for (GameKit kit : kits) {
-            if (kit.getName().equalsIgnoreCase(name)) {
+            String kitName = kit.getName();
+            if (kitName != null && kitName.equalsIgnoreCase(name)) {
                 return kit;
             }
         }
