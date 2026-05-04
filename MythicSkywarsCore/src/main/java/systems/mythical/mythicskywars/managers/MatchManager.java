@@ -3,6 +3,7 @@ package systems.mythical.mythicskywars.managers;
 import com.google.common.collect.ImmutableList;
 import systems.mythical.mythicskywars.clients.feather.FeatherClientBridge;
 import systems.mythical.mythicskywars.clients.lunar.LunarApolloBridge;
+import systems.mythical.mythicskywars.clients.labymod.LabyModBridge;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.enums.GameType;
 import systems.mythical.mythicskywars.enums.MatchState;
@@ -899,6 +900,7 @@ public class MatchManager {
         LunarApolloBridge.onMatchPlaying(gameMap);
         LunarApolloBridge.notifyMatchStarted(gameMap);
         FeatherClientBridge.onMatchPlaying(gameMap);
+        LabyModBridge.onMatchPlaying(gameMap);
 
         new BukkitRunnable() {
             public void run() {
@@ -1086,6 +1088,7 @@ public class MatchManager {
                             .setVariable("map", gameMap.getName()).format("game.won"));
                     LunarApolloBridge.notifyVictory(pWinner, gameMap);
                     FeatherClientBridge.updateLobbyActivity(pWinner);
+                    LabyModBridge.updateLobbyRpc(pWinner);
                 }
             }
 
@@ -1093,6 +1096,7 @@ public class MatchManager {
         if (gameMap.getMatchState() != MatchState.OFFLINE) {
             gameMap.setMatchState(MatchState.ENDING);
             FeatherClientBridge.onMatchEnd(gameMap);
+            LabyModBridge.onMatchEnd(gameMap);
             gameMap.getGameBoard().updateScoreboard();
             for (MatchEvent mEvent : gameMap.getEvents()) {
                 if (mEvent.isEnabled() && mEvent.hasFired()) {

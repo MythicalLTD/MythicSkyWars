@@ -9,6 +9,7 @@ softdepend:
   - Apollo-Bukkit
   - Apollo
   - FeatherServerAPI
+  - LabyModServerAPI
   - Vault
   - Essentials
   - EssentialsX

@@ -1,6 +1,7 @@
 package systems.mythical.mythicskywars.listeners;
 
 import systems.mythical.mythicskywars.clients.feather.FeatherClientBridge;
+import systems.mythical.mythicskywars.clients.labymod.LabyModBridge;
 import systems.mythical.mythicskywars.clients.lunar.LunarLobbyWaterPortalApollo;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.enums.PlayerRemoveReason;
@@ -23,6 +24,7 @@ public class PlayerQuitListener implements org.bukkit.event.Listener {
         final UUID uuid = player.getUniqueId();
         LunarLobbyWaterPortalApollo.onQuit(player);
         FeatherClientBridge.onQuit(player);
+        LabyModBridge.onQuit(player);
         Party party = Party.getParty(player);
         if (party != null) {
             party.removeMember(player);

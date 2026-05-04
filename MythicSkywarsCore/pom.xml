@@ -64,6 +64,10 @@
             <url>https://repo.feathermc.net/artifactory/maven-releases</url>
         </repository>
         <repository>
+            <id>labymod</id>
+            <url>https://dist.labymod.net/api/v1/maven/release/</url>
+        </repository>
+        <repository>
             <id>glaremasters-for-swm-legacy</id>
             <url>https://repo.glaremasters.me/repository/concuncan/</url>
         </repository>
@@ -193,6 +197,13 @@
             <groupId>net.digitalingot.feather-server-api</groupId>
             <artifactId>api</artifactId>
             <version>0.0.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- LabyMod 4 Server API (optional at runtime; requires LabyModServerAPI plugin) -->
+        <dependency>
+            <groupId>net.labymod.serverapi</groupId>
+            <artifactId>server-bukkit</artifactId>
+            <version>1.0.10</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -138,7 +138,6 @@ public final class FeatherClientBridge {
             }
         }
         syncTrackedPlayers(verboseDebug);
-        plugin.getLogger().info("Feather UI integration is disabled.");
     }
 
     public static void shutdown() {

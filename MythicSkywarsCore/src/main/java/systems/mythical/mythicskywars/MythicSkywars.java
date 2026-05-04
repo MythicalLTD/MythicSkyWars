@@ -13,6 +13,7 @@ import systems.mythical.mythicskywars.commands.player.RejoinMatchExecutor;
 import systems.mythical.mythicskywars.clients.feather.FeatherClientBridge;
 import systems.mythical.mythicskywars.clients.lunar.LunarApolloBridge;
 import systems.mythical.mythicskywars.clients.lunar.LunarApolloGameplayListener;
+import systems.mythical.mythicskywars.clients.labymod.LabyModBridge;
 import systems.mythical.mythicskywars.config.Config;
 import systems.mythical.mythicskywars.config.ConfigMerge;
 import systems.mythical.mythicskywars.database.DataStorage;
@@ -250,6 +251,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         saveResourceIfMissing("clients/lunar/mods.yml.example");
         saveResourceIfMissing("clients/feather/config.yml");
         saveResourceIfMissing("clients/feather/mods.yml");
+        saveResourceIfMissing("clients/labymod/config.yml");
 
         // ------ All external integrations --------
         // PAPI
@@ -347,10 +349,11 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
 
         // LOAD BEFORE HOLO - Holo needs server to be loaded to update correctly
         load();
-        // Apollo-Bukkit / Feather API may enable after this plugin; re-scan client bridges next tick.
+        // Apollo-Bukkit / Feather / LabyMod API may enable after this plugin; re-scan client bridges next tick.
         Bukkit.getScheduler().runTaskLater(this, () -> {
             LunarApolloBridge.reload(this);
             FeatherClientBridge.reload(this);
+            LabyModBridge.reload(this);
         }, 1L);
 
         // Requires IM - aka load()
@@ -489,6 +492,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         loaded = false;
         LunarApolloBridge.shutdown();
         FeatherClientBridge.shutdown();
+        LabyModBridge.shutdown();
         if (updateChecker != null) {
             updateChecker.stop();
         }
@@ -541,6 +545,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         config.load();
         LunarApolloBridge.reload(this);
         FeatherClientBridge.reload(this);
+        LabyModBridge.reload(this);
         cm = new ChestManager();
         LuckyBlockHook.setup();
         if (LuckyBlockHook.isAvailable()) {

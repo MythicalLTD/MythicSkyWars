@@ -1,0 +1,26 @@
+# MythicSkywars — LabyMod addon policy
+# https://dev.labymod.net/pages/server/labymod/moderation/disable-addons/
+# -----------------------------------------------------------------------------
+# Controls which LabyMod addons are forcefully disabled for players.
+# Addon namespaces must match the LabyMod addon store identifiers.
+#
+# When a player joins, addons listed under "disable" will be forcefully disabled.
+# When the player leaves or the match ends, they are reverted (re-enabled).
+# -----------------------------------------------------------------------------
+
+enabled: false
+
+# Revert all disabled addons when the player leaves a match.
+revert-on-match-end: true
+
+# Addons to forcefully disable during gameplay.
+# Use the addon namespace (as shown in the LabyMod addon store).
+disable:
+  - clearwater
+  # - betterping
+  # - freelook
+  # - betterperspective
+
+# Example common addon namespaces:
+#   voicechat, clearwater, freelook, betterperspective, betterping,
+#   damageindicator, schematica, worldeditcui, minimap, xray
