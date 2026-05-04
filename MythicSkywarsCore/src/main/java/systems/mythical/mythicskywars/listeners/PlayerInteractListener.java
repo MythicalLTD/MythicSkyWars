@@ -789,6 +789,9 @@ public class PlayerInteractListener implements Listener {
     public void onPlayerWalk(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         String playerUuid = player.getUniqueId().toString();
+        if (MythicSkywars.getGameMapMgr() == null) {
+            return;
+        }
         for (GameMap gMap : MythicSkywars.getGameMapMgr().getPlayableArenas(GameType.ALL)) {
             if (!gMap.getDeathMatchWaiters().contains(playerUuid)) {
                 continue;

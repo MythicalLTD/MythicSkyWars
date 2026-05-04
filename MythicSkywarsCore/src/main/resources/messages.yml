@@ -872,6 +872,8 @@ helpList:
       players stat value"
     setspawn: "&a/sw setspawn &e- &2Sets the spawn at your current location"
     reload: "&a/sw reload &e- &2Reloads SkyWars"
+    feather: "&a/sw feather &e- &2Feather status, player detection, async subscription and mod policy info"
+    lunar: "&a/sw lunar &e- &2Lunar status"
     clearstats: "&a/sw clearstats &e[playername] &e- &2Clears a SkyWars players stats"
     migrateusw: "&a/sw migrateusw [overwrite] &e- &2Imports player stats from
       UltraSkyWars MongoDB using config.yml migration settings"

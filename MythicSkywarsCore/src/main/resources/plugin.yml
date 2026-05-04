@@ -8,6 +8,7 @@ description: MythicSkywars - A modern, high-performance SkyWars plugin.
 softdepend:
   - Apollo-Bukkit
   - Apollo
+  - FeatherServerAPI
   - Vault
   - Essentials
   - EssentialsX
@@ -173,6 +174,9 @@ permissions:
   sw.winsound:
     description: Allows a player to use sw winsound command.
     default: true
+  sw.feather.combat.bypassmisspenalty:
+    description: Allows bypassing miss penalty for Feather users when permission-based mode is enabled.
+    default: false
   sw.killsound:
     description: Allows a player to use sw killsound command.
     default: true
@@ -211,6 +215,12 @@ permissions:
     default: op
   sw.reload:
     description: Allows a player to use the reload command.
+    default: op
+  sw.feather:
+    description: Allows a player to use Feather debug commands.
+    default: op
+  sw.lunar:
+    description: Allows a player to use Lunar debug commands.
     default: op
   sw.chestadd:
     description: Allows a player to use the chestadd command.

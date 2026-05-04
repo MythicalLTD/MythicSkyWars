@@ -10,6 +10,7 @@ import systems.mythical.mythicskywars.api.impl.MythicSkywarsImpl;
 import systems.mythical.mythicskywars.commands.*;
 import systems.mythical.mythicskywars.commands.player.LeaveMatchExecutor;
 import systems.mythical.mythicskywars.commands.player.RejoinMatchExecutor;
+import systems.mythical.mythicskywars.clients.feather.FeatherClientBridge;
 import systems.mythical.mythicskywars.clients.lunar.LunarApolloBridge;
 import systems.mythical.mythicskywars.clients.lunar.LunarApolloGameplayListener;
 import systems.mythical.mythicskywars.config.Config;
@@ -245,9 +246,10 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         }
 
         // Client integration defaults (Lunar Apollo reference + Feather placeholder)
-        saveResource("clients/lunar/config.yml", false);
-        saveResource("clients/lunar/mods.yml.example", false);
-        saveResource("clients/feather/config.yml", false);
+        saveResourceIfMissing("clients/lunar/config.yml");
+        saveResourceIfMissing("clients/lunar/mods.yml.example");
+        saveResourceIfMissing("clients/feather/config.yml");
+        saveResourceIfMissing("clients/feather/mods.yml");
 
         // ------ All external integrations --------
         // PAPI
@@ -345,8 +347,11 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
 
         // LOAD BEFORE HOLO - Holo needs server to be loaded to update correctly
         load();
-        // Apollo-Bukkit may enable after this plugin; re-scan Lunar bridge next tick so detection is correct.
-        Bukkit.getScheduler().runTaskLater(this, () -> LunarApolloBridge.reload(this), 1L);
+        // Apollo-Bukkit / Feather API may enable after this plugin; re-scan client bridges next tick.
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            LunarApolloBridge.reload(this);
+            FeatherClientBridge.reload(this);
+        }, 1L);
 
         // Requires IM - aka load()
         new ArenasMenu();
@@ -483,6 +488,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
     public void onDisable() {
         loaded = false;
         LunarApolloBridge.shutdown();
+        FeatherClientBridge.shutdown();
         if (updateChecker != null) {
             updateChecker.stop();
         }
@@ -534,6 +540,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         reloadConfig();
         config.load();
         LunarApolloBridge.reload(this);
+        FeatherClientBridge.reload(this);
         cm = new ChestManager();
         LuckyBlockHook.setup();
         if (LuckyBlockHook.isAvailable()) {
@@ -924,5 +931,12 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
 
     public static GameMapManager getGameMapMgr() {
         return instance.gameMapManager;
+    }
+
+    private void saveResourceIfMissing(String path) {
+        File out = new File(getDataFolder(), path);
+        if (!out.exists()) {
+            saveResource(path, false);
+        }
     }
 }

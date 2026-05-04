@@ -60,6 +60,10 @@
             <url>https://repo.lunarclient.dev</url>
         </repository>
         <repository>
+            <id>feather-repo</id>
+            <url>https://repo.feathermc.net/artifactory/maven-releases</url>
+        </repository>
+        <repository>
             <id>glaremasters-for-swm-legacy</id>
             <url>https://repo.glaremasters.me/repository/concuncan/</url>
         </repository>
@@ -182,6 +186,13 @@
             <groupId>com.lunarclient</groupId>
             <artifactId>apollo-extra-adventure4</artifactId>
             <version>1.2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Feather Server API (optional at runtime) -->
+        <dependency>
+            <groupId>net.digitalingot.feather-server-api</groupId>
+            <artifactId>api</artifactId>
+            <version>0.0.5</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

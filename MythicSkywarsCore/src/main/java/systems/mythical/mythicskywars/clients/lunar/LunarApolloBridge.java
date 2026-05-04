@@ -176,6 +176,13 @@ public final class LunarApolloBridge {
         return yamlEnabled && apolloClassesAvailable && isApolloPluginPresent();
     }
 
+    public static String getStatusSummary() {
+        return "enabled=" + yamlEnabled
+                + ", classes=" + apolloClassesAvailable
+                + ", plugin=" + isApolloPluginPresent()
+                + ", notifications=" + notificationEnabled;
+    }
+
     /**
      * Official Bukkit distribution uses {@code Apollo-Bukkit}; some builds may register as {@code Apollo}.
      */
@@ -295,6 +302,24 @@ public final class LunarApolloBridge {
         if (ap.isPresent()) {
             Notification n = buildNotification(notifVictoryTitle, notifVictoryDesc,
                     Duration.ofSeconds(Math.max(notificationDisplaySeconds, 5)), gameMap, winner);
+            if (n != null) {
+                mod.displayNotification(ap.get(), n);
+            }
+        }
+    }
+
+    public static void notifyTest(Player player, GameMap gameMap) {
+        if (!isUsable() || !notificationEnabled || player == null || gameMap == null) {
+            return;
+        }
+        NotificationModule mod = Apollo.getModuleManager().getModule(NotificationModule.class);
+        if (mod == null || !Apollo.getModuleManager().isEnabled(NotificationModule.class)) {
+            return;
+        }
+        Optional<ApolloPlayer> ap = Apollo.getPlayerManager().getPlayer(player.getUniqueId());
+        if (ap.isPresent()) {
+            Notification n = buildNotification("Lunar test", "SkyWars integration is active.",
+                    Duration.ofSeconds(Math.max(3, notificationDisplaySeconds)), gameMap, player);
             if (n != null) {
                 mod.displayNotification(ap.get(), n);
             }

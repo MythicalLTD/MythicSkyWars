@@ -1,6 +1,7 @@
 package systems.mythical.mythicskywars.listeners;
 
 import systems.mythical.mythicskywars.MythicSkywars;
+import systems.mythical.mythicskywars.clients.feather.FeatherClientBridge;
 import systems.mythical.mythicskywars.enums.GameType;
 import systems.mythical.mythicskywars.game.GameMap;
 import systems.mythical.mythicskywars.managers.GameMapManager;
@@ -29,6 +30,7 @@ public class PlayerJoinListener implements Listener {
     public void onJoin(final PlayerJoinEvent event) {
 
         final Player player = event.getPlayer();
+        FeatherClientBridge.onJoin(player);
 
         new BukkitRunnable() {
             @Override

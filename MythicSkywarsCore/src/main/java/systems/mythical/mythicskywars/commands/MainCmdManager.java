@@ -37,6 +37,8 @@ public class MainCmdManager implements CommandExecutor, SWRCmdManagerAPI {
         admincmds.add(new MigrateUSWCmd("sw"));
         admincmds.add(new CheckUpdatesCmd("sw"));
         admincmds.add(new UpdateCmd("sw"));
+        admincmds.add(new FeatherCmd("sw"));
+        admincmds.add(new LunarCmd("sw"));
 
         pcmds.add(new SWJoinCmd("sw"));
         pcmds.add(new SWJoinMenuCmd("sw"));

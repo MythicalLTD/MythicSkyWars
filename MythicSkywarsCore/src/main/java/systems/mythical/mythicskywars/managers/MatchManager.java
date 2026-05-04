@@ -1,6 +1,7 @@
 package systems.mythical.mythicskywars.managers;
 
 import com.google.common.collect.ImmutableList;
+import systems.mythical.mythicskywars.clients.feather.FeatherClientBridge;
 import systems.mythical.mythicskywars.clients.lunar.LunarApolloBridge;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.enums.GameType;
@@ -897,6 +898,7 @@ public class MatchManager {
         gameMap.setTimer(this.getGameTime());
         LunarApolloBridge.onMatchPlaying(gameMap);
         LunarApolloBridge.notifyMatchStarted(gameMap);
+        FeatherClientBridge.onMatchPlaying(gameMap);
 
         new BukkitRunnable() {
             public void run() {
@@ -1083,12 +1085,14 @@ public class MatchManager {
                     pWinner.sendMessage(new Messaging.MessageFormatter()
                             .setVariable("map", gameMap.getName()).format("game.won"));
                     LunarApolloBridge.notifyVictory(pWinner, gameMap);
+                    FeatherClientBridge.updateLobbyActivity(pWinner);
                 }
             }
 
         }
         if (gameMap.getMatchState() != MatchState.OFFLINE) {
             gameMap.setMatchState(MatchState.ENDING);
+            FeatherClientBridge.onMatchEnd(gameMap);
             gameMap.getGameBoard().updateScoreboard();
             for (MatchEvent mEvent : gameMap.getEvents()) {
                 if (mEvent.isEnabled() && mEvent.hasFired()) {
@@ -1220,6 +1224,9 @@ public class MatchManager {
     }
 
     public GameMap getPlayerMap(final Player player) {
+        if (MythicSkywars.getGameMapMgr() == null) {
+            return null;
+        }
         if (player != null) {
             for (final GameMap gameMap : MythicSkywars.getGameMapMgr().getMapsCopy()) {
                 if (gameMap.getAllPlayers().contains(player)) return gameMap;
@@ -1259,6 +1266,9 @@ public class MatchManager {
     }
 
     public GameMap getDeadPlayerMap(final Player v0) {
+        if (MythicSkywars.getGameMapMgr() == null) {
+            return null;
+        }
         if (v0 != null) {
             for (final GameMap gameMap : MythicSkywars.getGameMapMgr().getMapsCopy()) {
                 if (gameMap.mapContainsDead(v0.getUniqueId())) {
@@ -1270,6 +1280,9 @@ public class MatchManager {
     }
 
     public GameMap getSpectatorMap(final Player player) {
+        if (MythicSkywars.getGameMapMgr() == null) {
+            return null;
+        }
         UUID uuid = null;
         if (player != null) {
             uuid = player.getUniqueId();
