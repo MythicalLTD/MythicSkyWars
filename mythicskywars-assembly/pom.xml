@@ -134,6 +134,18 @@
             <version>3.2.1</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>4.17.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-legacy</artifactId>
+            <version>4.17.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -147,6 +159,10 @@
                         <relocation>
                             <pattern>org.bstats</pattern>
                             <shadedPattern>systems.mythical.mythicskywars.libs.bstats</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>net.kyori</pattern>
+                            <shadedPattern>systems.mythical.mythicskywars.libs.kyori</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
@@ -163,6 +179,7 @@
                                     <include>systems.mythical</include>
                                     <include>org.mongodb:mongo-java-driver</include>
                                     <include>org.bstats:*</include>
+                                    <include>net.kyori:*</include>
                                 </includes>
                             </artifactSet>
                             <finalName>MythicSkywars-${revision}</finalName>
@@ -181,6 +198,7 @@
                                     <include>systems.mythical</include>
                                     <include>org.mongodb:mongo-java-driver</include>
                                     <include>org.bstats:*</include>
+                                    <include>net.kyori:*</include>
                                 </includes>
                             </artifactSet>
                             <finalName>MythicSkywars-latest</finalName>

@@ -28,6 +28,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 
 import java.util.UUID;
@@ -54,6 +55,32 @@ public class LobbyListener implements org.bukkit.event.Listener {
         }
         if (MythicSkywars.getCfg().isLobbyForceDay()) {
             world.setTime(1000L);
+        }
+        // Remove hostile mobs from the lobby world (preserves NPCs, armor stands, holograms, etc.)
+        clearHostileMobs(world);
+    }
+
+    /**
+     * Removes hostile mobs from the lobby world while preserving:
+     * - Players
+     * - Armor stands (used by holograms, NPCs)
+     * - Entities with custom names (likely NPCs from Citizens, FancyNPCs, etc.)
+     * - Entities that have metadata from NPC plugins
+     */
+    private void clearHostileMobs(World world) {
+        for (org.bukkit.entity.Entity entity : world.getEntities()) {
+            if (entity instanceof Player) continue;
+            if (entity instanceof org.bukkit.entity.ArmorStand) continue;
+            // Preserve named entities (NPCs, custom mobs from other plugins)
+            if (entity.getCustomName() != null) continue;
+            // Preserve entities marked by NPC plugins (Citizens, FancyNPCs, etc.)
+            if (entity.hasMetadata("NPC")) continue;
+            // Only remove living hostile/neutral mobs (monsters, animals)
+            if (entity instanceof org.bukkit.entity.Monster
+                    || entity instanceof org.bukkit.entity.Slime
+                    || entity instanceof org.bukkit.entity.Phantom) {
+                entity.remove();
+            }
         }
     }
 
@@ -108,6 +135,24 @@ public class LobbyListener implements org.bukkit.event.Listener {
         e.setCancelled(true);
         player.setFireTicks(0);
         player.setHealth(player.getMaxHealth());
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onCreatureSpawn(CreatureSpawnEvent e) {
+        if (!MythicSkywars.getCfg().protectLobby()) {
+            return;
+        }
+        if (!Util.get().isSpawnWorld(e.getEntity().getWorld())) {
+            return;
+        }
+        // Allow spawns from plugins (NPCs, holograms, FancyNPCs, Citizens, etc.)
+        CreatureSpawnEvent.SpawnReason reason = e.getSpawnReason();
+        if (reason == CreatureSpawnEvent.SpawnReason.CUSTOM
+                || reason == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG
+                || reason == CreatureSpawnEvent.SpawnReason.DEFAULT) {
+            return;
+        }
+        e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGH)

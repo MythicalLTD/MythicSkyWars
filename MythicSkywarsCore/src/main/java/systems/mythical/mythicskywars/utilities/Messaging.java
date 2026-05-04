@@ -4,6 +4,9 @@ import com.google.common.collect.Maps;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.config.ConfigMerge;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -21,6 +24,15 @@ import java.util.regex.Pattern;
 public final class Messaging {
     private static final Pattern COLOR_PATTERN = Pattern.compile("(?i)([&§])[0-9A-FK-OR]");
     private static final Pattern HEX_PATTERN = Pattern.compile("(?i)[&§]#([0-9A-F]{6})");
+    // Detects MiniMessage tags like <red>, <bold>, <#FF5555>, <gradient:red:blue>, <reset>, etc.
+    private static final Pattern MINIMESSAGE_PATTERN = Pattern.compile("<(/?[a-zA-Z_#][a-zA-Z0-9_:#.\\-]*)>");
+
+    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.builder()
+            .hexColors()
+            .useUnusualXRepeatedCharacterHexFormat()
+            .build();
+
     private final FileConfiguration storage;
 
     public Messaging(Plugin plugin) {
@@ -143,8 +155,43 @@ public final class Messaging {
                 message = MythicSkywars.getMessaging().getPrefix() + message;
             }
 
-            return translateHexColors(ChatColor.translateAlternateColorCodes('&', message));
+            return colorize(message);
         }
+    }
+
+    /**
+     * Auto-detects the color format and applies the appropriate colorization.
+     * <ul>
+     *   <li>If the message contains MiniMessage tags (e.g. {@code <red>}, {@code <bold>}, {@code <#FF5555>}),
+     *       it is parsed as MiniMessage and serialized to legacy format.</li>
+     *   <li>Otherwise, legacy {@code &} color codes and {@code &#RRGGBB} hex codes are translated.</li>
+     * </ul>
+     */
+    private static String colorize(String message) {
+        if (message == null || message.isEmpty()) {
+            return message;
+        }
+
+        // Auto-detect: if it contains MiniMessage-style tags, parse as MiniMessage
+        if (isMiniMessage(message)) {
+            try {
+                Component component = MINI_MESSAGE.deserialize(message);
+                return LEGACY_SERIALIZER.serialize(component);
+            } catch (Exception e) {
+                // If MiniMessage parsing fails, fall through to legacy
+            }
+        }
+
+        // Legacy format: translate & codes and &#hex codes
+        return translateHexColors(ChatColor.translateAlternateColorCodes('&', message));
+    }
+
+    /**
+     * Detects whether a message uses MiniMessage format.
+     * Returns true if the message contains recognized MiniMessage tags.
+     */
+    private static boolean isMiniMessage(String message) {
+        return MINIMESSAGE_PATTERN.matcher(message).find();
     }
 
     /**
