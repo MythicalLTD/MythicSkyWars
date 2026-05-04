@@ -33,6 +33,20 @@ public class FileWorldManager implements WorldManager {
             deleteWorld(migratedDir);
         }
 
+        // Delete level.dat from the copied world folder before loading.
+        // Old map templates may contain deprecated/invalid game rules (e.g. gameLoopFunction, 
+        // randomTickSpeed stored as "false") that cause Paper warnings during world creation.
+        // Removing level.dat forces the server to generate a fresh one with valid defaults.
+        File worldFolder = getWorldFolder(worldName);
+        File levelDat = new File(worldFolder, "level.dat");
+        if (levelDat.exists()) {
+            levelDat.delete();
+        }
+        File levelDatOld = new File(worldFolder, "level.dat_old");
+        if (levelDatOld.exists()) {
+            levelDatOld.delete();
+        }
+
         WorldCreator worldCreator = new WorldCreator(worldName);
         worldCreator.environment(environment);
         worldCreator.generateStructures(false);
@@ -57,6 +71,7 @@ public class FileWorldManager implements WorldManager {
         MythicSkywars.getNMS().setGameRule(world, "showDeathMessages", "false");
         MythicSkywars.getNMS().setGameRule(world, "announceAdvancements", "false");
         MythicSkywars.getNMS().setGameRule(world, "doDaylightCycle", "false");
+        MythicSkywars.getNMS().setGameRule(world, "randomTickSpeed", "0");
 
         boolean loaded = false;
         for (World w : MythicSkywars.get().getServer().getWorlds()) {

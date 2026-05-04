@@ -17,12 +17,17 @@ public class NMSHandler extends systems.mythical.mythicskywars.nms.v1_21_R1.NMSH
     private static final Map<String, String> GAME_RULE_MAPPINGS = new HashMap<>();
     
     static {
-        GAME_RULE_MAPPINGS.put("doMobSpawning", "spawn_mobs");
+        GAME_RULE_MAPPINGS.put("doMobSpawning", "spawning_mobs");
         GAME_RULE_MAPPINGS.put("mobGriefing", "mob_griefing");
         GAME_RULE_MAPPINGS.put("doFireTick", "fire_spread_radius_around_player");
         GAME_RULE_MAPPINGS.put("showDeathMessages", "show_death_messages");
         GAME_RULE_MAPPINGS.put("announceAdvancements", "show_advancement_messages");
         GAME_RULE_MAPPINGS.put("doDaylightCycle", "advance_time");
+        GAME_RULE_MAPPINGS.put("doWeatherCycle", "advance_weather");
+        GAME_RULE_MAPPINGS.put("keepInventory", "keep_inventory");
+        GAME_RULE_MAPPINGS.put("naturalRegeneration", "natural_health_regeneration");
+        GAME_RULE_MAPPINGS.put("doTileDrops", "tile_drops");
+        GAME_RULE_MAPPINGS.put("randomTickSpeed", "random_tick_speed");
     }
 
     @Override
