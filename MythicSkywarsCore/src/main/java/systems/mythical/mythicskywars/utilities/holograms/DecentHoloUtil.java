@@ -183,21 +183,20 @@ public class DecentHoloUtil extends HologramsUtil {
         String keyToRemove = null;
         double distance = 1000000;
         for (LeaderType type : LeaderType.values()) {
-            if (MythicSkywars.getCfg().isTypeEnabled(type)) {
-                if (fc != null && fc.getConfigurationSection("leaderboard." + type.toString().toLowerCase(Locale.ROOT)) != null) {
-                    for (String key : fc.getConfigurationSection("leaderboard." + type.toString().toLowerCase(Locale.ROOT)).getKeys(false)) {
-                        if (hologramIds.get(type) != null && hologramIds.get(type).get(key) != null) {
-                            for (String hid : hologramIds.get(type).get(key)) {
-                                Hologram holo = DHAPI.getHologram(hid);
-                                if (holo == null) {
-                                    continue;
-                                }
-                                if (loc.distance(holo.getLocation()) < distance) {
-                                    idToRemove = hid;
-                                    typeToRemove = type;
-                                    keyToRemove = key;
-                                    distance = loc.distance(holo.getLocation());
-                                }
+            // Don't filter by isTypeEnabled — allow removing holograms even if the type is currently disabled
+            if (fc != null && fc.getConfigurationSection("leaderboard." + type.toString().toLowerCase(Locale.ROOT)) != null) {
+                for (String key : fc.getConfigurationSection("leaderboard." + type.toString().toLowerCase(Locale.ROOT)).getKeys(false)) {
+                    if (hologramIds.get(type) != null && hologramIds.get(type).get(key) != null) {
+                        for (String hid : hologramIds.get(type).get(key)) {
+                            Hologram holo = DHAPI.getHologram(hid);
+                            if (holo == null) {
+                                continue;
+                            }
+                            if (loc.distance(holo.getLocation()) < distance) {
+                                idToRemove = hid;
+                                typeToRemove = type;
+                                keyToRemove = key;
+                                distance = loc.distance(holo.getLocation());
                             }
                         }
                     }
