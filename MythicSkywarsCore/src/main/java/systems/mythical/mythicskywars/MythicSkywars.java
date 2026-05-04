@@ -175,6 +175,10 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
     public void onEnable() {
         loaded = false;
 
+        // bStats metrics
+        int pluginId = 24498; // MythicSkywars bStats plugin ID
+        new org.bstats.bukkit.Metrics(this, pluginId);
+
         // NMS Init
         this.nmsHandler = NMSUtils.loadNMS(this);
         if (this.nmsHandler == null) {

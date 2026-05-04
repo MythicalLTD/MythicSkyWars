@@ -93,6 +93,12 @@
             <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.2.1</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- SLIME WORLDS: ASWM DEPENDENCY -->
 
         <!-- SLIME WORLDS: USE THESE DEPENDENCIES TO GET LEGACY SWM SUPPORT IN THE IDEA DURING DEVELOPMENT-->

@@ -128,6 +128,12 @@
             <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.2.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -136,6 +142,14 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.1</version>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>systems.mythical.mythicskywars.libs.bstats</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
                 <executions>
                     <execution>
                         <id>version-jar</id>
@@ -148,6 +162,7 @@
                                 <includes>
                                     <include>systems.mythical</include>
                                     <include>org.mongodb:mongo-java-driver</include>
+                                    <include>org.bstats:*</include>
                                 </includes>
                             </artifactSet>
                             <finalName>MythicSkywars-${revision}</finalName>
@@ -165,6 +180,7 @@
                                 <includes>
                                     <include>systems.mythical</include>
                                     <include>org.mongodb:mongo-java-driver</include>
+                                    <include>org.bstats:*</include>
                                 </includes>
                             </artifactSet>
                             <finalName>MythicSkywars-latest</finalName>
