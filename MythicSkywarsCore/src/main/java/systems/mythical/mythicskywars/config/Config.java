@@ -371,11 +371,11 @@ public class Config {
             leaderSize = MythicSkywars.get().getConfig().getInt("leaderboards.length");
             leaderSignsEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.signsEnabled");
             leaderHeadsEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.headsEnabled");
-            winsEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.winsLeaderboardEnabled");
-            lossesEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.lossesLeaderboardEnabled");
-            killsEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.killsLeaderboardEnabled");
-            deathsEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.deathsLeaderboardEnabled");
-            xpEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.xpLeaderboardEnabled");
+            winsEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.winsLeaderboardEnabled", true);
+            lossesEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.lossesLeaderboardEnabled", true);
+            killsEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.killsLeaderboardEnabled", true);
+            deathsEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.deathsLeaderboardEnabled", true);
+            xpEnabled = MythicSkywars.get().getConfig().getBoolean("leaderboards.xpLeaderboardEnabled", true);
             leaderboardUpdateInterval = MythicSkywars.get().getConfig().getInt("leaderboards.leaderboardUpdateInterval");
 
             displayTimerOnLevelbar = MythicSkywars.get().getConfig().getBoolean("game.displayTimerOnLevelbar");
@@ -447,7 +447,7 @@ public class Config {
             chestRefillKeepChestOpen =  MythicSkywars.get().getConfig().getBoolean("chests.refill.keepChestOpen", false);
             chestRefillShowHologram =   MythicSkywars.get().getConfig().getBoolean("chests.refill.showHologram", false);
 
-            useHolograms =              MythicSkywars.get().getConfig().getBoolean("holograms.enabled");
+            useHolograms =              MythicSkywars.get().getConfig().getBoolean("holograms.enabled", true);
 
             boolean requireSave = false;
 
