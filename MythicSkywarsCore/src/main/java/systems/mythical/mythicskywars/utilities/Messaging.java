@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 public final class Messaging {
     private static final Pattern COLOR_PATTERN = Pattern.compile("(?i)([&§])[0-9A-FK-OR]");
+    private static final Pattern HEX_PATTERN = Pattern.compile("(?i)[&§]#([0-9A-F]{6})");
     private final FileConfiguration storage;
 
     public Messaging(Plugin plugin) {
@@ -142,7 +143,30 @@ public final class Messaging {
                 message = MythicSkywars.getMessaging().getPrefix() + message;
             }
 
-            return ChatColor.translateAlternateColorCodes('&', message);
+            return translateHexColors(ChatColor.translateAlternateColorCodes('&', message));
         }
+    }
+
+    /**
+     * Translates hex color codes in the format {@code &#RRGGBB} or {@code §#RRGGBB}
+     * to the Minecraft-compatible {@code §x§R§R§G§G§B§B} format.
+     * Only applies on servers that support RGB colors (1.16+).
+     */
+    private static String translateHexColors(String message) {
+        if (message == null || MythicSkywars.getNMS() == null || MythicSkywars.getNMS().getVersion() < 16) {
+            return message;
+        }
+        Matcher matcher = HEX_PATTERN.matcher(message);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String hex = matcher.group(1);
+            StringBuilder replacement = new StringBuilder("§x");
+            for (char c : hex.toCharArray()) {
+                replacement.append('§').append(c);
+            }
+            matcher.appendReplacement(sb, replacement.toString());
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 }
