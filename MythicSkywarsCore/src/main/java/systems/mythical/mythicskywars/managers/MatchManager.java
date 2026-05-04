@@ -906,20 +906,7 @@ public class MatchManager {
                     for (MatchEvent event : gameMap.getEvents()) {
                         if (event.isEnabled() && event.willFire() && !event.hasFired()) {
                             if (event.getStartTime() <= gameMap.getTimer()) {
-                                // Only fire one event at a time — skip if another event is currently active
-                                boolean anotherEventActive = false;
-                                for (MatchEvent other : gameMap.getEvents()) {
-                                    if (other != event && other.hasFired() && !other.isRepeatable()) {
-                                        // Check if this other event has a length (timed) and is still running
-                                        if (other.getLength() > 0) {
-                                            anotherEventActive = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (!anotherEventActive) {
-                                    event.doEvent();
-                                }
+                                event.doEvent();
                             } else {
                                 if (event.announceEnabled()) {
                                     event.announceTimer();

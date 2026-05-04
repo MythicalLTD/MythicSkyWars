@@ -82,6 +82,7 @@ public final class LunarApolloBridge {
 
     private static boolean glowEnabled;
     private static boolean glowTeammates;
+    private static boolean glowEnemiesTeams;
     private static boolean glowEnemiesSolo;
     /** When true, glow is only sent if the viewer has unobstructed line of sight (no x-ray through walls). */
     private static boolean glowRequireLineOfSight = true;
@@ -141,6 +142,7 @@ public final class LunarApolloBridge {
 
         glowEnabled = cfg.getBoolean("modules.glow.enabled", true);
         glowTeammates = cfg.getBoolean("modules.glow.teammates", true);
+        glowEnemiesTeams = cfg.getBoolean("modules.glow.enemies-in-team", true);
         glowEnemiesSolo = cfg.getBoolean("modules.glow.enemies-in-solo", false);
         glowRequireLineOfSight = cfg.getBoolean("modules.glow.require-line-of-sight", true);
         glowMaxHorizontalBlocks = Math.max(0, cfg.getInt("modules.glow.max-horizontal-blocks", 48));
@@ -625,26 +627,29 @@ public final class LunarApolloBridge {
             }
             ApolloPlayer ap = apOpt.get();
             glow.resetGlow(ap);
-            if (gameMap.getTeamSize() > 1 && glowTeammates) {
-                TeamCard tc = gameMap.getTeamCard(viewer);
-                if (tc == null) {
-                    continue;
+            if (gameMap.getTeamSize() > 1) {
+                TeamCard viewerTeam = resolvePlayerTeam(gameMap, viewer);
+                for (Player other : alive) {
+                    if (other.equals(viewer)) {
+                        continue;
+                    }
+                    if (!viewer.getWorld().equals(other.getWorld())) {
+                        continue;
+                    }
+                    if (!viewer.canSee(other) || !shouldApplyApolloGlow(viewer, other)) {
+                        continue;
+                    }
+                    TeamCard otherTeam = resolvePlayerTeam(gameMap, other);
+                    if (viewerTeam != null && otherTeam != null && viewerTeam.equals(otherTeam)) {
+                        if (glowTeammates) {
+                            glow.overrideGlow(ap, other.getUniqueId(), colorFromTeamWool(viewerTeam.getByte()));
+                        }
+                    } else if (viewerTeam != null && otherTeam != null && glowEnemiesTeams) {
+                        // Only mark enemies when both teams are known; this avoids false enemy glow.
+                        glow.overrideGlow(ap, other.getUniqueId(), new Color(0xE74848));
+                    }
                 }
-                Color col = colorFromTeamWool(tc.getByte());
-                for (PlayerCard pc : tc.getPlayerCards()) {
-                    Player mate = pc.getPlayer();
-                    if (mate == null || mate.equals(viewer)) {
-                        continue;
-                    }
-                    if (!viewer.getWorld().equals(mate.getWorld())) {
-                        continue;
-                    }
-                    if (!viewer.canSee(mate) || !shouldApplyApolloGlow(viewer, mate)) {
-                        continue;
-                    }
-                    glow.overrideGlow(ap, mate.getUniqueId(), col);
-                }
-            } else if (gameMap.getTeamSize() == 1 && glowEnemiesSolo) {
+            } else if (glowEnemiesSolo) {
                 for (Player other : alive) {
                     if (other.equals(viewer)) {
                         continue;
@@ -659,6 +664,22 @@ public final class LunarApolloBridge {
                 }
             }
         }
+    }
+
+    private static TeamCard resolvePlayerTeam(GameMap gameMap, Player player) {
+        TeamCard direct = gameMap.getTeamCard(player);
+        if (direct != null) {
+            return direct;
+        }
+        for (TeamCard team : gameMap.getTeamCards()) {
+            for (PlayerCard pc : team.getPlayerCards()) {
+                Player p = pc.getPlayer();
+                if (p != null && p.getUniqueId().equals(player.getUniqueId())) {
+                    return team;
+                }
+            }
+        }
+        return null;
     }
 
     private static void refreshRichPresence(GameMap gameMap) {

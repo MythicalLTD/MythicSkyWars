@@ -4,8 +4,8 @@ import systems.mythical.mythicskywars.clients.lunar.LunarApolloBridge;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.game.GameMap;
 import systems.mythical.mythicskywars.menus.gameoptions.objects.CoordLoc;
+import systems.mythical.mythicskywars.utilities.Messaging;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -15,7 +15,6 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,7 +131,7 @@ public final class ChestRefillVisualManager {
         Block holoAnchor = getHoloAnchorBlock(block);
         String id = getCanonicalHoloId(gameMap, holoAnchor);
         cleanupDuplicateChestHolograms(gameMap, block, id);
-        String line = ChatColor.YELLOW + "Refill in: " + ChatColor.GOLD + formatTime(remainingSeconds);
+        String line = resolveRefillHologramLine(remainingSeconds);
         Location holoLoc = holoAnchor.getLocation().add(0.5D, 1.15D, 0.5D);
         try {
             eu.decentsoftware.holograms.api.holograms.Hologram existing = eu.decentsoftware.holograms.api.DHAPI.getHologram(id);
@@ -342,5 +341,14 @@ public final class ChestRefillVisualManager {
         int min = s / 60;
         int sec = s % 60;
         return String.format("%d:%02d", min, sec);
+    }
+
+    private String resolveRefillHologramLine(int remainingSeconds) {
+        int safe = Math.max(0, remainingSeconds);
+        String key = safe > 0 ? "game.chest-refill-hologram.line-countdown" : "game.chest-refill-hologram.line-ready";
+        return new Messaging.MessageFormatter()
+                .setVariable("seconds", String.valueOf(safe))
+                .setVariable("time", formatTime(safe))
+                .format(key);
     }
 }

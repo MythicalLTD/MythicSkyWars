@@ -54,6 +54,8 @@ modules:
   glow:
     enabled: true
     teammates: true
+    # In team mode, highlight enemies too (red) when both teams are known.
+    enemies-in-team: true
     # Solo: glowing every opponent is a wallhack on Lunar — default off. LOS + range still apply if enabled.
     enemies-in-solo: true
     # Require unobstructed line of sight so glow is not visible through walls (strongly recommended).

@@ -1150,7 +1150,7 @@ public class GameMap {
             // Disable mob spawning in the arena
             MythicSkywars.getNMS().setGameRule(worldLoaded, "doMobSpawning", "false");
 
-            // Avoid vanilla spawn protection
+            // Avoid vanilla spawn protection by moving spawn far from the arena
             worldLoaded.setSpawnLocation(5000, 0, 5000);
             // Setup border if enabled
             if (swrConfig.borderEnabled()) {
