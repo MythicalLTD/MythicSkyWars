@@ -10,6 +10,7 @@ import systems.mythical.mythicskywars.events.MythicSkywarsWinEvent;
 import systems.mythical.mythicskywars.game.*;
 import systems.mythical.mythicskywars.game.cages.schematics.SchematicCage;
 import systems.mythical.mythicskywars.matchevents.MatchEvent;
+import systems.mythical.mythicskywars.menus.MapSearchListener;
 import systems.mythical.mythicskywars.menus.gameoptions.objects.CoordLoc;
 import systems.mythical.mythicskywars.menus.gameoptions.objects.GameKit;
 import systems.mythical.mythicskywars.menus.playeroptions.ParticleEffectOption;
@@ -365,6 +366,9 @@ public class MatchManager {
         }
 
         Player player = pCard.getPlayer();
+        // Cancel any active arena search so chat isn't intercepted
+        MapSearchListener.cancelSearch(player);
+
         if (PlayerData.getPlayerData(player.getUniqueId()) == null) {
             PlayerData.getAllPlayerData().add(new PlayerData(player));
         }

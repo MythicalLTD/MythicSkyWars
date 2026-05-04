@@ -18,8 +18,9 @@ public class SWLobbyTeleportCmd extends BaseCmd {
     public boolean run(CommandSender sender, Player player, String[] args) {
         if (MythicSkywars.getCfg().getSpawn() != null) {
             player.teleport(MythicSkywars.getCfg().getSpawn());
+            player.sendMessage(new Messaging.MessageFormatter().format("command.teleported-to-spawn"));
         } else {
-            new Messaging.MessageFormatter().format("nospawn");
+            player.sendMessage(new Messaging.MessageFormatter().format("error.nospawn"));
         }
         return true;
     }

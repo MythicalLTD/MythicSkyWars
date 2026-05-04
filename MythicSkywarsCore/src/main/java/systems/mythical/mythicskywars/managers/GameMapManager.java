@@ -96,8 +96,12 @@ public class GameMapManager {
         
         // Reset stagger counter after all maps have been queued for loading.
         // This ensures subsequent individual refreshMap() calls (after games end) use minimal delay.
-        org.bukkit.Bukkit.getScheduler().runTaskLater(MythicSkywars.get(), GameMap::resetLoadStagger, 
-                20L + ((long) arenas.size() * GameMap.TICKS_BETWEEN_MAP_LOADS) + 20L);
+        // Also marks the server as ready to accept players.
+        org.bukkit.Bukkit.getScheduler().runTaskLater(MythicSkywars.get(), () -> {
+            GameMap.resetLoadStagger();
+            MythicSkywars.get().setMapsReady(true);
+            MythicSkywars.get().getLogger().info("All maps loaded and ready! Server is now accepting players.");
+        }, 20L + ((long) arenas.size() * GameMap.TICKS_BETWEEN_MAP_LOADS) + 20L);
     }
 
     private void updateMapData() {

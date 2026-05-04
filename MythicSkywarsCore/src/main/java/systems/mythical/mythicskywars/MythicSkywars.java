@@ -90,6 +90,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
 
     private HologramsUtil hu;
     private boolean loaded;
+    private boolean mapsReady;
     private BukkitTask specObserver;
     private UpdateChecker updateChecker;
 
@@ -174,6 +175,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
     @Override
     public void onEnable() {
         loaded = false;
+        mapsReady = false;
 
         // bStats metrics
         int pluginId = 24498; // MythicSkywars bStats plugin ID
@@ -323,6 +325,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         this.getServer().getPluginManager().registerEvents(new SummonedMobListener(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
         this.getServer().getPluginManager().registerEvents(new LobbyListener(), this);
+        this.getServer().getPluginManager().registerEvents(new StartupLoginBlocker(), this);
         this.getServer().getPluginManager().registerEvents(new LobbyWaterPortalListener(), this);
         this.getServer().getPluginManager().registerEvents(new SoulWellListener(), this);
         this.getServer().getPluginManager().registerEvents(new systems.mythical.mythicskywars.perks.PerkListener(), this);
@@ -888,6 +891,14 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
 
     public boolean serverLoaded() {
         return loaded;
+    }
+
+    public boolean areMapsReady() {
+        return mapsReady;
+    }
+
+    public void setMapsReady(boolean ready) {
+        this.mapsReady = ready;
     }
 
     public GameMapManager getGameMapManager() {

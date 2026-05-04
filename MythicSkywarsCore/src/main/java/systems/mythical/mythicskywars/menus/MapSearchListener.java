@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MapSearchListener implements Listener {
 
     private static final Map<UUID, String> SEARCHING = new ConcurrentHashMap<>();
+    private static final Map<UUID, Integer> SEARCH_TASKS = new ConcurrentHashMap<>();
+    private static final int SEARCH_TIMEOUT_SECONDS = 20;
 
     /**
      * Start a search for a player.
@@ -37,7 +39,35 @@ public class MapSearchListener implements Listener {
      * @param mode "solo" or "team"
      */
     public static void startSearch(Player player, String mode) {
-        SEARCHING.put(player.getUniqueId(), mode);
+        UUID uuid = player.getUniqueId();
+        // Cancel any existing search timeout
+        cancelSearch(player);
+        SEARCHING.put(uuid, mode);
+        // Schedule timeout
+        int taskId = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (SEARCHING.remove(uuid) != null) {
+                    SEARCH_TASKS.remove(uuid);
+                    if (player.isOnline()) {
+                        player.sendMessage(new Messaging.MessageFormatter().format("items.search-timeout"));
+                    }
+                }
+            }
+        }.runTaskLater(MythicSkywars.get(), SEARCH_TIMEOUT_SECONDS * 20L).getTaskId();
+        SEARCH_TASKS.put(uuid, taskId);
+    }
+
+    /**
+     * Cancel an active search for a player (e.g. when they join a game).
+     */
+    public static void cancelSearch(Player player) {
+        UUID uuid = player.getUniqueId();
+        SEARCHING.remove(uuid);
+        Integer taskId = SEARCH_TASKS.remove(uuid);
+        if (taskId != null) {
+            Bukkit.getScheduler().cancelTask(taskId);
+        }
     }
 
     public static boolean isSearching(Player player) {
@@ -52,6 +82,11 @@ public class MapSearchListener implements Listener {
         }
         event.setCancelled(true);
         String mode = SEARCHING.remove(player.getUniqueId());
+        // Cancel the timeout task
+        Integer taskId = SEARCH_TASKS.remove(player.getUniqueId());
+        if (taskId != null) {
+            Bukkit.getScheduler().cancelTask(taskId);
+        }
         String query = event.getMessage().trim();
 
         if (query.equalsIgnoreCase("cancel")) {
@@ -70,7 +105,7 @@ public class MapSearchListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        SEARCHING.remove(event.getPlayer().getUniqueId());
+        cancelSearch(event.getPlayer());
     }
 
     private static void openSearchResults(Player player, String query, String mode) {
