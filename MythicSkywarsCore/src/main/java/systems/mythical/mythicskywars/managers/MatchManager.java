@@ -398,7 +398,11 @@ public class MatchManager {
             //Location newSpawn = new Location(world, spawn.getX() + 0.5, spawn.getY() + 0.25, spawn.getZ() + 0.5);
         }
 
-        spawn = resolveSafeTeleportLocation(gameMap, spawn, "arena-spawn");
+        // Only apply safe-spawn resolution for arena spawns, not the waiting lobby
+        // (the waiting lobby is auto-generated with a known-safe platform)
+        if (!gameMap.getMatchState().equals(MatchState.WAITINGLOBBY)) {
+            spawn = resolveSafeTeleportLocation(gameMap, spawn, "arena-spawn");
+        }
         player.teleport(spawn, TeleportCause.END_PORTAL);
 
 
