@@ -1,5 +1,7 @@
 package systems.mythical.mythicskywars.commands.player;
 
+import systems.mythical.mythicskywars.MythicSkywars;
+import systems.mythical.mythicskywars.game.GameMap;
 import systems.mythical.mythicskywars.managers.MatchManager;
 import systems.mythical.mythicskywars.utilities.Messaging;
 import systems.mythical.mythicskywars.utilities.Util;
@@ -24,6 +26,14 @@ public class LeaveMatchExecutor implements CommandExecutor {
             sender.sendMessage(new Messaging.MessageFormatter().format("error.cmd-no-perm"));
             return true;
         }
+        
+        // Check if the player is in the arena editor
+        GameMap editorMap = MythicSkywars.getGameMapMgr().getMap(player.getWorld().getName());
+        if (editorMap != null && editorMap.isEditing()) {
+            editorMap.exitEditMode(player, true);
+            return true;
+        }
+        
         if (!MatchManager.get().quitCurrentGame(player)) {
             player.sendMessage(new Messaging.MessageFormatter().format("error.leave-not-in-game"));
         }

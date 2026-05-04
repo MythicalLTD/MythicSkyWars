@@ -54,6 +54,17 @@ import java.util.logging.Level;
 
 public class GameMap {
 
+    // Static counter for staggering initial map loads to avoid overwhelming the chunk system
+    private static int mapLoadStaggerCounter = 0;
+    public static final int TICKS_BETWEEN_MAP_LOADS = 5;
+
+    /**
+     * Resets the stagger counter. Call this before bulk-loading maps (e.g. on plugin enable).
+     */
+    public static void resetLoadStagger() {
+        mapLoadStaggerCounter = 0;
+    }
+
     // Managers
     // In single mode:
     //      All team spawn locations are in team index 0 (aka spawnLocations.get(0))
@@ -1247,12 +1258,15 @@ public class GameMap {
         MythicSkywars.getWM().deleteWorld(name, false);
         final GameMap gMap = this;
         if (MythicSkywars.get().isEnabled()) {
+            // Stagger map loads to avoid overwhelming the chunk system during bulk loading
+            long delay = 20L + (mapLoadStaggerCounter * TICKS_BETWEEN_MAP_LOADS);
+            mapLoadStaggerCounter++;
             new BukkitRunnable() {
                 @Override
                 public void run() {
                     gMap.loadMap();
                 }
-            }.runTaskLater(MythicSkywars.get(), 20);
+            }.runTaskLater(MythicSkywars.get(), delay);
         }
         if (MythicSkywars.get().isEnabled()) {
             new BukkitRunnable() {

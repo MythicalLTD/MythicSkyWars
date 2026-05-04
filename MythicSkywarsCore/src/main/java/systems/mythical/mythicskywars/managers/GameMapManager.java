@@ -46,6 +46,9 @@ public class GameMapManager {
             updateMapData();
         }
         arenas.clear();
+        
+        // Reset stagger counter before bulk-loading maps
+        GameMap.resetLoadStagger();
 
         if (MythicSkywars.getWM() instanceof FileWorldManager) {
             File dataDirectory = MythicSkywars.get().getDataFolder();
@@ -90,6 +93,11 @@ public class GameMapManager {
                 }
             }
         }
+        
+        // Reset stagger counter after all maps have been queued for loading.
+        // This ensures subsequent individual refreshMap() calls (after games end) use minimal delay.
+        org.bukkit.Bukkit.getScheduler().runTaskLater(MythicSkywars.get(), GameMap::resetLoadStagger, 
+                20L + ((long) arenas.size() * GameMap.TICKS_BETWEEN_MAP_LOADS) + 20L);
     }
 
     private void updateMapData() {
