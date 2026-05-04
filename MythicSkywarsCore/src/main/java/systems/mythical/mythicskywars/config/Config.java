@@ -655,6 +655,16 @@ public class Config {
     }
 
     private void addMaterial(String key, String mat, String def) {
+        if (mat == null) {
+            materials.put(key, def);
+            return;
+        }
+        // Allow custom head format (head:<texture> or PLAYER_HEAD:<texture>) to pass through without validation
+        String lower = mat.toLowerCase().trim();
+        if (lower.startsWith("head:") || lower.startsWith("player_head:")) {
+            materials.put(key, mat);
+            return;
+        }
         int data = -1;
         String matWithData = "";
         String[] matParts = mat.split(":");

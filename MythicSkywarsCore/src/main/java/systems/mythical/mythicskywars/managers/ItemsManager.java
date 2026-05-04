@@ -28,20 +28,28 @@ public class ItemsManager {
 
     public void addExtraItem(String materialref, List<String> lore, String message) {
         String mat = message;
-        int data = -1;
-        String matWithData = "";
-        String[] matParts = mat.split(":");
-        if (matParts.length == 2) {
-            matWithData = matParts[0];
-            data = Integer.parseInt(matParts[1]);
-        }
         ItemStack item;
-        if (data != -1) {
-            item = MythicSkywars.getNMS().getColorItem(matWithData, (byte) data);
+        if (isCustomHead(mat)) {
+            item = createCustomHead(mat);
         } else {
-            Material material = matchMaterialSafe(message);
-            if (material == null) material = Material.BARRIER;
-            item = new ItemStack(material, 1);
+            int data = -1;
+            String matWithData = "";
+            String[] matParts = mat.split(":");
+            if (matParts.length == 2) {
+                try {
+                    matWithData = matParts[0];
+                    data = Integer.parseInt(matParts[1]);
+                } catch (NumberFormatException ignored) {
+                    data = -1;
+                }
+            }
+            if (data != -1) {
+                item = MythicSkywars.getNMS().getColorItem(matWithData, (byte) data);
+            } else {
+                Material material = matchMaterialSafe(message);
+                if (material == null) material = Material.BARRIER;
+                item = new ItemStack(material, 1);
+            }
         }
 
         ItemStack addItem = MythicSkywars.getNMS().getItemStack(item, lore, message);
@@ -50,20 +58,28 @@ public class ItemsManager {
 
     private void addItem(String materialref, List<String> lore, String message) {
         String mat = MythicSkywars.getCfg().getMaterial(materialref);
-        int data = -1;
-        String matWithData = "";
-        String[] matParts = mat.split(":");
-        if (matParts.length == 2) {
-            matWithData = matParts[0];
-            data = Integer.parseInt(matParts[1]);
-        }
         ItemStack item;
-        if (data != -1) {
-            item = MythicSkywars.getNMS().getColorItem(matWithData, (byte) data);
+        if (isCustomHead(mat)) {
+            item = createCustomHead(mat);
         } else {
-            Material material = matchMaterialSafe(MythicSkywars.getCfg().getMaterial(materialref));
-            if (material == null) material = Material.BARRIER;
-            item = new ItemStack(material, 1);
+            int data = -1;
+            String matWithData = "";
+            String[] matParts = mat.split(":");
+            if (matParts.length == 2) {
+                try {
+                    matWithData = matParts[0];
+                    data = Integer.parseInt(matParts[1]);
+                } catch (NumberFormatException ignored) {
+                    data = -1;
+                }
+            }
+            if (data != -1) {
+                item = MythicSkywars.getNMS().getColorItem(matWithData, (byte) data);
+            } else {
+                Material material = matchMaterialSafe(MythicSkywars.getCfg().getMaterial(materialref));
+                if (material == null) material = Material.BARRIER;
+                item = new ItemStack(material, 1);
+            }
         }
 
         ItemStack addItem = MythicSkywars.getNMS().getItemStack(item, lore, new Messaging.MessageFormatter().format(message));
@@ -211,5 +227,74 @@ public class ItemsManager {
         String upper = name.toUpperCase().trim();
         Material mat = Material.matchMaterial(upper);
         return mat;
+    }
+
+    /**
+     * Checks if the material string represents a custom player head.
+     * Supported formats:
+     * <ul>
+     *   <li>{@code head:<base64_texture>} - Base64 encoded skin texture</li>
+     *   <li>{@code PLAYER_HEAD:<base64_texture>} - Alternative format</li>
+     *   <li>{@code head:<player_name>} - Player name (fetches their skin)</li>
+     * </ul>
+     */
+    private boolean isCustomHead(String mat) {
+        if (mat == null) return false;
+        String lower = mat.toLowerCase().trim();
+        return lower.startsWith("head:") || lower.startsWith("player_head:");
+    }
+
+    /**
+     * Creates a player head ItemStack with a custom texture.
+     * Supports base64 texture values and player names.
+     */
+    @SuppressWarnings("deprecation")
+    private ItemStack createCustomHead(String mat) {
+        String value;
+        if (mat.toLowerCase().startsWith("head:")) {
+            value = mat.substring("head:".length()).trim();
+        } else {
+            // PLAYER_HEAD:value
+            value = mat.substring("PLAYER_HEAD:".length()).trim();
+        }
+
+        ItemStack head = MythicSkywars.getNMS().getBlankPlayerHead();
+        org.bukkit.inventory.meta.SkullMeta skullMeta = (org.bukkit.inventory.meta.SkullMeta) head.getItemMeta();
+
+        if (skullMeta == null) return head;
+
+        // Determine if value is base64 texture or player name
+        // Base64 textures are typically long strings (>32 chars) with no spaces
+        if (value.length() > 32 && !value.contains(" ")) {
+            // Treat as base64 texture - use reflection to set GameProfile
+            try {
+                java.util.UUID uuid = java.util.UUID.nameUUIDFromBytes(value.getBytes());
+                Class<?> gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
+                Class<?> propertyClass = Class.forName("com.mojang.authlib.properties.Property");
+
+                Object profile = gameProfileClass.getConstructor(java.util.UUID.class, String.class)
+                        .newInstance(uuid, "custom_head");
+
+                Object properties = gameProfileClass.getMethod("getProperties").invoke(profile);
+                Object property = propertyClass.getConstructor(String.class, String.class)
+                        .newInstance("textures", value);
+
+                // PropertyMap extends ForwardingMultimap, use put(key, value)
+                properties.getClass().getMethod("put", Object.class, Object.class)
+                        .invoke(properties, "textures", property);
+
+                java.lang.reflect.Field profileField = skullMeta.getClass().getDeclaredField("profile");
+                profileField.setAccessible(true);
+                profileField.set(skullMeta, profile);
+            } catch (Exception e) {
+                MythicSkywars.get().getLogger().warning("Failed to apply custom head texture: " + e.getMessage());
+            }
+        } else {
+            // Treat as player name
+            skullMeta.setOwner(value);
+        }
+
+        head.setItemMeta(skullMeta);
+        return head;
     }
 }
