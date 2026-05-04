@@ -1,5 +1,6 @@
 package systems.mythical.mythicskywars.managers;
 
+import systems.mythical.mythicskywars.clients.lunar.LunarApolloBridge;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.game.GameMap;
 import systems.mythical.mythicskywars.menus.gameoptions.objects.CoordLoc;
@@ -102,6 +103,7 @@ public final class ChestRefillVisualManager {
         }
         keys.clear();
         cancelRefreshTask(mapName);
+        LunarApolloBridge.notifyChestRefill(gameMap);
     }
 
     private void trackAndOpenChest(GameMap gameMap, Block block) {

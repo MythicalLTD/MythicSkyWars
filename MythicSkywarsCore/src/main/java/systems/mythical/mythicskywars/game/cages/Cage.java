@@ -33,22 +33,32 @@ public abstract class Cage {
 
     public void createSpawnPlatforms(GameMap gMap) {
         World world = gMap.getCurrentWorld();
+        int maxHeight = world.getMaxHeight();
         for (List<CoordLoc> coords : gMap.getSpawnLocations().values()) {
             for (CoordLoc loc1 : coords) {
                 int x = loc1.getX();
                 int y = loc1.getY();
                 int z = loc1.getZ();
                 for (CoordLoc loc : bottomCoordOffsets) {
-                    world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.GLASS);
+                    int blockY = y + loc.getY();
+                    if (blockY >= 0 && blockY < maxHeight) {
+                        world.getBlockAt(x + loc.getX(), blockY, z + loc.getZ()).setType(Material.GLASS);
+                    }
                 }
                 Runnable middleLayer = () -> {
                     for (CoordLoc loc : middleCoordOffsets) {
-                        world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.GLASS);
+                        int blockY = y + loc.getY();
+                        if (blockY >= 0 && blockY < maxHeight) {
+                            world.getBlockAt(x + loc.getX(), blockY, z + loc.getZ()).setType(Material.GLASS);
+                        }
                     }
                 };
                 Runnable topLayer = () -> {
                     for (CoordLoc loc : topCoordOffsets) {
-                        world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.GLASS);
+                        int blockY = y + loc.getY();
+                        if (blockY >= 0 && blockY < maxHeight) {
+                            world.getBlockAt(x + loc.getX(), blockY, z + loc.getZ()).setType(Material.GLASS);
+                        }
                     }
                 };
                 if (canScheduleTasks()) {
@@ -122,10 +132,12 @@ public abstract class Cage {
 
     private void setBlockColor(CoordLoc loc, int x, int y, int z, World world, MaterialWithByte materialWithByte) {
         if (world == null) return;
+        int blockY = y + loc.getY();
+        if (blockY < 0 || blockY >= world.getMaxHeight()) return;
         if (materialWithByte.cByte <= -1) {
-            world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(materialWithByte.mat);
+            world.getBlockAt(x + loc.getX(), blockY, z + loc.getZ()).setType(materialWithByte.mat);
         } else {
-            MythicSkywars.getNMS().setBlockWithColor(world, x + loc.getX(), y + loc.getY(), z + loc.getZ(), materialWithByte.mat, materialWithByte.cByte);
+            MythicSkywars.getNMS().setBlockWithColor(world, x + loc.getX(), blockY, z + loc.getZ(), materialWithByte.mat, materialWithByte.cByte);
         }
     }
 
@@ -167,15 +179,25 @@ public abstract class Cage {
         int x = loc1.getX();
         int y = loc1.getY();
         int z = loc1.getZ();
+        int maxHeight = world.getMaxHeight();
 
         for (CoordLoc loc : bottomCoordOffsets) {
-            world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.AIR);
+            int blockY = y + loc.getY();
+            if (blockY >= 0 && blockY < maxHeight) {
+                world.getBlockAt(x + loc.getX(), blockY, z + loc.getZ()).setType(Material.AIR);
+            }
         }
         for (CoordLoc loc : middleCoordOffsets) {
-            world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.AIR);
+            int blockY = y + loc.getY();
+            if (blockY >= 0 && blockY < maxHeight) {
+                world.getBlockAt(x + loc.getX(), blockY, z + loc.getZ()).setType(Material.AIR);
+            }
         }
         for (CoordLoc loc : topCoordOffsets) {
-            world.getBlockAt(x + loc.getX(), y + loc.getY(), z + loc.getZ()).setType(Material.AIR);
+            int blockY = y + loc.getY();
+            if (blockY >= 0 && blockY < maxHeight) {
+                world.getBlockAt(x + loc.getX(), blockY, z + loc.getZ()).setType(Material.AIR);
+            }
         }
     }
 

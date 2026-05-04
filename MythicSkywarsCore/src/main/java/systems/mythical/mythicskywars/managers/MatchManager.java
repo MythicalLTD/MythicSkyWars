@@ -1,6 +1,7 @@
 package systems.mythical.mythicskywars.managers;
 
 import com.google.common.collect.ImmutableList;
+import systems.mythical.mythicskywars.clients.lunar.LunarApolloBridge;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.enums.GameType;
 import systems.mythical.mythicskywars.enums.MatchState;
@@ -218,6 +219,14 @@ public class MatchManager {
      * Prefer arenas in {@link MatchState#WAITINGSTART} (countdown / about to start), then
      * {@link MatchState#WAITINGLOBBY}; among equals prefer more players already queued.
      */
+    private static int getEffectivePlayerCount(GameMap map) {
+        int count = map.getPlayerCount();
+        if (map.getMatchState() == MatchState.WAITINGLOBBY) {
+            count += map.getWaitingPlayers().size();
+        }
+        return count;
+    }
+
     private static void sortMapsForAutojoin(List<GameMap> maps) {
         Collections.sort(maps, new Comparator<GameMap>() {
             @Override
@@ -227,19 +236,26 @@ public class MatchManager {
                 if (ra != rb) {
                     return Integer.compare(ra, rb);
                 }
-                return Integer.compare(b.getPlayerCount(), a.getPlayerCount());
+                return Integer.compare(getEffectivePlayerCount(b), getEffectivePlayerCount(a));
             }
         });
     }
 
     /**
      * Prefer arenas that already have players; if all are empty, randomize empty arenas.
+     * For team mode (WAITINGLOBBY), also counts players in the waiting list so that
+     * auto-join funnels new players into arenas that already have people queued.
      */
     private static ArrayList<GameMap> prioritizeAutojoinMaps(List<GameMap> maps) {
         ArrayList<GameMap> withPlayers = new ArrayList<>();
         ArrayList<GameMap> empty = new ArrayList<>();
         for (GameMap map : maps) {
-            if (map.getPlayerCount() > 0) {
+            int effectiveCount = map.getPlayerCount();
+            // In WAITINGLOBBY, players are in the waiting list, not assigned to team cards yet
+            if (map.getMatchState() == MatchState.WAITINGLOBBY) {
+                effectiveCount += map.getWaitingPlayers().size();
+            }
+            if (effectiveCount > 0) {
                 withPlayers.add(map);
             } else {
                 empty.add(map);
@@ -310,6 +326,10 @@ public class MatchManager {
         if (gameMap == null) {
             return false;
         }
+        // Lucky mode is only supported for solo (teamSize == 1)
+        if (luckyMode && gameMap.getTeamSize() > 1) {
+            return false;
+        }
         if (luckyMode && !LuckyBlockHook.isAvailable()) {
             return false;
         }
@@ -359,10 +379,20 @@ public class MatchManager {
     }
 
     public void teleportToArena(final GameMap gameMap, PlayerCard pCard) {
-        if (pCard.getPlayer() == null || (!gameMap.getMatchState().equals(MatchState.WAITINGLOBBY) && !gameMap.getMatchState().equals(MatchState.WAITINGSTART)) ||
-                (gameMap.getMatchState().equals(MatchState.WAITINGSTART) && pCard.getTeamCard().getSpawns() == null)) {
+        if (pCard == null || pCard.getPlayer() == null) {
+            return;
+        }
+        if (!gameMap.getMatchState().equals(MatchState.WAITINGLOBBY) && !gameMap.getMatchState().equals(MatchState.WAITINGSTART)) {
             pCard.reset();
             return;
+        }
+        if (gameMap.getMatchState().equals(MatchState.WAITINGSTART)) {
+            TeamCard tc = pCard.getTeamCard();
+            if (tc == null || tc.getSpawns() == null || pCard.getSpawn() == null) {
+                MythicSkywars.get().getLogger().warning("teleportToArena: Player " + pCard.getPlayer().getName() + " has no spawn assigned on map " + gameMap.getName() + "! Resetting.");
+                pCard.reset();
+                return;
+            }
         }
 
         Player player = pCard.getPlayer();
@@ -399,14 +429,16 @@ public class MatchManager {
             ) {
                 spawn = new Location(world, sspawn.getX() + 0.5, sspawn.getY() + 0.25, sspawn.getZ() + 0.5);
             }
-            //Location newSpawn = new Location(world, spawn.getX() + 0.5, spawn.getY() + 0.25, spawn.getZ() + 0.5);
+
+            // Ensure the chunk at the spawn is loaded before teleporting
+            if (!world.isChunkLoaded(world.getChunkAt(spawn))) {
+                world.loadChunk(world.getChunkAt(spawn));
+            }
         }
 
-        // Only apply safe-spawn resolution for arena spawns, not the waiting lobby
-        // (the waiting lobby is auto-generated with a known-safe platform)
-        if (!gameMap.getMatchState().equals(MatchState.WAITINGLOBBY)) {
-            spawn = resolveSafeTeleportLocation(gameMap, spawn, "arena-spawn");
-        }
+        // Trust the configured spawn location — the cage system places blocks at this
+        // exact position. Do NOT run safe-spawn resolution here as it incorrectly rejects
+        // glass cages (transparent blocks) and relocates players to the ground.
         player.teleport(spawn, TeleportCause.END_PORTAL);
 
 
@@ -619,6 +651,15 @@ public class MatchManager {
                                 assignUnselectedWaitingPlayersRandom(gameMap);
                             }
 
+                            // Safety: kick any players that failed to get assigned to a team back to lobby
+                            for (UUID waitingUuid : ImmutableList.copyOf(gameMap.getWaitingPlayers())) {
+                                Player wp = Bukkit.getPlayer(waitingUuid);
+                                if (wp != null && gameMap.getTeamCard(wp) == null) {
+                                    MythicSkywars.get().getLogger().warning("Player " + wp.getName() + " could not be assigned to a team on " + gameMap.getName() + ". Sending back to lobby.");
+                                    MythicSkywars.get().getPlayerManager().removePlayer(wp, PlayerRemoveReason.PLAYER_QUIT_GAME, null, false, false);
+                                }
+                            }
+
                             // Remove all players from waiting lobby state and set the game to waiting start (in cages mode)
                             gameMap.clearWaitingPlayers();
                             gameMap.setMatchState(MatchState.WAITINGSTART);
@@ -654,12 +695,19 @@ public class MatchManager {
                 continue;
             }
 
+            // Fill teams sequentially: pick the team with the MOST players that still has room.
+            // This ensures teams get filled up completely before moving to the next one.
             TeamCard targetTeam = gameMap.getTeamCards().stream()
                     .filter(card -> card.getEmptySlots() > 0)
-                    .min(Comparator.comparingInt(TeamCard::getPlayersSize))
+                    .max(Comparator.comparingInt(TeamCard::getPlayersSize))
                     .orElse(null);
             if (targetTeam != null) {
-                targetTeam.sendReservation(player, PlayerStat.getPlayerStats(player));
+                TeamCard result = targetTeam.sendReservation(player, PlayerStat.getPlayerStats(player));
+                if (result == null) {
+                    MythicSkywars.get().getLogger().warning("Failed to assign " + player.getName() + " to team on map " + gameMap.getName() + " (sendReservation returned null)");
+                }
+            } else {
+                MythicSkywars.get().getLogger().warning("No team with empty slots for " + player.getName() + " on map " + gameMap.getName());
             }
         }
     }
@@ -776,11 +824,15 @@ public class MatchManager {
 
         if (MythicSkywars.getCfg().getEnablePVPTimer() && MythicSkywars.getCfg().getPVPTimerTime() >= 1) {
             gameMap.setDisableDamage(true);
+            LunarApolloBridge.showPvpProtectionCooldowns(
+                    gameMap, MythicSkywars.getCfg().getPVPTimerTime());
 
             Bukkit.getScheduler().scheduleSyncDelayedTask(MythicSkywars.get(), () -> {
                 gameMap.setDisableDamage(false);
                 gameMap.getWaitingPlayers().clear();
                 for (Player player : gameMap.getAlivePlayers()) {
+                    LunarApolloBridge.clearPvpCooldown(player);
+                    LunarApolloBridge.notifyPvpEnabled(player, gameMap);
                     if (!MythicSkywars.getMessaging().getFile().getString("game.pvp-timer-disabled-message").isEmpty()) {
                         player.sendMessage(new Messaging.MessageFormatter().setVariable("player", player.getName()).setVariable("arena", gameMap.getName()).format("game.pvp-timer-disabled-message"));
                     }
@@ -794,6 +846,10 @@ public class MatchManager {
                     }
                 }
             }, 20L * MythicSkywars.getCfg().getPVPTimerTime());
+        } else {
+            for (Player player : gameMap.getAlivePlayers()) {
+                LunarApolloBridge.notifyPvpEnabled(player, gameMap);
+            }
         }
     }
 
@@ -839,6 +895,8 @@ public class MatchManager {
         gameMap.getGameBoard().updateScoreboard();
         gameMap.update();
         gameMap.setTimer(this.getGameTime());
+        LunarApolloBridge.onMatchPlaying(gameMap);
+        LunarApolloBridge.notifyMatchStarted(gameMap);
 
         new BukkitRunnable() {
             public void run() {
@@ -848,7 +906,20 @@ public class MatchManager {
                     for (MatchEvent event : gameMap.getEvents()) {
                         if (event.isEnabled() && event.willFire() && !event.hasFired()) {
                             if (event.getStartTime() <= gameMap.getTimer()) {
-                                event.doEvent();
+                                // Only fire one event at a time — skip if another event is currently active
+                                boolean anotherEventActive = false;
+                                for (MatchEvent other : gameMap.getEvents()) {
+                                    if (other != event && other.hasFired() && !other.isRepeatable()) {
+                                        // Check if this other event has a length (timed) and is still running
+                                        if (other.getLength() > 0) {
+                                            anotherEventActive = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!anotherEventActive) {
+                                    event.doEvent();
+                                }
                             } else {
                                 if (event.announceEnabled()) {
                                     event.announceTimer();
@@ -961,6 +1032,7 @@ public class MatchManager {
             }
 
             // Winners
+            boolean broadcastSent = false;
             for (PlayerCard pCard : winners.getPlayerCards()) {
                 Player pWinner = pCard.getPlayer();
 
@@ -1004,9 +1076,11 @@ public class MatchManager {
                         Bukkit.getPluginManager().callEvent(new MythicSkywarsWinEvent(winnerData, gameMap));
                     }
 
-                    if (MythicSkywars.getCfg().enableWinMessage()) {
+                    // Only broadcast once per team, not per player
+                    if (!broadcastSent && MythicSkywars.getCfg().enableWinMessage()) {
                         server.broadcastMessage(new Messaging.MessageFormatter()
                                 .setVariable("player1", winner).setVariable("map", map).format("game.broadcast-win"));
+                        broadcastSent = true;
                     }
                     if (MythicSkywars.getCfg().titlesEnabled()) {
                         Util.get().sendTitle(pWinner, 5, 80, 5, new Messaging.MessageFormatter().format("titles.endgame-title-won"), new Messaging.MessageFormatter().format("titles.endgame-subtitle-won"));
@@ -1021,6 +1095,7 @@ public class MatchManager {
                     }
                     pWinner.sendMessage(new Messaging.MessageFormatter()
                             .setVariable("map", gameMap.getName()).format("game.won"));
+                    LunarApolloBridge.notifyVictory(pWinner, gameMap);
                 }
             }
 
@@ -1041,6 +1116,7 @@ public class MatchManager {
         if (debug) {
             Util.get().logToFile(getDebugName(gameMap) + ChatColor.YELLOW + "SkyWars Match Has Ended - Waiting for teleport");
         }
+        LunarApolloBridge.onMatchEnd(gameMap);
         gameMap.update();
         gameMap.setTimer(0);
         if (MythicSkywars.get().isEnabled() && !gameMap.getMatchState().equals(MatchState.OFFLINE)) {
@@ -1495,7 +1571,8 @@ public class MatchManager {
         Material head = world.getBlockAt(location.getBlockX(), y + 1, location.getBlockZ()).getType();
         Material ground = world.getBlockAt(location.getBlockX(), y - 1, location.getBlockZ()).getType();
 
-        return !isSolidOrLiquid(feet) && !isSolidOrLiquid(head) && ground.isSolid() && !ground.isTransparent();
+        // Accept any solid block as ground — glass/stained glass are valid (cages use them)
+        return !isSolidOrLiquid(feet) && !isSolidOrLiquid(head) && ground.isSolid();
     }
 
     private boolean isSolidOrLiquid(Material material) {

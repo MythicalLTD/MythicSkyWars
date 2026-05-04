@@ -56,6 +56,10 @@
             <url>https://jitpack.io</url>
         </repository>
         <repository>
+            <id>lunarclient</id>
+            <url>https://repo.lunarclient.dev</url>
+        </repository>
+        <repository>
             <id>glaremasters-for-swm-legacy</id>
             <url>https://repo.glaremasters.me/repository/concuncan/</url>
         </repository>
@@ -166,6 +170,19 @@
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>3.12.14</version>
+        </dependency>
+        <!-- Lunar Client Apollo (optional at runtime; compile-time API is provided) -->
+        <dependency>
+            <groupId>com.lunarclient</groupId>
+            <artifactId>apollo-api</artifactId>
+            <version>1.2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.lunarclient</groupId>
+            <artifactId>apollo-extra-adventure4</artifactId>
+            <version>1.2.5</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

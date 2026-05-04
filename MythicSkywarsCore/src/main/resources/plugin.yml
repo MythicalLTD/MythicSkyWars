@@ -6,6 +6,8 @@ website: https://mythical.systems
 author: MythicalSystems
 description: MythicSkywars - A modern, high-performance SkyWars plugin.
 softdepend:
+  - Apollo-Bukkit
+  - Apollo
   - Vault
   - Essentials
   - EssentialsX

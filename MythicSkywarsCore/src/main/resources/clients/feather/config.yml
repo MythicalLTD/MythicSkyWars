@@ -1,0 +1,15 @@
+# MythicSkywars — Feather Client settings (placeholder)
+# -----------------------------------------------------------------------------
+# Feather Client is NOT Lunar Client; it does not use Apollo:
+#   https://lunarclient.dev/apollo/introduction
+#
+# Use this file for future Feather-specific options (e.g. messaging channels or
+# documented server APIs), or server policy toggles you apply in-game for
+# Feather users. Nothing in MythicSkywars reads this file yet.
+# -----------------------------------------------------------------------------
+
+enabled: false
+
+# Reserved for future keys, e.g.:
+# features:
+#   prefer-feather-ping-display: false

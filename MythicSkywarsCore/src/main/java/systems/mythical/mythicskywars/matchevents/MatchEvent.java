@@ -105,11 +105,14 @@ public abstract class MatchEvent {
 
         for (org.bukkit.entity.Player player : gMap.getAlivePlayers()) {
             if (systems.mythical.mythicskywars.MythicSkywars.getCfg().titlesEnabled()) {
-                Util.get().sendTitle(player, 2, 20, 2, colorize(title),
-                        colorize(subtitle));
+                String coloredTitle = colorize(title);
+                String coloredSubtitle = colorize(subtitle);
+                if (!coloredTitle.isEmpty() || !coloredSubtitle.isEmpty()) {
+                    Util.get().sendTitle(player, 2, 20, 2, coloredTitle, coloredSubtitle);
+                }
             }
         }
-        MatchManager.get().message(gMap, colorize(startMessage));
+        messageMapIfPresent(startMessage);
     }
 
     public void announceTimer() {

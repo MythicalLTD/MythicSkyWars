@@ -1,5 +1,6 @@
 package systems.mythical.mythicskywars.listeners;
 
+import systems.mythical.mythicskywars.clients.lunar.LunarLobbyWaterPortalApollo;
 import systems.mythical.mythicskywars.MythicSkywars;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,5 +23,6 @@ public class LobbyWaterPortalListener implements org.bukkit.event.Listener {
         if (MythicSkywars.getLobbyWaterPortals() != null) {
             MythicSkywars.getLobbyWaterPortals().tryEnterPortal(player);
         }
+        LunarLobbyWaterPortalApollo.onPlayerMove(player, event.getTo());
     }
 }

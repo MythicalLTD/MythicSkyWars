@@ -195,8 +195,8 @@ public class TeamCard {
     }
 
     boolean isFull() {
-        return getEmptySlots() == getGameMap().getTeamSize();
-            }
+        return getEmptySlots() == 0;
+    }
 
     public int getPlayersSize() {
         int count = 0;

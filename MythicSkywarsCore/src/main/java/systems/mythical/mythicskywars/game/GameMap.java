@@ -944,6 +944,13 @@ public class GameMap {
 
         if (fc.contains("waitingLobbySpawn")) {
             this.waitingLobbySpawn = Util.get().getCoordLocFromString(fc.getString("waitingLobbySpawn"));
+            // Clamp to safe height for the server's build limit (1.8 = 256, 1.17+ = 320)
+            // Use 200 as a conservative max since we need room for walls above and must stay within build limits
+            int maxLobbyY = 200;
+            if (this.waitingLobbySpawn != null && this.waitingLobbySpawn.getY() > maxLobbyY) {
+                MythicSkywars.get().getLogger().warning("Map " + name + " has waitingLobbySpawn at Y=" + this.waitingLobbySpawn.getY() + " which exceeds safe limit. Clamping to Y=" + maxLobbyY);
+                this.waitingLobbySpawn = new CoordLoc(this.waitingLobbySpawn.getX(), maxLobbyY, this.waitingLobbySpawn.getZ());
+            }
         }
 
         int def = 2;
@@ -1005,8 +1012,15 @@ public class GameMap {
                     return 3;
                 }
                 if (waitingLobbySpawn == null && teamSize > 1) {
-                    // Auto-generate waiting lobby above the map
+                    // Auto-generate waiting lobby above the map, clamped to world height
                     int lobbyY = MythicSkywars.get().getConfig().getInt("game.teamWaitingLobby.height", 200);
+                    // Clamp to safe height (1.8 max is 256, 1.17+ can be 320)
+                    int maxWorldHeight = 256; // conservative default for 1.8 compat
+                    int wallHeight = MythicSkywars.get().getConfig().getInt("game.teamWaitingLobby.wallHeight", 4);
+                    int maxSafeY = maxWorldHeight - wallHeight - 3;
+                    if (lobbyY > maxSafeY) {
+                        lobbyY = maxSafeY;
+                    }
                     waitingLobbySpawn = new CoordLoc(0, lobbyY, 0);
                     generateWaitingLobbyIfNeeded();
                 }
@@ -1269,39 +1283,31 @@ public class GameMap {
             }.runTaskLater(MythicSkywars.get(), delay);
         }
         if (MythicSkywars.get().isEnabled()) {
+            // Wait for the world to load, then start the match. Retry every 20 ticks until loaded (max 30s).
             new BukkitRunnable() {
+                private int attempts = 0;
+                private static final int MAX_ATTEMPTS = 30; // 30 * 20 ticks = 30 seconds max wait
+
                 @Override
                 public void run() {
-                    // Ensure world is loaded before starting match
-                    if (gMap.getCurrentWorld() == null) {
-                        // Retry after another 40 ticks
-                        new BukkitRunnable() {
-                            @Override
-                            public void run() {
-                                if (teamSize > 1) {
-                                    setMatchState(MatchState.WAITINGLOBBY);
-                                } else {
-                                    setMatchState(MatchState.WAITINGSTART);
-                                }
-                                generateWaitingLobbyIfNeeded();
-                                gameboard.updateScoreboard();
-                                MatchManager.get().start(gMap);
-                                update();
-                            }
-                        }.runTaskLater(MythicSkywars.get(), 40);
-                        return;
+                    attempts++;
+                    if (gMap.getCurrentWorld() != null) {
+                        this.cancel();
+                        if (teamSize > 1) {
+                            setMatchState(MatchState.WAITINGLOBBY);
+                        } else {
+                            setMatchState(MatchState.WAITINGSTART);
+                        }
+                        generateWaitingLobbyIfNeeded();
+                        gameboard.updateScoreboard();
+                        MatchManager.get().start(gMap);
+                        update();
+                    } else if (attempts >= MAX_ATTEMPTS) {
+                        this.cancel();
+                        MythicSkywars.get().getLogger().severe("Map " + name + ": World failed to load after " + MAX_ATTEMPTS + " attempts. Skipping.");
                     }
-                    if (teamSize > 1) {
-                        setMatchState(MatchState.WAITINGLOBBY);
-                    } else {
-                        setMatchState(MatchState.WAITINGSTART);
-                    }
-                    generateWaitingLobbyIfNeeded();
-                    gameboard.updateScoreboard();
-                    MatchManager.get().start(gMap);
-                    update();
                 }
-            }.runTaskLater(MythicSkywars.get(), 60);
+            }.runTaskTimer(MythicSkywars.get(), 60L, 20L);
         }
     }
 
@@ -2366,14 +2372,30 @@ public class GameMap {
     private void generateWaitingLobbyIfNeeded() {
         if (teamSize <= 1 || waitingLobbySpawn == null) return;
         World w = getCurrentWorld();
-        if (w == null) return;
+        if (w == null) {
+            MythicSkywars.get().getLogger().warning("generateWaitingLobbyIfNeeded: World not loaded for map " + name + "! Lobby platform will not be generated.");
+            return;
+        }
+
+        // Clamp lobby height to stay within world build limits (walls need wallHeight above floor)
+        int wallHeight = MythicSkywars.get().getConfig().getInt("game.teamWaitingLobby.wallHeight", 4);
+        int maxSafeY = w.getMaxHeight() - wallHeight - 3; // leave room for walls + headroom
+        if (maxSafeY > 200) maxSafeY = 200; // hard cap at 200 for safety
+        if (waitingLobbySpawn.getY() > maxSafeY) {
+            MythicSkywars.get().getLogger().info("Map " + name + ": Clamping waitingLobbySpawn from Y=" + waitingLobbySpawn.getY() + " to Y=" + maxSafeY);
+            waitingLobbySpawn = new CoordLoc(waitingLobbySpawn.getX(), maxSafeY, waitingLobbySpawn.getZ());
+        }
+
         int floorY = waitingLobbySpawn.getY() - 1;
         if (w.getBlockAt(waitingLobbySpawn.getX(), floorY, waitingLobbySpawn.getZ()).getType() == Material.DIAMOND_BLOCK) return;
 
         int radius = MythicSkywars.get().getConfig().getInt("game.teamWaitingLobby.radius", 15);
-        int wallHeight = MythicSkywars.get().getConfig().getInt("game.teamWaitingLobby.wallHeight", 4);
         int cx = waitingLobbySpawn.getX();
         int cz = waitingLobbySpawn.getZ();
+
+        if (MythicSkywars.getCfg().debugEnabled()) {
+            MythicSkywars.get().getLogger().info("Generating waiting lobby for " + name + " at Y=" + waitingLobbySpawn.getY() + " (floor at Y=" + floorY + ")");
+        }
 
         // Floor: barrier everywhere, diamond in center
         for (int x = cx - radius; x <= cx + radius; x++) {
@@ -2388,6 +2410,7 @@ public class GameMap {
 
         // Barrier walls around the edge
         for (int y = floorY + 1; y <= floorY + wallHeight; y++) {
+            if (y >= w.getMaxHeight()) break; // don't place blocks above build limit
             for (int x = cx - (radius + 1); x <= cx + (radius + 1); x++) {
                 w.getBlockAt(x, y, cz - (radius + 1)).setType(Material.BARRIER);
                 w.getBlockAt(x, y, cz + (radius + 1)).setType(Material.BARRIER);
@@ -2450,7 +2473,12 @@ public class GameMap {
     }
 
     public void setWaitingLobbySpawn(Location location) {
-        waitingLobbySpawn = new CoordLoc(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        int y = location.getBlockY();
+        // Clamp to safe height to prevent lobby above build limit
+        if (y > 200) {
+            y = 200;
+        }
+        waitingLobbySpawn = new CoordLoc(location.getBlockX(), y, location.getBlockZ());
         saveArenaData();
         refreshEditorSetupHolograms();
     }

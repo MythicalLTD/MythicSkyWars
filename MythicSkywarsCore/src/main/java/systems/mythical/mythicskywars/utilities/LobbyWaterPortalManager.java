@@ -336,6 +336,26 @@ public class LobbyWaterPortalManager {
             return between(x, x1, x2) && between(y, y1, y2) && between(z, z1, z2);
         }
 
+        /**
+         * Block center of the portal cuboid (for waypoints / markers).
+         */
+        public Location getCenterLocation(org.bukkit.Server server) {
+            if (!isReady()) {
+                return null;
+            }
+            org.bukkit.World w = server.getWorld(world);
+            if (w == null) {
+                return null;
+            }
+            int minX = Math.min(x1, x2);
+            int maxX = Math.max(x1, x2);
+            int minY = Math.min(y1, y2);
+            int maxY = Math.max(y1, y2);
+            int minZ = Math.min(z1, z2);
+            int maxZ = Math.max(z1, z2);
+            return new Location(w, (minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2);
+        }
+
         private static boolean between(int v, int a, int b) {
             int min = Math.min(a, b);
             int max = Math.max(a, b);

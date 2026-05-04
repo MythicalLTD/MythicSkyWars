@@ -1,3 +1,13 @@
+# Lunar Client (Apollo) — used when clients/lunar/config.yml points message keys here.
+# Placeholders: {portal} {type} {friendly_type} {lucky} {lucky_line} — plus PlaceholderAPI when enabled.
+lunar:
+  water-portal:
+    waypoint-name: "&b&l{portal}"
+    hint-title: "&e{portal}"
+    hint-desc: "&7{friendly_type} &8· &7{lucky_line} &8· &7Dive in to queue!"
+    lucky-on: "&aLucky queue"
+    lucky-off: "&7Normal queue"
+
 chat:
   lobbychat: "&7[&bSkyWars&7] {level_display_prefix}&b{displayname}&f: &7{message}"
   specchat: "&8[&cSpec&8] {level_display_prefix}&b{displayname}&f: &7{message}"

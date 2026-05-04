@@ -10,6 +10,8 @@ import systems.mythical.mythicskywars.api.impl.MythicSkywarsImpl;
 import systems.mythical.mythicskywars.commands.*;
 import systems.mythical.mythicskywars.commands.player.LeaveMatchExecutor;
 import systems.mythical.mythicskywars.commands.player.RejoinMatchExecutor;
+import systems.mythical.mythicskywars.clients.lunar.LunarApolloBridge;
+import systems.mythical.mythicskywars.clients.lunar.LunarApolloGameplayListener;
 import systems.mythical.mythicskywars.config.Config;
 import systems.mythical.mythicskywars.config.ConfigMerge;
 import systems.mythical.mythicskywars.database.DataStorage;
@@ -242,6 +244,11 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
             }
         }
 
+        // Client integration defaults (Lunar Apollo reference + Feather placeholder)
+        saveResource("clients/lunar/config.yml", false);
+        saveResource("clients/lunar/mods.yml.example", false);
+        saveResource("clients/feather/config.yml", false);
+
         // ------ All external integrations --------
         // PAPI
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
@@ -333,9 +340,13 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         this.getServer().getPluginManager().registerEvents(new SpectateListener(), this);
         this.getServer().getPluginManager().registerEvents(new ChatListener(), this);
         this.getServer().getPluginManager().registerEvents(new ProjectileSpleefListener(), this);
+        this.getServer().getPluginManager().registerEvents(new LunarApolloGameplayListener(), this);
+        this.getServer().getPluginManager().registerEvents(new WorldGuardBypassListener(), this);
 
         // LOAD BEFORE HOLO - Holo needs server to be loaded to update correctly
         load();
+        // Apollo-Bukkit may enable after this plugin; re-scan Lunar bridge next tick so detection is correct.
+        Bukkit.getScheduler().runTaskLater(this, () -> LunarApolloBridge.reload(this), 1L);
 
         // Requires IM - aka load()
         new ArenasMenu();
@@ -471,6 +482,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
 
     public void onDisable() {
         loaded = false;
+        LunarApolloBridge.shutdown();
         if (updateChecker != null) {
             updateChecker.stop();
         }
@@ -521,6 +533,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         mergeConfigFromBundledTemplate();
         reloadConfig();
         config.load();
+        LunarApolloBridge.reload(this);
         cm = new ChestManager();
         LuckyBlockHook.setup();
         if (LuckyBlockHook.isAvailable()) {

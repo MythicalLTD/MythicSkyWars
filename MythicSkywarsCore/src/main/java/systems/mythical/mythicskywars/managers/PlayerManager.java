@@ -1,5 +1,6 @@
 package systems.mythical.mythicskywars.managers;
 
+import systems.mythical.mythicskywars.clients.lunar.LunarApolloBridge;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.enums.MatchState;
 import systems.mythical.mythicskywars.enums.PlayerRemoveReason;
@@ -81,6 +82,7 @@ public class PlayerManager {
         // Filter which type of remove we should perform
         // Player is in an arena - else we don't handle removes
         if (gameMap != null) {
+            LunarApolloBridge.resetForPlayer(playerRemoved);
             MatchState mState = gameMap.getMatchState();
             boolean shouldRestorePlayer = true;
             boolean shouldSendToLobby = shouldSendToLobbyIn;
