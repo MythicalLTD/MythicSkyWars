@@ -61,24 +61,25 @@ public class LobbyListener implements org.bukkit.event.Listener {
     }
 
     /**
-     * Removes hostile mobs from the lobby world while preserving:
+     * Removes all mobs from the lobby world while preserving:
      * - Players
      * - Armor stands (used by holograms, NPCs)
      * - Entities with custom names (likely NPCs from Citizens, FancyNPCs, etc.)
      * - Entities that have metadata from NPC plugins
+     * - Item frames, paintings, and other non-living decorations
      */
     private void clearHostileMobs(World world) {
         for (org.bukkit.entity.Entity entity : world.getEntities()) {
             if (entity instanceof Player) continue;
             if (entity instanceof org.bukkit.entity.ArmorStand) continue;
+            if (entity instanceof org.bukkit.entity.ItemFrame) continue;
+            if (entity instanceof org.bukkit.entity.Painting) continue;
             // Preserve named entities (NPCs, custom mobs from other plugins)
             if (entity.getCustomName() != null) continue;
             // Preserve entities marked by NPC plugins (Citizens, FancyNPCs, etc.)
             if (entity.hasMetadata("NPC")) continue;
-            // Only remove living hostile/neutral mobs (monsters, animals)
-            if (entity instanceof org.bukkit.entity.Monster
-                    || entity instanceof org.bukkit.entity.Slime
-                    || entity instanceof org.bukkit.entity.Phantom) {
+            // Remove all living entities (monsters, animals, villagers, etc.)
+            if (entity instanceof org.bukkit.entity.LivingEntity) {
                 entity.remove();
             }
         }
