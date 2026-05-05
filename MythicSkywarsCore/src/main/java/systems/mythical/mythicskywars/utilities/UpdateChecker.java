@@ -8,7 +8,9 @@ import org.bukkit.scheduler.BukkitTask;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
+import java.net.URLEncoder;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
@@ -21,6 +23,7 @@ import java.util.logging.Level;
 public class UpdateChecker {
 
     private static final String GITHUB_API_URL = "https://api.github.com/repos/%s/%s/releases";
+    private static final String GITHUB_API_TAG_URL = "https://api.github.com/repos/%s/%s/releases/tags/%s";
     private static final String USER_AGENT = "MythicSkywars-UpdateChecker/%s";
 
     private final MythicSkywars plugin;
@@ -127,6 +130,7 @@ public class UpdateChecker {
                 // Array response — find the release with the highest version
                 String bestVersion = null;
                 String bestHtml = null;
+                String bestTag = null;
                 int searchFrom = 0;
                 while (true) {
                     String tag = extractJsonStringFrom(json, "tag_name", searchFrom);
@@ -151,6 +155,7 @@ public class UpdateChecker {
                     if (bestVersion == null || isNewerVersion(version, bestVersion)) {
                         bestVersion = version;
                         bestHtml = extractJsonStringFrom(json, "html_url", Math.max(0, tagPos - 200));
+                        bestTag = tag;
                     }
                     searchFrom = tagPos + 1;
                     if (searchFrom <= 0) break;
@@ -158,6 +163,17 @@ public class UpdateChecker {
                 if (bestVersion != null) {
                     tagName = bestVersion;
                     htmlUrl = bestHtml;
+                    if (bestTag != null) {
+                        // Resolve selected release directly by tag to avoid picking an asset from another release in the list.
+                        String bestReleaseJson = fetchReleaseByTagJson(bestTag);
+                        if (bestReleaseJson != null) {
+                            String resolvedHtml = extractJsonString(bestReleaseJson, "html_url");
+                            if (resolvedHtml != null) {
+                                htmlUrl = resolvedHtml;
+                            }
+                            jarDownloadUrl = extractJarAssetUrl(bestReleaseJson);
+                        }
+                    }
                 }
             } else {
                 // Single release response
@@ -176,7 +192,9 @@ public class UpdateChecker {
             String remoteVersion = tagName.startsWith("v") ? tagName.substring(1) : tagName;
 
             // Find the jar download URL from assets
-            jarDownloadUrl = extractJarAssetUrl(json);
+            if (jarDownloadUrl == null) {
+                jarDownloadUrl = extractJarAssetUrl(json);
+            }
 
             // Compare versions
             if (isNewerVersion(remoteVersion, currentVersion)) {
@@ -366,6 +384,40 @@ public class UpdateChecker {
                 return url;
             }
             searchFrom = end;
+        }
+    }
+
+    private String fetchReleaseByTagJson(String tag) {
+        HttpsURLConnection connection = null;
+        try {
+            String encodedTag = URLEncoder.encode(tag, StandardCharsets.UTF_8.name()).replace("+", "%20");
+            String endpoint = String.format(GITHUB_API_TAG_URL, repoOwner, repoName, encodedTag);
+            URL url = new URL(endpoint);
+            connection = (HttpsURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", String.format(USER_AGENT, currentVersion));
+            connection.setRequestProperty("Accept", "application/vnd.github.v3+json");
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
+
+            if (connection.getResponseCode() != 200) {
+                return null;
+            }
+
+            StringBuilder response = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+            }
+            return response.toString();
+        } catch (Exception ignored) {
+            return null;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 

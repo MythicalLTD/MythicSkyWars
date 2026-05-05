@@ -94,23 +94,19 @@ jobs:
           BASE_VERSION=$(grep -oP '(?<=<revision>)[^<]+' pom.xml | head -1)
           SHORT_SHA=$(git rev-parse --short HEAD)
           NIGHTLY_VERSION="${BASE_VERSION}-nightly.${GITHUB_RUN_NUMBER}+${SHORT_SHA}"
+          NIGHTLY_TAG="nightly-${GITHUB_RUN_NUMBER}"
           echo "version=${NIGHTLY_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${NIGHTLY_TAG}" >> "$GITHUB_OUTPUT"
           echo "base_version=${BASE_VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Building nightly: ${NIGHTLY_VERSION}"
+          echo "Building nightly: ${NIGHTLY_VERSION} (tag: ${NIGHTLY_TAG})"
 
       - name: Build
         run: mvn clean package -Drevision=${{ steps.version.outputs.version }} -B --no-transfer-progress -DskipTests -Daether.checksumPolicy=warn
 
-      - name: Delete old nightly release
-        run: |
-          gh release delete nightly --yes --cleanup-tag || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Create nightly release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: nightly
+          tag_name: ${{ steps.version.outputs.tag }}
           name: "MythicSkywars Nightly #${{ github.run_number }} (${{ steps.version.outputs.version }})"
           body: |
             ## MythicSkywars Nightly Build
