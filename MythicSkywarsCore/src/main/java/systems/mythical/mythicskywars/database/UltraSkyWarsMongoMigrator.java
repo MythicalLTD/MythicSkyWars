@@ -60,24 +60,64 @@ public final class UltraSkyWarsMongoMigrator {
         String host = cfg.getString(root + "host", "").trim();
         int port = cfg.getInt(root + "port", 27017);
         String databaseName = cfg.getString(root + "database", "").trim();
+        String authDatabaseName = cfg.getString(root + "authDatabase", databaseName).trim();
         String username = cfg.getString(root + "username", "").trim();
         String password = cfg.getString(root + "password", "");
         String collectionName = cfg.getString(root + "collection", "players").trim();
+        String authMechanism = cfg.getString(root + "authMechanism", "auto").trim();
+        boolean migrationDebug = cfg.getBoolean(root + "debug", false);
 
         if (host.isEmpty() || databaseName.isEmpty()) {
             throw new IllegalArgumentException("Missing migration MongoDB config. Set migration.ultimateskywars.mongodb.host and database.");
         }
 
+        if (migrationDebug) {
+            MythicSkywars.get().getLogger().info("[MigrationDebug] Mongo config resolved -> host=" + host
+                    + ", port=" + port
+                    + ", database=" + databaseName
+                    + ", authDatabase=" + (authDatabaseName.isEmpty() ? "<empty>" : authDatabaseName)
+                    + ", username=" + (username.isEmpty() ? "<empty>" : username)
+                    + ", collection=" + collectionName
+                    + ", authMechanism=" + (authMechanism.isEmpty() ? "<empty>" : authMechanism));
+        }
+
         MongoClient mongoClient;
         if (!username.isEmpty()) {
-            MongoCredential credential = MongoCredential.createCredential(
-                    username,
-                    databaseName,
-                    password.toCharArray()
-            );
+            if (authDatabaseName.isEmpty()) {
+                authDatabaseName = databaseName;
+            }
+            MongoCredential credential;
+            String mechanism = authMechanism == null ? "" : authMechanism.trim().toLowerCase();
+            if (mechanism.equals("scram-sha-256") || mechanism.equals("sha256")) {
+                credential = MongoCredential.createScramSha256Credential(
+                        username,
+                        authDatabaseName,
+                        password.toCharArray()
+                );
+            } else if (mechanism.equals("scram-sha-1") || mechanism.equals("sha1")) {
+                credential = MongoCredential.createScramSha1Credential(
+                        username,
+                        authDatabaseName,
+                        password.toCharArray()
+                );
+            } else {
+                credential = MongoCredential.createCredential(
+                        username,
+                        authDatabaseName,
+                        password.toCharArray()
+                );
+            }
+            if (migrationDebug) {
+                MythicSkywars.get().getLogger().info("[MigrationDebug] Using Mongo credential mechanism="
+                        + credential.getMechanism()
+                        + ", source=" + credential.getSource());
+            }
             mongoClient = new MongoClient(new ServerAddress(host, port), Collections.singletonList(credential));
         } else {
             mongoClient = new MongoClient(new ServerAddress(host, port));
+            if (migrationDebug) {
+                MythicSkywars.get().getLogger().info("[MigrationDebug] Using Mongo connection without credentials.");
+            }
         }
 
         MigrationResult result = new MigrationResult();
@@ -99,10 +139,26 @@ public final class UltraSkyWarsMongoMigrator {
                     MythicSkywars.get().getLogger().warning("Failed to migrate one USW record: " + ex.getMessage());
                 }
             }
+        } catch (Exception ex) {
+            if (migrationDebug) {
+                logExceptionChain(ex);
+            }
+            throw ex;
         } finally {
             mongoClient.close();
         }
         return result;
+    }
+
+    private static void logExceptionChain(Throwable throwable) {
+        int depth = 0;
+        Throwable current = throwable;
+        while (current != null && depth < 8) {
+            MythicSkywars.get().getLogger().warning("[MigrationDebug] Mongo exception[" + depth + "]: "
+                    + current.getClass().getName() + " -> " + String.valueOf(current.getMessage()));
+            current = current.getCause();
+            depth++;
+        }
     }
 
     private static boolean migrateOne(DBObject playerDoc, boolean overwrite) throws Exception {

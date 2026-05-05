@@ -181,8 +181,8 @@ public final class Messaging {
     private static void applyBundledDefaultsInMemoryOnly(FileConfiguration playerConfig) {
         int added = ConfigMerge.mergeMissingKeysFromResource(MythicSkywars.get(), "messages.yml", playerConfig);
         if (added > 0) {
-            MythicSkywars.get().getLogger().info("Loaded " + added + " default message key(s) from the jar "
-                    + "(missing from messages.yml on disk; disk file was not modified).");
+            MythicSkywars.get().getLogger().info("Loaded " + added + " default message key(s) into memory from jar "
+                    + "(INFO only; not an error, and disk messages.yml was not changed).");
         }
     }
 

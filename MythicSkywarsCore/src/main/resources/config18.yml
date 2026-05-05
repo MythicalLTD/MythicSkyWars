@@ -461,6 +461,12 @@ migration:
       host: localhost
       port: 27017
       database: database
+      # Optional: database used for MongoDB authentication (authSource). Defaults to 'database' when empty.
+      authDatabase: admin
+      # auto, scram-sha-1, or scram-sha-256
+      authMechanism: auto
+      # Print resolved migration Mongo settings and full exception chain.
+      debug: true
       username: ''
       password: ''
       collection: players
