@@ -427,13 +427,12 @@ public class PlayerManager {
             World world = gameMap.getCurrentWorld();
             if (world != null) {
                 CoordLoc ss = gameMap.getSpectateSpawn();
-                Location spectateSpawn = new Location(world, ss.getX(), ss.getY(), ss.getZ());
-                // Sanity check for spec spawn
-                if (spectateSpawn == null) {
+                if (ss == null) {
                     MythicSkywars.get().getLogger().severe(
                             "The spectator spawn was not set in the map " + gameMap.getName() +
                                     "! Players will not be teleported correctly.");
                 } else {
+                    Location spectateSpawn = new Location(world, ss.getX(), ss.getY(), ss.getZ());
                     player.teleport(spectateSpawn, PlayerTeleportEvent.TeleportCause.END_PORTAL);
                 }
             } else {
@@ -472,10 +471,6 @@ public class PlayerManager {
             player.sendMessage(new Messaging.MessageFormatter().format("spectate.starting"));
             player.sendMessage(new Messaging.MessageFormatter().format("spectate.startmessage"));
             player.sendMessage(new Messaging.MessageFormatter().format("spectate.startmessage2"));
-            String specTip = MythicSkywars.getMessaging().formatRandomListLine("spectate.join-tips", new Messaging.MessageFormatter());
-            if (specTip != null && !specTip.isEmpty()) {
-                player.sendMessage(specTip);
-            }
             if (debug) {
                 Util.get().logToFile(matchManager.getDebugName(gameMap) + ChatColor.YELLOW + player.getName() + " has been added to spectators");
             }

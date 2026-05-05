@@ -34,6 +34,7 @@ public class MainCmdManager implements CommandExecutor, SWRCmdManagerAPI {
         admincmds.add(new SWSendCmd("sw"));
         admincmds.add(new LobbyWaterPortalCmd("sw"));
         admincmds.add(new SoulWellCmd("sw"));
+        admincmds.add(new SWEcoCmd("sw"));
         admincmds.add(new MigrateUSWCmd("sw"));
         admincmds.add(new CheckUpdatesCmd("sw"));
         admincmds.add(new UpdateCmd("sw"));
@@ -46,6 +47,7 @@ public class MainCmdManager implements CommandExecutor, SWRCmdManagerAPI {
         pcmds.add(new SWQuitCmd("sw"));
         pcmds.add(new SWStatsCmd("sw"));
         pcmds.add(new SWTopCmd("sw"));
+        pcmds.add(new SWCoinsCmd("sw"));
         pcmds.add(new SWOptionsCmd("sw"));
         pcmds.add(new SWPrestigeCmd("sw"));
         pcmds.add(new SWPerksCmd("sw"));
@@ -98,7 +100,9 @@ public class MainCmdManager implements CommandExecutor, SWRCmdManagerAPI {
                     s.sendMessage(" ");
                     s.sendMessage(new Messaging.MessageFormatter().format("helpList.sw.header" + num));
                 }
-                s.sendMessage(new Messaging.MessageFormatter().format("helpList.sw." + cmd.cmdName));
+                String helpLine = new Messaging.MessageFormatter().format("helpList.sw." + cmd.cmdName);
+                // Tolerate accidental "&/" in disk messages.yml entries.
+                s.sendMessage(helpLine.replace("&/", "/"));
             }
         }
     }

@@ -6,10 +6,16 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import systems.mythical.mythicskywars.database.Database;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Locale;
 import java.util.UUID;
 
 public class VaultUtils {
@@ -50,10 +56,20 @@ public class VaultUtils {
 
 
     public boolean canBuy(Player player, double cost) {
+        if (player == null) return false;
+        if (useBuiltInEconomy()) {
+            return getBuiltInBalance(player.getUniqueId().toString(), player.getName()) >= cost;
+        }
         return (econ != null) && (econ.getBalance(player) >= cost);
     }
 
     public boolean payCost(Player player, double cost) {
+        if (player == null) return false;
+        if (useBuiltInEconomy()) {
+            double current = getBuiltInBalance(player.getUniqueId().toString(), player.getName());
+            if (current < cost) return false;
+            return setBuiltInBalance(player.getUniqueId().toString(), player.getName(), current - cost);
+        }
         if (econ == null) return false;
         try {
             EconomyResponse rp = econ.withdrawPlayer(player, cost);
@@ -65,6 +81,10 @@ public class VaultUtils {
     }
 
     public double getBalance(Player player) {
+        if (player == null) return 0.0D;
+        if (useBuiltInEconomy()) {
+            return getBuiltInBalance(player.getUniqueId().toString(), player.getName());
+        }
         if (econ == null) return 0.0D;
         try {
             return econ.getBalance(player);
@@ -74,7 +94,36 @@ public class VaultUtils {
         return 0.0D;
     }
 
+    public double getBalance(OfflinePlayer player) {
+        if (player == null) return 0.0D;
+        if (useBuiltInEconomy()) {
+            if (player.getUniqueId() == null) return 0.0D;
+            return getBuiltInBalance(player.getUniqueId().toString(), player.getName());
+        }
+        if (econ == null) return 0.0D;
+        try {
+            Double byOffline = invokeDouble("getBalance", new Class<?>[]{OfflinePlayer.class}, new Object[]{player});
+            if (byOffline != null) {
+                return byOffline;
+            }
+            if (player.getName() != null && !player.getName().trim().isEmpty()) {
+                Double byName = invokeDouble("getBalance", new Class<?>[]{String.class}, new Object[]{player.getName()});
+                if (byName != null) {
+                    return byName;
+                }
+            }
+        } catch (Exception e) {
+            this.handleException(e);
+        }
+        return 0.0D;
+    }
+
     public void give(Player win, int i) {
+        if (win == null) return;
+        if (useBuiltInEconomy()) {
+            addBuiltInBalance(win.getUniqueId().toString(), win.getName(), i);
+            return;
+        }
         if (econ == null) return;
         try {
             econ.depositPlayer(win, i);
@@ -88,10 +137,17 @@ public class VaultUtils {
     }
 
     public boolean isEconomyAvailable() {
+        if (useBuiltInEconomy()) {
+            return true;
+        }
         return econ != null;
     }
 
     public boolean setBalance(UUID uuid, String playerName, double amount) {
+        if (useBuiltInEconomy()) {
+            if (uuid == null) return false;
+            return setBuiltInBalance(uuid.toString(), playerName, amount);
+        }
         if (econ == null) return false;
         amount = Math.max(0D, amount);
         try {
@@ -108,6 +164,63 @@ public class VaultUtils {
             this.handleException(e);
             return false;
         }
+    }
+
+    private boolean useBuiltInEconomy() {
+        String provider = MythicSkywars.getCfg() == null ? "ESSENTIALSX" : MythicSkywars.getCfg().economyProvider();
+        return "BUILTIN".equalsIgnoreCase(provider == null ? "" : provider.trim().toUpperCase(Locale.ROOT));
+    }
+
+    private double getBuiltInBalance(String uuid, String playerName) {
+        Database db = MythicSkywars.getDb();
+        if (db != null) {
+            return db.getStoredEconomy(uuid, playerName);
+        }
+        return getYamlEconomy(uuid);
+    }
+
+    private boolean setBuiltInBalance(String uuid, String playerName, double amount) {
+        Database db = MythicSkywars.getDb();
+        if (db != null) {
+            return db.setStoredEconomy(uuid, playerName, amount);
+        }
+        return setYamlEconomy(uuid, amount);
+    }
+
+    private boolean addBuiltInBalance(String uuid, String playerName, double delta) {
+        double current = getBuiltInBalance(uuid, playerName);
+        return setBuiltInBalance(uuid, playerName, current + delta);
+    }
+
+    private double getYamlEconomy(String uuid) {
+        File f = getPlayerDataFile(uuid);
+        if (f == null || !f.exists()) return 0D;
+        FileConfiguration fc = YamlConfiguration.loadConfiguration(f);
+        return Math.max(0D, fc.getDouble("economy", 0D));
+    }
+
+    private boolean setYamlEconomy(String uuid, double amount) {
+        File f = getPlayerDataFile(uuid);
+        if (f == null) return false;
+        File parent = f.getParentFile();
+        if (parent != null && !parent.exists() && !parent.mkdirs()) {
+            return false;
+        }
+        FileConfiguration fc = YamlConfiguration.loadConfiguration(f);
+        fc.set("economy", Math.max(0D, amount));
+        try {
+            fc.save(f);
+            return true;
+        } catch (IOException e) {
+            handleException(e);
+            return false;
+        }
+    }
+
+    private File getPlayerDataFile(String uuid) {
+        if (uuid == null || uuid.trim().isEmpty()) return null;
+        File playerDataDir = new File(MythicSkywars.get().getDataFolder(), "player_data");
+        return new File(playerDataDir, uuid + ".yml");
     }
 
     // PRIVATE UTILS

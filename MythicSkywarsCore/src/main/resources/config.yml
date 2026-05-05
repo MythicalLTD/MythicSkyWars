@@ -23,6 +23,8 @@ lobby:
   hideJoinQuitMessages: true
   hideDeathMessages: true
 economyEnabled: false
+# ESSENTIALSX (Vault provider) or BUILTIN (sw_player.economy SQL column)
+economyProvider: ESSENTIALSX
 clearInventoryOnLobbyJoin: true
 timeFormat: simplified
 defaultKit: "null" #Name of the starter kit, leave null for none
@@ -302,6 +304,12 @@ soulwell:
     deathangel:
       souls: 50
       cost: 750
+  upgrades:
+    discount-costs:
+      level1: 400
+      level2: 1000
+      level3: 2000
+    frame-cost: 900
   rewards:
     coins:
       weight: 20
@@ -464,7 +472,15 @@ sqldatabase:
   database: database
   username: username
   password: password
-  ssl: true
+  # Disable SSL/certificate checks if your MySQL host does not provide TLS certificates.
+  ssl: false
+  verifyCertificate: false
+  publicKeyRetrieval: false
+  connectTimeoutMs: 10000
+  socketTimeoutMs: 30000
+  serverTimezone: UTC
+  useUnicode: true
+  characterEncoding: utf8
 migration:
   ultimateskywars:
     mongodb:
@@ -475,6 +491,15 @@ migration:
       authDatabase: admin
       # auto, scram-sha-1, or scram-sha-256
       authMechanism: auto
+      # ESSENTIALSX (via Vault), BUILTIN (store in sw_player.economy), or SKIP.
+      economyImportMode: BUILTIN
+      # Optional ID mappings for importing USW-owned kits/perks into SWR permissions.
+      # Example: kits: { "1": "scout" } -> grants sw.kit.scout when USW kit id 1 is owned.
+      # Example: perks: { "3": "bulldozer" } -> grants sw.perk.bulldozer.<level> from USW perksData.
+      # If left empty, migrateusw auto-detects mappings from plugins/Skywars/UltraSkyWars/kits.yml and perks.yml.
+      mappings:
+        kits: {}
+        perks: {}
       # Print resolved migration Mongo settings and full exception chain.
       debug: false
       username: ''

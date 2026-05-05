@@ -1,10 +1,8 @@
 package systems.mythical.mythicskywars.commands;
 
-import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.managers.GameMapManager;
 import systems.mythical.mythicskywars.utilities.Messaging;
 import systems.mythical.mythicskywars.utilities.Util;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -35,7 +33,7 @@ public abstract class BaseCmd {
 
         if (!Util.get().hasPerm(type, sender, cmdName)) {
             sender.sendMessage(new Messaging.MessageFormatter().format("error.cmd-no-perm"));
-        } else if ((maxArgs == -1 && argLength > args.length) || (maxArgs!=-1 && args.length > maxArgs)) {
+        } else if (argLength > args.length || (maxArgs != -1 && args.length > maxArgs)) {
             sender.sendMessage(new Messaging.MessageFormatter()
                     .setVariable("usage", new Messaging.MessageFormatter().format("helpList." + Util.get().getMessageKey(type) + "." + cmdName))
                     .format("error.wrong-usage"));

@@ -134,6 +134,7 @@ public final class Messaging {
                 "signs.line",
                 "lunar.",
                 "kit.",
+                "timer.",
                 "soulwell.holo-",
                 "game.chest-refill-hologram."
         ));

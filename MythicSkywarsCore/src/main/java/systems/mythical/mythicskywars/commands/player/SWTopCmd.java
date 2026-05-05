@@ -22,20 +22,26 @@ public class SWTopCmd extends BaseCmd {
     }
 
     public boolean run(CommandSender sender, Player player, String[] args) {
-        String leaderType;
-        if (args.length < 2) {
-            leaderType = "wins";
-        } else {
-            leaderType = args[1].toUpperCase();
+        String leaderType = args.length < 2 ? "WINS" : args[1].toUpperCase();
+        LeaderType selectedType;
+        try {
+            selectedType = LeaderType.valueOf(leaderType);
+        } catch (IllegalArgumentException ex) {
+            StringJoiner types = new StringJoiner(", ");
+            for (String add : MythicSkywars.get().getLeaderTypes()) {
+                types.add(add);
+            }
+            player.sendMessage(new Messaging.MessageFormatter().setVariable("validtypes", types.toString()).format("leaderboard.invalidtype"));
+            return true;
         }
 
         if (MythicSkywars.get().getLeaderTypes().contains(leaderType)) {
-            if (!MythicSkywars.getLB().loaded(LeaderType.valueOf(args[1].toUpperCase()))) {
+            if (!MythicSkywars.getLB().loaded(selectedType)) {
                 player.sendMessage(new Messaging.MessageFormatter().format("leaderboard.updating"));
                 return true;
             }
 
-            List<Leaderboard.LeaderData> top = MythicSkywars.getLB().getTopList(LeaderType.valueOf(args[1].toUpperCase()));
+            List<Leaderboard.LeaderData> top = MythicSkywars.getLB().getTopList(selectedType);
 
             player.sendMessage(new Messaging.MessageFormatter().format("leaderboard.header"));
             player.sendMessage(new Messaging.MessageFormatter().format("leaderboard.header2"));

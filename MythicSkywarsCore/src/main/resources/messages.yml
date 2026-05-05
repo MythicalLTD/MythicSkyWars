@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------------------
 # Universal prefix — matches legacy Megas/oldlang game lines: bold aqua + gray ▸ + body.
-# (oldlang: "&b&lSkywars &7▸ &b<player> &ehas joined...")
+# (oldlang: "&b&lSkywars &7▸ &b(player) &ehas joined...")
 # ---------------------------------------------------------------------------
 message-prefix: "&b&lSkyWars &7▸ &r"
 message-prefix-exclude-prefixes: []
@@ -21,8 +21,12 @@ chat:
   externalPrefix: ""
 command:
   teleported-to-spawn: "&aTeleported to the lobby spawn."
-  select-set: "&aSelected &e{player}&a for &e/sw send <map>&a."
+  select-set: "&aSelected &e{player}&a for &e/sw send [map]&a."
   send-success: "&aSent &e{player}&a to arena &e{map}&a."
+  coins:
+    unavailable: "&cEconomy is disabled or unavailable."
+    player-not-found: "&cPlayer not found: &e{player}"
+    balance: "&a{player}&7's balance: &6{balance}"
   kit-create: "&aSuccessfully created the kit {kit}"
   kit-update: "&aThe kit {kit}&7's contents have been updated with your inventory contents"
   kit-enable: "&7The kit {kit} &7is now {state}!"
@@ -89,13 +93,13 @@ command:
   lobbywaterportal:
     unavailable: "&cLobby water portal manager is not available."
     usage-header: "&6Lobby water portal commands:"
-    usage-create: "&e/sw lobbywaterportal create <name>"
-    usage-pos1: "&e/sw lobbywaterportal pos1 <name>"
-    usage-pos2: "&e/sw lobbywaterportal pos2 <name>"
-    usage-pos: "&eUsage: /sw lobbywaterportal {sub} <name>"
-    usage-type: "&e/sw lobbywaterportal type <name> <all|single|team>"
-    usage-luckymode: "&e/sw lobbywaterportal luckymode <name> <on|off>"
-    usage-delete: "&e/sw lobbywaterportal delete <name>"
+    usage-create: "&e/sw lobbywaterportal create (name)"
+    usage-pos1: "&e/sw lobbywaterportal pos1 (name)"
+    usage-pos2: "&e/sw lobbywaterportal pos2 (name)"
+    usage-pos: "&eUsage: /sw lobbywaterportal {sub} (name)"
+    usage-type: "&e/sw lobbywaterportal type (name) (all|single|team)"
+    usage-luckymode: "&e/sw lobbywaterportal luckymode (name) (on|off)"
+    usage-delete: "&e/sw lobbywaterportal delete (name)"
     usage-list: "&e/sw lobbywaterportal list"
     created: "&aCreated lobby water portal &e{name}&a. Use pos1/pos2/type."
     exists: "&ePortal &6{name} &ealready exists."
@@ -117,7 +121,7 @@ command:
     usage-info: "&e/sw soulwell info"
     usage-clear: "&e/sw soulwell clear"
     usage-open: "&e/sw soulwell open [player]"
-    usage-debug: "&e/sw soulwell debug <on|off>"
+    usage-debug: "&e/sw soulwell debug (on|off)"
     look-at-block: "&cLook at a block within 6 blocks."
     not-set: "&cSoul Well block is not set."
     set-at: "&aSoul Well set at &e{world} {x}, {y}, {z}"
@@ -138,7 +142,7 @@ event:
   announce: "&eEvent &a{event} &8- &estarts in &c{time}&e! &7Get ready."
   crateInv: "&7SkyWars Crate"
 maps:
-  noArenas: "&cThere currently are no arenas. Create one using '/swm create <name>'"
+  noArenas: "&cThere currently are no arenas. Create one using '/swm create (name)'"
   editor:
     tool-given: "&aUse the blaze rod to open the arena setup menu."
     left-without-saving: "&eLeft editor for arena {mapname} without saving changes."
@@ -254,7 +258,7 @@ maps:
     team-size-error: "&cTeam size must be a number (default: 2)."
     not-found: "&cMap data file not found: &e{map}.yml"
     not-found-hint: "&7Make sure the solo map exists in plugins/MythicSkywars/mapsData/"
-    converting: "&a[MythicSkywars] &7Converting &e{source} &7-> &e{target} &7(team
+    converting: "&a[MythicSkywars] &7Converting &e{source} &7-) &e{target} &7(team
       size: {teamsize})..."
     success: "&a[MythicSkywars] &aSuccessfully created &e{target}&a!"
     data-file: "&7  Map data: &f{file}"
@@ -294,6 +298,10 @@ party:
   info3: "&eParty &8| &7Members: &b{members}"
   leader-tip: "&7Leaders: &e/swparty invite &7adds players &8· &7only you can queue everyone!"
   stack-tip: "&7Parties spawn together on team maps &8» &7share kits mentally!"
+coins:
+  unavailable: "&cEconomy is disabled or unavailable."
+  player-not-found: "&cPlayer not found: &e{player}"
+  balance: "&a{player}&7's balance: &6{balance}"
 error:
   server-starting: "&cServer is still starting up. Please try again in a moment."
   not-looking-at-chest: "&cYou must be looking at a chest within a 5 blocks ratio!"
@@ -340,7 +348,7 @@ error:
     spawn to. Use: /swm spawn player"
   map-spawn-separate-cages-disabled: "&cSeparate cages are disabled! You can only
     add one spawn per team. Use: /swm spawn player"
-  map-spawn-usage: "&cCorrect usage: /swm spawn <type> [team]"
+  map-spawn-usage: "&cCorrect usage: /swm spawn (type) [team]"
   cmd-no-perm: "&cYou don't have permission to use this command!"
   must-be-player: "&cYou must be a player to perform this command!"
   signs-no-perm: "&cYou don't have permission to create join signs!"
@@ -374,9 +382,9 @@ error:
   migrateusw-failed: "&cUltraSkyWars migration failed: {error}"
   leave-not-in-game: "&cYou are not in a SkyWars match."
   send-bungee-not-supported: "&cPlayer send is not supported in bungee mode."
-  send-no-selection: "&cNo player selected. Use &e/sw select <player>&c first, or
-    &e/sw send <player> <map>&c."
-  send-console-needs-player: "&cFrom console use &e/sw send <player> <map>&c."
+  send-no-selection: "&cNo player selected. Use &e/sw select (player)&c first, or
+    &e/sw send (player) (map)&c."
+  send-console-needs-player: "&cFrom console use &e/sw send (player) (map)&c."
   send-target-offline: "&cThe selected player is no longer online."
   send-player-not-found: "&cThat player is not online."
   send-map-not-found: "&cNo arena found with that name."
@@ -387,51 +395,6 @@ error:
 game:
   # Legacy fallback if root message-prefix is empty (older configs).
   broadcast-prefix: "&b&lSkyWars &7▸ &r"
-  # Random filler lines while cages countdown (Megas/oldlang vibe). Vars: {map} {playercount} {maxplayers} {needed}
-  wait-pregame-tips:
-    - "&eMinimum players reached &8— &7starting soon on &f{map}&7!"
-    - "&eThe game starts in moments &8· &7you are &b{playercount}&7/&b{maxplayers}&7."
-    - "&7Grab a kit vote and chest vote while you can &8» &eislands drop fast!"
-    - "&eNeed &c{needed} &emore &8— &7then we roll. &7(&b{playercount}&7/&b{maxplayers}&7)"
-    - "&7Tip: &ecenter island &7has the juiciest chests. &8| &7Map &f{map}"
-    - "&eWarm up your clicks &8· &7friendly fire is OFF until PvP!"
-    - "&7Party up mentally &8— &esolo means every player for themselves."
-    - "&eSound check &8» &7if you hear the countdown, you are in."
-    - "&7Blocks break, hearts drop &8| &estay on your island until release."
-    - "&eVotes lock when the timer hits zero &8· &7last chance to change loot!"
-    - "&7Lucky mode? &eLucky blocks &7replace chests &8— &7read the vote board!"
-    - "&eCages open &8» &7first to mid often gets snowballed. Worth it anyway."
-  # Team waiting lobby (before cages). Same vars.
-  team-lobby-tips:
-    - "&ePick a team from the menu &8· &7unbalanced teams get reshuffled at start."
-    - "&7Still in lobby on &f{map}&7? &e{playercount}&7/&e{maxplayers} &7players ready."
-    - "&eNeed &c{needed} &emore fighters &8— &7tell a friend to &a/sw join&7!"
-    - "&7Teams of friends survive longer &8| &echoose the same &a[Team] &7color."
-    - "&eLeader can drag the party in &8» &7everyone lands on the same map."
-    - "&7Not sure which team? &ePick the one with fewer players &8· &7auto-balance."
-    - "&eWaiting is boring on purpose &8— &7use the time to tweak your kit."
-    - "&7Lucky queue portals glow different &8| &7read signs before you jump."
-    - "&eAlmost go-time &8· &7{playercount} souls waiting on &f{map}&7."
-    - "&7Pro tip: &ebind your compass &7to open the voting menu faster."
-    - "&eDon't AFK &8» &7lobby timer resets if you dip below minimum."
-    - "&7Hydrate, stretch, &ethen take souls &8| &7SkyWars is a sprint."
-  # Mid-match chatter. Vars: {map} {alive} {seconds}
-  playing-tips:
-    - "&eStill &b{alive} &ealive on &f{map}&7. &8| &7Rotate islands for fresh chests."
-    - "&7Mid is contested &8» &epearl if you have one &7— or bait someone else in."
-    - "&eHeight advantage wins ranged fights &8· &7build up before you get rushed."
-    - "&7Sneak bridges when you can &8| &eone TNT player ruins everyone's day."
-    - "&eCheck your corners &8» &7{alive} players means {alive} angles to die from."
-    - "&7Souls on the line &8· &7playtime &e{seconds}s &7— make them count."
-    - "&eLow on blocks? &7Mine your island's trees &8| &7nobody judges looters here."
-    - "&7Storm closing in? &eUse sound &8» &7footsteps do not lie."
-    - "&eTeam mode? &7Stick within pearl range of your carry &8· &7or be the carry."
-    - "&7Solo? &eThird party fights &8| &7cleanups are the real MVP plays."
-    - "&eDo not chase into unknown fog &8» &7that's how finals become 1v0s."
-    - "&7Golden apples win trades &8· &7save one for the last duel."
-    - "&eFeather / Lunar overlays &8| &7if you use them, peek cooldowns often."
-    - "&7Still reading tips? &eGood &8— &7aware players live longer than cracked ones."
-    - "&eEdge of the map is lava for your karma &8» &7respect the requeue."
   lobby-void-teleport: "&eYou fell into the void. Teleported to spawn."
   select-team-before-voting: "&c&lYou must select a team before voting!"
   select-team-before-kit: "&c&lYou must select a team before choosing a kit!"
@@ -455,7 +418,7 @@ game:
   command-disabled: "&cYou can't do this when playing a game!"
   votekit: "&b{player} &ehas voted for kit &b{kit}&e!"
   votechest: "&b{player} &ehas voted for &a&lchest &b{chest}&e. &8| &eVotes &a&l{votes}"
-  votetime: "&b{player} &ehas voted for &a&ltime &b{time}&e. &8| &eVotes &a&l{votes}"
+  votetime: "&b{player} &ehas voted for &atime &b{time}&e. &8| &eVotes &a&l{votes}"
   votehealth: "&b{player} &ehas voted for &a&lhealth &b{health}&e. &8| &eVotes &a&l{votes}"
   voteweather: "&b{player} &ehas voted for &a&lweather &b{weather}&e. &8| &eVotes &a&l{votes}"
   votemodifier: "&b{player} &ehas voted for &a&lmodifier &b{mod}&e. &8| &eVotes &a&l{votes}"
@@ -513,12 +476,6 @@ spectate:
   startmessage2: "&7Return hub anytime: &e/spawn &8— &7no ELO lost from leaving spec!"
   tip-map: "&7Map intel refreshes on the scoreboard &8» &7watch rotations!"
   tip-players: "&eRight-click player heads &8· &7teleport cam between fights!"
-  join-tips:
-    - "&7Tip: &escoreboard &8| &7shows who is low before you TP."
-    - "&eUse the compass slots &8· &7quick hop between fighters!"
-    - "&7Clean audio helps &8» &7hear bow charges before they peek!"
-    - "&eRespect delays &8| &7some clients hide armor until close!"
-    - "&7Clip worthy? &eReplay mod &8· &7we won't judge."
   exititemname: "&cLeave the game"
   exititemlore: "&7Click here to return to the lobby."
   playeritemlore: "&7Click to teleport to {player}"
@@ -724,7 +681,7 @@ items:
   glass-sel: "&bCages"
   taunt-sel: "&bTaunts"
   soul-well-sel: "&5&lSoul Well"
-  soul-well-open-lore: "&7Spend souls on random rewards"
+  soul-well-open-lore: "&7Spin for random rewards using souls"
   prestige-sel: "&6&lPrestige"
   prestige-open-lore: "&7Choose your level prefix cosmetic"
   perks-sel: "&5&lPerks"
@@ -747,35 +704,23 @@ items:
   prestige-nav-prev-material: ARROW
   prestige-nav-next-material: ARROW
   soul-well-spin: "&dSoul Well &8x{rolls}"
-  soul-well-buy-souls: "&aSoul Well upgrades"
+  soul-well-buy-souls: "&aBuy Souls"
   soul-well-buy-tier: "&e{tier}"
   soul-well-info: "&5&lYour souls"
+  soul-well-shop-info: "&d&lSoul Shop Info"
+  soul-well-upgrade-discount: "&bSoul Discount Upgrade"
+  soul-well-upgrade-frame: "&dGlass Frame Upgrade"
 timer:
   game-timer: "&cSudden death in &e{time}&c! &8| &7last players standing."
   wait-timer: "&eThe game starts in &c{time} &eseconds!"
   wait-timer-variants:
     - "&eThe game starts in &c{time} &eseconds!"
     - "&eThe cages open in &c{time} &eseconds!"
-    - "&eStarting in &c{time} &8- &7sharpen your aim!"
-    - "&eHold tight &8| &c{time} &7until release!"
-    - "&7Match rolls in &c{time}&7! &eVote kits &8· &7chests &8· &7teams!"
-    - "&eSkyWars drops in &c{time}&7! &8» &7do not AFK."
-    - "&7Timer: &c{time} &8| &eislands unlock soon!"
-    - "&eBrace &8— &c{time} &7seconds on the clock!"
-    - "&7Minimum players met &8· &estarting in &c{time}&7!"
-    - "&eEdge of your seat? &c{time} &7to go!"
-    - "&7Borders stay calm for &c{time} &8» &ethen chaos."
-    - "&eLoot tables are rolling &8| &c{time} &7left in lobby!"
-    - "&7Cages buzz in &c{time}&7! &eGet hyped!"
-    - "&eAlmost airborne &8· &c{time} &7seconds!"
-    - "&7Calm before storm: &c{time}&8|&7storm is SkyWars."
-    - "&eQueue popped mentally &8— &c{time} &7IRL seconds!"
-    - "&7Sound on? &c{time} &8» &ecountdown ticks here!"
-    - "&eNo refunds on death &8| &c{time} &7to chicken out (jk)."
-    - "&7Train your flick &8· &c{time} &7to show it off!"
-    - "&eLegends are forged in &c{time} &7seconds!"
-    - "&7Patience, padawan &8— &c{time} &7left!"
-    - "&eLag is cringe &8| &c{time} &7to stabilize!"
+    - "&eStarting in &c{time} &eseconds!"
+    - "&eGet ready, &c{time} &eseconds remaining!"
+    - "&eMatch begins in &c{time} &eseconds!"
+    - "&eCountdown: &c{time} &eseconds."
+    - "&eFinal prep, &c{time} &eseconds left."
   minutes: minutes
   minute: minute
   seconds: seconds
@@ -791,9 +736,14 @@ soulwell:
   spin-lore: "&7Costs &e{souls} &7souls"
   xezbeth-free-lore: "&aNext x1 spin: &ffree &7(Xezbeth Luck)"
   you-have-souls: "&7Souls: &e{souls}"
-  buy-lore: "&7Buy souls with SkyWars coins"
-  buy-tier-souls: "&7Grants &e{souls} &7souls"
+  buy-lore: "&7Buy more souls with SkyWars coins"
+  buy-tier-souls: "&7Soul bundle: &e+{souls} souls"
   buy-tier-cost: "&7Price: &a${cost}"
+  shop-info-note: "&7Souls are spent on spins in the main Soul Well menu."
+  upgrade-discount-current: "&7Current: &bLv {level} &7(-{percent}% soul cost)"
+  upgrade-discount-next: "&7Next: &aLv {level} &7(-{percent}% soul cost)"
+  upgrade-frame-desc: "&7Unlock colorful spinning glass frames in Soul Well animation."
+  upgrade-maxed: "&aAlready maxed."
   buy-disabled-no-economy: "&cEconomy is disabled. Enable economy + Vault
     (EssentialsX recommended) to buy souls."
   buy-disabled-no-vault: "&cEconomy is enabled, but no Vault economy provider is
@@ -811,9 +761,9 @@ soulwell:
   reward-gameperk: "&8+ &5Perk &e{perk} &5Lv &e{level} &8| &5Soul Well"
   reward-command: "&8+ &cSpecial drop &8| &cSoul Well"
   xezbeth-granted: "&dXezbeth Luck &8» &7next &ex1 &7spin is &aFREE&7!"
-  tier-warlock: "Warlock"
-  tier-necromancer: "Necromancer"
-  tier-death-angel: "Death Angel"
+  tier-warlock: "Warlock Bundle"
+  tier-necromancer: "Necromancer Bundle"
+  tier-death-angel: "Death Angel Bundle"
 perks:
   disabled: "&cPerks are currently disabled."
   maxed: "&6This perk is already at max level!"
@@ -827,11 +777,11 @@ levels:
   prestige-status-unlocked: "&aClick to equip"
   prestige-status-locked: "&cLocked — see requirements"
 stats:
-  header: "&9>>>&3==&1==&3==&1==&3==&1==&3==&1==&3==&1==&9<<<"
-  name: "&9>> &cName: &6{player}"
-  win-loss: "&9>> &cWins/Losses: &6{wins}/{losses}"
-  kill-death: "&9>> &cKill/Death: &6{kills}/{deaths}"
-  xp: "&9>> &cXP: &6{xp}"
+  header: "&9)))&3==&1==&3==&1==&3==&1==&3==&1==&3==&1==&9((("
+  name: "&9)) &cName: &6{player}"
+  win-loss: "&9)) &cWins/Losses: &6{wins}/{losses}"
+  kill-death: "&9)) &cKill/Death: &6{kills}/{deaths}"
+  xp: "&9)) &cXP: &6{xp}"
   not-ready: "&cStill fetching player data..."
 scoreboards:
   waitboard:
@@ -842,7 +792,7 @@ scoreboards:
       - " &eMap: &b{mapname}"
       - " &ePlayers: &b{players}&7/&b{maxplayers}"
       - ""
-      - "&7> &bWaiting..."
+      - "&7) &bWaiting..."
       - ""
       - "&eNeed: &b{players_needed}"
       - ""
@@ -855,7 +805,7 @@ scoreboards:
       - " &eMap: &b{mapname}"
       - " &ePlayers: &b{players}&7/&b{maxplayers}"
       - ""
-      - "&7> &aStarting in: &b{waitingtimer}"
+      - "&7) &aStarting in: &b{waitingtimer}"
       - ""
       - "&7mc.gamster.org"
   playboard:
@@ -863,7 +813,7 @@ scoreboards:
       - "&b&lSKYWARS"
       - ""
       - "&6&lNext Event"
-      - " &7> &e{nextevent_name} &b{nextevent_time}"
+      - " &7) &e{nextevent_name} &b{nextevent_time}"
       - ""
       - "&6&lGame Info"
       - " &ePlayers left: &b{players}"
@@ -906,11 +856,11 @@ scoreboards:
       - ""
       - "&7mc.gamster.org"
 leaderboard:
-  header: "&9>>>&3==&1==&3== &5Leaderboard &1==&3==&1==&9<<<"
+  header: "&9)))&3==&1==&3== &5Leaderboard &1==&3==&1==&9((("
   header2: "&b#Rank &aName: &eWins/&4Losses &eKills/&4Deaths &eXP"
   no-data: "&cNo players found"
   player-data: "&b#{rank} &a{player}: &e{wins}/&4{losses} &e{kills}/&4{deaths} &e{xp}"
-  footer: "&9>>>&3==&1==&3==&1==&3==&1==&3==&1==&3==&1==&9<<<"
+  footer: "&9)))&3==&1==&3==&1==&3==&1==&3==&1==&3==&1==&9((("
   updating: "&cThe leaderboard is currently being updated. Try again later!"
   invalidtype: "&cLeaderboard [stat] must be either: {validtypes}"
   invalidformat: "&cLeaderboard hologram [format] must be either: {validtypes}"
@@ -958,22 +908,25 @@ helpList:
     reload: "&a/sw reload &e- &2Reloads SkyWars"
     feather: "&a/sw feather &e- &2Feather status, player detection, async subscription and mod policy info"
     lunar: "&a/sw lunar &e- &2Lunar status"
+    labymod: "&a/sw labymod &e- &2LabyMod bridge status"
     clearstats: "&a/sw clearstats &e[playername] &e- &2Clears a SkyWars players stats"
     migrateusw: "&a/sw migrateusw [overwrite] &e- &2Imports player stats from
       UltraSkyWars MongoDB using config.yml migration settings"
+    eco: "&a/sw eco &e[give|take|set|get] [player] [amount] &e- &2Manage balances"
     checkupdates: "&a/sw checkupdates &e- &2Check for plugin updates"
     update: "&a/sw update &e- &2Download and apply the latest update"
     join: "&a/sw join &e[arena] | &a/sw join solo|team &e[arena] &e- &2Join a match
       or a specific arena"
-    joinmenu: "&a/sw joinmenu <solo/team> &e- &2Open map select menu"
+    joinmenu: "&a/sw joinmenu (solo/team) &e- &2Open map select menu"
     quit: "&a/sw quit &e- &2Quits from the current game"
     leave: "&a/leave &e- &2Leave the current match (same as /sw quit)"
-    select: "&a/sw select &e<player> &e- &2Select a player for &a/sw send <map>"
-    send: "&a/sw send &e<player> <map> &e| &a/sw send <map> &e- &2Send a player to a
+    select: "&a/sw select &e(player) &e- &2Select a player for &a/sw send (map)"
+    send: "&a/sw send &e(player) (map) &e| &a/sw send (map) &e- &2Send a player to a
       waiting arena"
     spectate: "&a/sw spectate &e[playername/mapname] &e- &2Spectates a match"
     stats: "&a/sw stats &e[playername] &e- &2Shows a players stats"
     top: "&a/sw top [stat] &e- &2Displays SkyWars leaderboard"
+    coins: "&a/sw coins &e[player] &e- &2Shows your (or target) balance"
     options: "&a/sw options &e- &2Opens options selection menu"
     prestige: "&a/sw prestige &e- &2Opens prestige cosmetic selection (&7levels.yml&e)"
     perks: "&a/sw perks &e- &2Opens the perks menu"
@@ -1042,13 +995,13 @@ helpList:
     load: "&a/swkit load &e[kitname] &e- &2Clears your inventory and loads the kit
       into your inventory"
     lore: "&a/swkit lore &e[kitname] [number] [lore] &e- &2Used to set up to 16
-      lines of lore and locked lore. <number> can be between 1 and 16 or the
+      lines of lore and locked lore. (number) can be between 1 and 16 or the
       string \"locked\""
     name: "&a/swkit name &e[kitname] [displayname] &e- &2Sets the display name for
       the kit. Can include color codes"
     position: "&a/swkit position &e[kitname] [position] &e- &2Sets the icon position
       within the kit menu"
-    update: "&a/swkit update &e[kitname] &e- &2Updates the kit <kitname> with your
+    update: "&a/swkit update &e[kitname] &e- &2Updates the kit (kitname) with your
       current inventory"
   swparty:
     header1: "&7-----------------[&aParty Commands&7]-----------------"

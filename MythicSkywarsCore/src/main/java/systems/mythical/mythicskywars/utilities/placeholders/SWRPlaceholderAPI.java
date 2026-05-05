@@ -9,6 +9,7 @@ import systems.mythical.mythicskywars.managers.PlayerStat;
 import systems.mythical.mythicskywars.utilities.LevelManager;
 import systems.mythical.mythicskywars.utilities.PrestigeManager;
 import systems.mythical.mythicskywars.utilities.Util;
+import systems.mythical.mythicskywars.utilities.VaultUtils;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 
@@ -20,6 +21,7 @@ import java.util.Locale;
  * PlaceholderAPI expansion {@code swr}. Player placeholders (require an online player context):
  * <ul>
  *   <li>{@code %swr_wins%}, {@code %swr_losses%}, {@code %swr_kills%}, {@code %swr_deaths%}, {@code %swr_xp%}</li>
+ *   <li>{@code %swr_balance%}</li>
  *   <li>{@code %swr_games_played%}, {@code %swr_games%} — wins + losses</li>
  *   <li>{@code %swr_kill_death%} — kills ÷ deaths (0 deaths → shows kills as {@code n.00}; both 0 → {@code 0.00})</li>
  *   <li>{@code %swr_win_loss%} — wins ÷ losses (0 losses → {@code 0.00} unless wins only, then wins as {@code n.00})</li>
@@ -149,6 +151,7 @@ public class SWRPlaceholderAPI extends PlaceholderExpansion {
                 return "icon1";
             }
             if ("wins".equals(id) || "losses".equals(id) || "kills".equals(id) || "deaths".equals(id) || "xp".equals(id)
+                    || "balance".equals(id)
                     || "souls".equals(id) || "total_souls".equals(id)
                     || "soulwell_usages".equals(id) || "soul_well_usages".equals(id)
                     || "soulwell_legendaries".equals(id) || "soul_well_legendaries".equals(id)
@@ -175,6 +178,9 @@ public class SWRPlaceholderAPI extends PlaceholderExpansion {
         }
         if ("xp".equals(id)) {
             return Integer.toString(stat.getXp());
+        }
+        if ("balance".equals(id)) {
+            return String.format(Locale.US, "%.2f", VaultUtils.get().getBalance(p));
         }
         if ("souls".equals(id) || "total_souls".equals(id)) {
             return Integer.toString(stat.getSouls());

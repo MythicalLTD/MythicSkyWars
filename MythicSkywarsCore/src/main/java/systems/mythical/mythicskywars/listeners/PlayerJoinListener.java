@@ -3,9 +3,9 @@ package systems.mythical.mythicskywars.listeners;
 import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.clients.feather.FeatherClientBridge;
 import systems.mythical.mythicskywars.clients.labymod.LabyModBridge;
+import systems.mythical.mythicskywars.database.UltraSkyWarsMongoMigrator;
 import systems.mythical.mythicskywars.enums.GameType;
 import systems.mythical.mythicskywars.game.GameMap;
-import systems.mythical.mythicskywars.managers.GameMapManager;
 import systems.mythical.mythicskywars.managers.MatchManager;
 import systems.mythical.mythicskywars.managers.PlayerStat;
 import systems.mythical.mythicskywars.utilities.Messaging;
@@ -31,6 +31,10 @@ public class PlayerJoinListener implements Listener {
     public void onJoin(final PlayerJoinEvent event) {
 
         final Player player = event.getPlayer();
+        if (UltraSkyWarsMongoMigrator.isMigrationRunning()) {
+            player.kickPlayer(ChatColor.RED + "Data import is running. Please reconnect after it finishes.");
+            return;
+        }
         FeatherClientBridge.onJoin(player);
         LabyModBridge.onJoin(player);
 

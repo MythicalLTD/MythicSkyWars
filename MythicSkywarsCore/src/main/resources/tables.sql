@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS `sw_player` (
   `soulwell_rares` INT(6)       NOT NULL DEFAULT 0,
   `soulwell_souls_gathered` INT(6) NOT NULL DEFAULT 0,
   `soulwell_souls_purchased` INT(6) NOT NULL DEFAULT 0,
+  `economy`     DOUBLE          NOT NULL DEFAULT 0,
+  `usw_data`    LONGTEXT        NULL,
   PRIMARY KEY (`player_id`),
   KEY (`uuid`)
 )

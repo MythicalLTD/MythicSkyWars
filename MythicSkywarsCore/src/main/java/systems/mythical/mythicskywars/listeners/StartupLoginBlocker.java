@@ -1,6 +1,7 @@
 package systems.mythical.mythicskywars.listeners;
 
 import systems.mythical.mythicskywars.MythicSkywars;
+import systems.mythical.mythicskywars.database.UltraSkyWarsMongoMigrator;
 import systems.mythical.mythicskywars.utilities.Messaging;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
@@ -17,14 +18,15 @@ public class StartupLoginBlocker implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLogin(PlayerLoginEvent event) {
+        if (UltraSkyWarsMongoMigrator.isMigrationRunning()) {
+            int percent = UltraSkyWarsMongoMigrator.getMigrationProgressPercent();
+            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, ChatColor.RED + "Data import is running (" + percent + "%). Please reconnect soon.");
+            return;
+        }
         if (MythicSkywars.get().areMapsReady()) {
             return;
         }
         if (!MythicSkywars.getCfg().isBungeeEnabled()) {
-            return;
-        }
-        // Allow admins to bypass
-        if (event.getPlayer().hasPermission("sw.bypass.startup")) {
             return;
         }
         String message = new Messaging.MessageFormatter().format("error.server-starting");

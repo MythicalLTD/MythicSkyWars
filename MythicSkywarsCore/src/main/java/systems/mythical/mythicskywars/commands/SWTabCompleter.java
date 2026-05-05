@@ -123,6 +123,8 @@ public class SWTabCompleter implements TabCompleter {
                     for (String leaderType : MythicSkywars.get().getLeaderTypes()) {
                         possibilities.add(leaderType.toLowerCase());
                     }
+                } else if ((args[0].equalsIgnoreCase("eco") || args[0].equalsIgnoreCase("economy")) && Util.get().hasPerm("sw", commandSender, "eco")) {
+                    possibilities = Lists.newArrayList("get", "balance", "give", "add", "take", "remove", "withdraw", "set");
                 } else if (args[0].equalsIgnoreCase("migrateusw") && Util.get().hasPerm("sw", commandSender, "migrateusw")) {
                     possibilities.add("overwrite");
                 } else if (args[0].equalsIgnoreCase("select") && Util.get().hasPerm("sw", commandSender, "select")) {
@@ -151,6 +153,10 @@ public class SWTabCompleter implements TabCompleter {
                     for (GameMap map : MythicSkywars.getGameMapMgr().getMapsCopy()) {
                         possibilities.add(map.getName());
                     }
+                } else if ((args[0].equalsIgnoreCase("eco") || args[0].equalsIgnoreCase("economy")) && Util.get().hasPerm("sw", commandSender, "eco")) {
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        possibilities.add(p.getName());
+                    }
                 } else if (args[0].equalsIgnoreCase("join") && Util.get().hasPerm("sw", commandSender, "join")) {
                     String mode = args[1].toLowerCase();
                     if ("solo".equals(mode) || "single".equals(mode)) {
@@ -170,6 +176,12 @@ public class SWTabCompleter implements TabCompleter {
             } else if (args.length == 4) {
                 if (args[0].equalsIgnoreCase("stat") && Util.get().hasPerm("sw", commandSender, "stat")) {
                     possibilities = Lists.newArrayList("set", "add", "remove");
+                } else if ((args[0].equalsIgnoreCase("eco") || args[0].equalsIgnoreCase("economy")) && Util.get().hasPerm("sw", commandSender, "eco")) {
+                    String mode = args[1].toLowerCase();
+                    if ("give".equals(mode) || "add".equals(mode) || "take".equals(mode)
+                            || "remove".equals(mode) || "withdraw".equals(mode) || "set".equals(mode)) {
+                        possibilities = Lists.newArrayList("1", "10", "100", "1000");
+                    }
                 }
             }
         }

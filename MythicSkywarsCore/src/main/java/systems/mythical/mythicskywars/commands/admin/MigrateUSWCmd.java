@@ -4,6 +4,7 @@ import systems.mythical.mythicskywars.MythicSkywars;
 import systems.mythical.mythicskywars.commands.BaseCmd;
 import systems.mythical.mythicskywars.database.UltraSkyWarsMongoMigrator;
 import systems.mythical.mythicskywars.utilities.Messaging;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -21,6 +22,10 @@ public class MigrateUSWCmd extends BaseCmd {
 
     @Override
     public boolean run(CommandSender sender, Player player, String[] args) {
+        if (UltraSkyWarsMongoMigrator.isMigrationRunning()) {
+            sender.sendMessage("§b§lSkyWars §7▸ §r§cA USW data import is already running.");
+            return true;
+        }
         boolean overwrite = args.length >= 2 && "overwrite".equalsIgnoreCase(args[1]);
         if (args.length >= 2 && !overwrite) {
             return false;
@@ -29,9 +34,13 @@ public class MigrateUSWCmd extends BaseCmd {
         final long progressIntervalMillis = 5000L;
 
         sender.sendMessage(new Messaging.MessageFormatter().format("command.migrateusw-start"));
+        sender.sendMessage("§b§lSkyWars §7▸ §r§cWarning: this import will delete existing kits/cosmetics/chests and truncate SkyWars player data before importing.");
         sender.sendMessage(new Messaging.MessageFormatter()
                 .setVariable("mode", overwrite ? "overwrite" : "skip")
                 .format("command.migrateusw-mode"));
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            online.kickPlayer("§cData import is starting. Please reconnect in a few minutes.");
+        }
 
         new BukkitRunnable() {
             @Override
@@ -73,6 +82,11 @@ public class MigrateUSWCmd extends BaseCmd {
                             sender.sendMessage("§b§lSkyWars §7▸ §r§7USW migration timing: total=§b" + total
                                     + " §7| elapsed=§f" + formatDuration(result.getElapsedMillis())
                                     + " §7| avgRate=§f" + String.format("%.2f", (result.getElapsedMillis() <= 0L ? 0D : (result.getScanned() / Math.max(0.001D, result.getElapsedMillis() / 1000D)))) + "/s");
+                            sender.sendMessage("§b§lSkyWars §7▸ §r§cForcing server restart to reload imported data...");
+                            boolean issued = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
+                            if (!issued) {
+                                Bukkit.shutdown();
+                            }
                         }
                     }.runTask(MythicSkywars.get());
                 } catch (Exception ex) {

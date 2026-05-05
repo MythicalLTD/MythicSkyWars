@@ -51,6 +51,8 @@ public final class SoulWellService {
             Material.GOLD_BLOCK, Material.IRON_BLOCK, Material.DIAMOND, Material.EMERALD,
             Material.LAPIS_BLOCK, Material.REDSTONE_BLOCK, Material.NETHER_STAR, Material.ENDER_PEARL
     };
+    private static final int[] GLASS_FRAME_SLOTS = new int[]{3, 4, 5, 12, 14, 21, 22, 23};
+    private static final short[] GLASS_COLORS = new short[]{2, 3, 5, 10, 11, 14, 1, 4};
 
     private SoulWellService() {
     }
@@ -208,8 +210,7 @@ public final class SoulWellService {
             return;
         }
 
-        int per = MythicSkywars.getCfg().getSoulWellSoulsPerSpin();
-        int cost = per * rolls;
+        int cost = calculateSpinCost(player, rolls);
         boolean freeXezbeth = rolls == 1 && ps.hasSoulWellXezbethFreeRollPending();
         if (freeXezbeth) {
             ps.setSoulWellXezbethFreeRollPending(false);
@@ -260,6 +261,9 @@ public final class SoulWellService {
                 Material mat = FRAMES[frame % FRAMES.length];
                 ItemStack show = new ItemStack(mat, 1);
                 p.getOpenInventory().getTopInventory().setItem(centerSlot, show);
+                if (hasGlassFrameUpgrade(p)) {
+                    paintGlassFrame(p.getOpenInventory().getTopInventory(), frame);
+                }
                 Util.get().playSound(p, p.getLocation(), MythicSkywars.getCfg().getConfirmeSelctionSound(), 0.35f, 1.2f);
                 frame++;
                 if (frame >= frames) {
@@ -285,6 +289,49 @@ public final class SoulWellService {
             }
         }.runTaskTimer(MythicSkywars.get(), 1L, ticksPer);
         SPINNING.put(uuid, task);
+    }
+
+    public static int calculateSpinCost(Player player, int rolls) {
+        int baseCost = Math.max(0, MythicSkywars.getCfg().getSoulWellSoulsPerSpin() * rolls);
+        int discountPercent = getSoulDiscountPercent(player);
+        if (discountPercent <= 0) {
+            return baseCost;
+        }
+        double multiplier = Math.max(0D, 1D - (discountPercent / 100D));
+        return (int) Math.max(0, Math.ceil(baseCost * multiplier));
+    }
+
+    private static int getSoulDiscountPercent(Player player) {
+        if (player == null) {
+            return 0;
+        }
+        if (player.hasPermission("sw.soulwell.upgrade.discount.3")) {
+            return 30;
+        }
+        if (player.hasPermission("sw.soulwell.upgrade.discount.2")) {
+            return 20;
+        }
+        if (player.hasPermission("sw.soulwell.upgrade.discount.1")) {
+            return 10;
+        }
+        return 0;
+    }
+
+    private static boolean hasGlassFrameUpgrade(Player player) {
+        return player != null && player.hasPermission("sw.soulwell.upgrade.frames.1");
+    }
+
+    private static void paintGlassFrame(Inventory inventory, int frame) {
+        short color = GLASS_COLORS[frame % GLASS_COLORS.length];
+        for (int i = 0; i < GLASS_FRAME_SLOTS.length; i++) {
+            short shiftColor = GLASS_COLORS[(frame + i) % GLASS_COLORS.length];
+            inventory.setItem(GLASS_FRAME_SLOTS[i], coloredFramePane((short) ((color + shiftColor) % 15)));
+        }
+    }
+
+    private static ItemStack coloredFramePane(short colorData) {
+        ItemStack pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, colorData);
+        return MythicSkywars.getNMS().getItemStack(pane, Lists.newArrayList(), ChatColor.translateAlternateColorCodes('&', "&d&lSoul Frame"));
     }
 
     private static Reward rollReward(Player player) {

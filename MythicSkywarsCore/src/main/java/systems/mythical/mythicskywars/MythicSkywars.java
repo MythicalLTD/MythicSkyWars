@@ -37,6 +37,7 @@ import systems.mythical.mythicskywars.utilities.LevelManager;
 import systems.mythical.mythicskywars.utilities.LuckyBlockHook;
 import systems.mythical.mythicskywars.utilities.SoulWellManager;
 import systems.mythical.mythicskywars.utilities.SWRServer;
+import systems.mythical.mythicskywars.utilities.BuiltInVaultEconomy;
 import systems.mythical.mythicskywars.utilities.Util;
 import systems.mythical.mythicskywars.utilities.UpdateChecker;
 import systems.mythical.mythicskywars.utilities.holograms.DecentHoloUtil;
@@ -49,6 +50,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -97,6 +99,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
     private boolean mapsReady;
     private BukkitTask specObserver;
     private UpdateChecker updateChecker;
+    private BuiltInVaultEconomy builtInVaultEconomy;
 
     // Utils
 
@@ -490,6 +493,7 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
 
     public void onDisable() {
         loaded = false;
+        unregisterBuiltInVaultEconomy();
         LunarApolloBridge.shutdown();
         FeatherClientBridge.shutdown();
         LabyModBridge.shutdown();
@@ -546,6 +550,10 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         LunarApolloBridge.reload(this);
         FeatherClientBridge.reload(this);
         LabyModBridge.reload(this);
+        // Register BUILTIN Vault provider as early as possible so other plugins can discover it on startup.
+        if (MythicSkywars.getCfg().economyEnabled() && "BUILTIN".equalsIgnoreCase(MythicSkywars.getCfg().economyProvider())) {
+            registerBuiltInVaultEconomy();
+        }
         cm = new ChestManager();
         LuckyBlockHook.setup();
         if (LuckyBlockHook.isAvailable()) {
@@ -596,10 +604,17 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
             if (Bukkit.getServer().getPluginManager().getPlugin("Vault") == null) {
                 MythicSkywars.getCfg().setEconomyEnabled(false);
             }
-            RegisteredServiceProvider<Economy> rsp = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
-            if (rsp == null) {
-                MythicSkywars.getCfg().setEconomyEnabled(false);
+            if (MythicSkywars.getCfg().economyEnabled()) {
+                if ("BUILTIN".equalsIgnoreCase(MythicSkywars.getCfg().economyProvider())) {
+                    registerBuiltInVaultEconomy();
+                }
+                RegisteredServiceProvider<Economy> rsp = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
+                if (rsp == null) {
+                    MythicSkywars.getCfg().setEconomyEnabled(false);
+                }
             }
+        } else {
+            unregisterBuiltInVaultEconomy();
         }
 
         if (MythicSkywars.getCfg().joinMenuEnabled() || MythicSkywars.getCfg().spectateMenuEnabled()) {
@@ -701,6 +716,24 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
             }
         } catch (IOException e) {
             getLogger().severe("Failed to merge bundled config into config.yml: " + e.getMessage());
+        }
+    }
+
+    private void registerBuiltInVaultEconomy() {
+        if (Bukkit.getServer().getPluginManager().getPlugin("Vault") == null) {
+            return;
+        }
+        if (builtInVaultEconomy == null) {
+            builtInVaultEconomy = new BuiltInVaultEconomy();
+        }
+        unregisterBuiltInVaultEconomy();
+        Bukkit.getServicesManager().register(Economy.class, builtInVaultEconomy, this, ServicePriority.Highest);
+        getLogger().info("Registered BUILTIN Vault economy provider for compatibility.");
+    }
+
+    private void unregisterBuiltInVaultEconomy() {
+        if (builtInVaultEconomy != null) {
+            Bukkit.getServicesManager().unregister(Economy.class, builtInVaultEconomy);
         }
     }
 

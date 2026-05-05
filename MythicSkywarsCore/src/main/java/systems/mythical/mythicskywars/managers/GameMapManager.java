@@ -13,6 +13,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -230,10 +231,18 @@ public class GameMapManager {
 
     public void copyDefaults(File mapFile) {
         FileConfiguration playerConfig = YamlConfiguration.loadConfiguration(mapFile);
-        Reader defConfigStream = new InputStreamReader(MythicSkywars.get().getResource("mapFile.yml"));
-        YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-        playerConfig.options().copyDefaults(true);
-        playerConfig.setDefaults(defConfig);
+        InputStream in = MythicSkywars.get().getResource("mapFile.yml");
+        if (in == null) {
+            MythicSkywars.get().getLogger().warning("Bundled mapFile.yml is missing; skipping map defaults merge for " + mapFile.getName());
+        } else {
+            try (Reader defConfigStream = new InputStreamReader(in)) {
+                YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+                playerConfig.options().copyDefaults(true);
+                playerConfig.setDefaults(defConfig);
+            } catch (IOException ioException) {
+                MythicSkywars.get().getLogger().warning("Failed reading mapFile.yml defaults for " + mapFile.getName() + ": " + ioException.getMessage());
+            }
+        }
         try {
             playerConfig.save(mapFile);
         } catch (IOException e) {

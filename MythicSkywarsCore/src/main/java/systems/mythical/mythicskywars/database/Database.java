@@ -9,17 +9,18 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 public class Database {
 
     private final String connectionUri;
     private final String username;
     private final String password;
+    private final Driver mySqlDriver;
     private Connection connection;
 
     public Database() throws ClassNotFoundException, SQLException {
@@ -27,18 +28,25 @@ public class Database {
         final String hostname = config.getString("sqldatabase.hostname");
         final int port = config.getInt("sqldatabase.port");
         final String database = config.getString("sqldatabase.database");
-        final boolean ssl = config.getBoolean("sqldatabase.ssl", true);
+        final boolean ssl = config.getBoolean("sqldatabase.ssl", false);
         final boolean verifyCert = ssl && config.getBoolean("sqldatabase.verifyCertificate", true);
-        final boolean pubKeyRetrieval = config.getBoolean("sqldatabase.publicKeyRetrieval", false);
+        final boolean pubKeyRetrieval = config.getBoolean("sqldatabase.publicKeyRetrieval", true);
+        final int connectTimeoutMs = Math.max(1000, config.getInt("sqldatabase.connectTimeoutMs", 10000));
+        final int socketTimeoutMs = Math.max(1000, config.getInt("sqldatabase.socketTimeoutMs", 30000));
+        final String serverTimezone = config.getString("sqldatabase.serverTimezone", "UTC");
+        final boolean useUnicode = config.getBoolean("sqldatabase.useUnicode", true);
+        final String characterEncoding = config.getString("sqldatabase.characterEncoding", "utf8");
 
         connectionUri = String.format(
-                "jdbc:mysql://%s:%d/%s?useSSL=%s&verifyServerCertificate=%s&allowPublicKeyRetrieval=%s",
-                hostname, port, database, ssl, verifyCert, pubKeyRetrieval);
+                "jdbc:mysql://%s:%d/%s?useSSL=%s&verifyServerCertificate=%s&allowPublicKeyRetrieval=%s"
+                        + "&connectTimeout=%d&socketTimeout=%d&serverTimezone=%s&useUnicode=%s&characterEncoding=%s",
+                hostname, port, database, ssl, verifyCert, pubKeyRetrieval,
+                connectTimeoutMs, socketTimeoutMs, serverTimezone, useUnicode, characterEncoding);
         username = config.getString("sqldatabase.username");
         password = config.getString("sqldatabase.password");
 
         try {
-            ensureMySqlDriverLoaded();
+            mySqlDriver = createMySqlDriver();
             connect();
 
         } catch (SQLException sqlException) {
@@ -64,21 +72,38 @@ public class Database {
         }
 
         if (connection == null || connection.isClosed()) {
-            Driver selectedDriver = DriverManager.getDriver(connectionUri);
-            String selectedDriverName = selectedDriver == null ? "none" : selectedDriver.getClass().getName();
-            if (selectedDriverName.toLowerCase().contains("sqlite")) {
-                throw new SQLException("MySQL JDBC driver not active. Selected driver: " + selectedDriverName
-                        + ". Add mysql-connector-j to the plugin runtime classpath.");
+            if (mySqlDriver == null) {
+                throw new SQLException("MySQL JDBC driver not available.");
             }
-            connection = DriverManager.getConnection(connectionUri, username, password);
+            Properties properties = new Properties();
+            if (username != null) {
+                properties.setProperty("user", username);
+            }
+            if (password != null) {
+                properties.setProperty("password", password);
+            }
+            connection = mySqlDriver.connect(connectionUri, properties);
+            if (connection == null) {
+                throw new SQLException("MySQL JDBC driver rejected connection URL: " + connectionUri);
+            }
         }
     }
 
-    private void ensureMySqlDriverLoaded() throws ClassNotFoundException {
+    private Driver createMySqlDriver() throws ClassNotFoundException, SQLException {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class<?> driverClass = Class.forName("com.mysql.cj.jdbc.Driver");
+            try {
+                return (Driver) driverClass.getDeclaredConstructor().newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw new SQLException("Failed to instantiate com.mysql.cj.jdbc.Driver", e);
+            }
         } catch (ClassNotFoundException ignored) {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class<?> driverClass = Class.forName("com.mysql.jdbc.Driver");
+            try {
+                return (Driver) driverClass.getDeclaredConstructor().newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw new SQLException("Failed to instantiate com.mysql.jdbc.Driver", e);
+            }
         }
     }
 
@@ -198,6 +223,8 @@ public class Database {
         ensureColumn("soulwell_rares", "INT(6) NOT NULL DEFAULT 0");
         ensureColumn("soulwell_souls_gathered", "INT(6) NOT NULL DEFAULT 0");
         ensureColumn("soulwell_souls_purchased", "INT(6) NOT NULL DEFAULT 0");
+        ensureColumn("economy", "DOUBLE NOT NULL DEFAULT 0");
+        ensureColumn("usw_data", "LONGTEXT NULL");
     }
 
     private void ensureColumn(String column, String ddl) {
@@ -219,6 +246,91 @@ public class Database {
                 }
             }
         }
+    }
+
+    public synchronized double getStoredEconomy(String uuid, String playerName) {
+        if (checkConnection()) {
+            return 0D;
+        }
+        ensureEconomyRow(uuid, playerName);
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            statement = connection.prepareStatement("SELECT `economy` FROM `sw_player` WHERE `uuid` = ? LIMIT 1;");
+            statement.setString(1, uuid);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return Math.max(0D, resultSet.getDouble("economy"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+            } catch (SQLException ignored) {
+            }
+            try {
+                if (statement != null) statement.close();
+            } catch (SQLException ignored) {
+            }
+        }
+        return 0D;
+    }
+
+    public synchronized boolean setStoredEconomy(String uuid, String playerName, double amount) {
+        if (checkConnection()) {
+            return false;
+        }
+        ensureEconomyRow(uuid, playerName);
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("UPDATE `sw_player` SET `player_name` = ?, `economy` = ? WHERE `uuid` = ?;");
+            statement.setString(1, safeName(playerName, uuid));
+            statement.setDouble(2, Math.max(0D, amount));
+            statement.setString(3, uuid);
+            statement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (statement != null) statement.close();
+            } catch (SQLException ignored) {
+            }
+        }
+    }
+
+    public synchronized boolean addStoredEconomy(String uuid, String playerName, double delta) {
+        double current = getStoredEconomy(uuid, playerName);
+        return setStoredEconomy(uuid, playerName, current + delta);
+    }
+
+    private void ensureEconomyRow(String uuid, String playerName) {
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement(
+                    "INSERT INTO `sw_player` (`player_id`, `uuid`, `player_name`, `wins`, `losses`, `kills`, `deaths`, `xp`, `pareffect`, `proeffect`, `glasscolor`, `killsound`, `winsound`, `taunt`, `prestige_icon`, `souls`, `soulwell_usages`, `soulwell_legendaries`, `soulwell_rares`, `soulwell_souls_gathered`, `soulwell_souls_purchased`, `economy`) " +
+                            "VALUES (NULL, ?, ?, 0, 0, 0, 0, 0, 'none', 'none', 'none', 'none', 'none', 'none', 'icon1', 0, 0, 0, 0, 0, 0, 0) " +
+                            "ON DUPLICATE KEY UPDATE `player_name` = VALUES(`player_name`);");
+            statement.setString(1, uuid);
+            statement.setString(2, safeName(playerName, uuid));
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (statement != null) statement.close();
+            } catch (SQLException ignored) {
+            }
+        }
+    }
+
+    private String safeName(String playerName, String uuid) {
+        if (playerName != null && !playerName.trim().isEmpty()) {
+            return playerName.trim();
+        }
+        return uuid;
     }
 
     void createNewPlayer(String fId, String name) {

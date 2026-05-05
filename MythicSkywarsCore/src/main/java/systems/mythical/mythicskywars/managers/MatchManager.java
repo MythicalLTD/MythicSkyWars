@@ -638,9 +638,6 @@ public class MatchManager {
                             if (gameMap.getTimer() % 5 == 0 || gameMap.getTimer() <= 5) {
                                 MatchManager.this.announceTimer(gameMap);
                             }
-                            if (gameMap.getTimer() > 15 && gameMap.getTimer() % 23 == 0) {
-                                MatchManager.this.broadcastRandomTip(gameMap, "game.wait-pregame-tips", queuedPlayers);
-                            }
                         }
                         // Decrease the timer unless we are already at 0
                         gameMap.setTimer(gameMap.getTimer() > 0 ? gameMap.getTimer() - 1 : 0);
@@ -716,9 +713,6 @@ public class MatchManager {
                             if (gameMap.getTimer() % 5 == 0 || gameMap.getTimer() <= 5) {
                                 MatchManager.this.announceTimer(gameMap);
                             }
-                            if (gameMap.getTimer() > 18 && gameMap.getTimer() % 27 == 0) {
-                                MatchManager.this.broadcastRandomTip(gameMap, "game.team-lobby-tips", queuedPlayers);
-                            }
                             gameMap.setTimer(gameMap.getTimer() - 1);
                         }
                     } else { // if not at least 1 player per team AND force start is not triggered
@@ -727,18 +721,6 @@ public class MatchManager {
                 }
             }
         }.runTaskTimer(MythicSkywars.get(), 0L, 20L);
-    }
-
-    private void broadcastRandomTip(GameMap gameMap, String listKey, int playerCount) {
-        String tip = MythicSkywars.getMessaging().formatRandomListLine(listKey,
-                new Messaging.MessageFormatter()
-                        .setVariable("map", gameMap.getDisplayName())
-                        .setVariable("playercount", String.valueOf(playerCount))
-                        .setVariable("maxplayers", String.valueOf(gameMap.getMaxPlayers()))
-                        .setVariable("needed", String.valueOf(Math.max(0, gameMap.getMinTeams() - playerCount))));
-        if (tip != null && !tip.isEmpty()) {
-            this.message(gameMap, tip, null);
-        }
     }
 
     private void assignUnselectedWaitingPlayersBalanced(GameMap gameMap) {
@@ -1008,17 +990,6 @@ public class MatchManager {
                         if (refillInterval > 0 && gameMap.getTimer() > 0 && gameMap.getTimer() % refillInterval == 0) {
                             gameMap.getChestOption().completeOption();
                             ChestRefillVisualManager.get().onRefill(gameMap);
-                        }
-                    }
-                    int aliveTip = gameMap.getAlivePlayers().size();
-                    if (aliveTip >= 2 && gameMap.getTimer() > 50 && gameMap.getTimer() % 95 == 0) {
-                        String tip = MythicSkywars.getMessaging().formatRandomListLine("game.playing-tips",
-                                new Messaging.MessageFormatter()
-                                        .setVariable("map", gameMap.getDisplayName())
-                                        .setVariable("alive", String.valueOf(aliveTip))
-                                        .setVariable("seconds", String.valueOf(gameMap.getTimer())));
-                        if (tip != null && !tip.isEmpty()) {
-                            MatchManager.this.message(gameMap, tip, null);
                         }
                     }
                 }

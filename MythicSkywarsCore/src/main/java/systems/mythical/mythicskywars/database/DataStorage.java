@@ -34,7 +34,7 @@ public class DataStorage {
     }
 
     public void saveStats(final PlayerStat pData) {
-        boolean sqlEnabled = MythicSkywars.get().getConfig().getBoolean("sqldatabase.enabled");
+        boolean sqlEnabled = isSqlEnabledAndAvailable();
         if (!sqlEnabled) {
             try {
                 File dataDirectory = MythicSkywars.get().getDataFolder();
@@ -137,6 +137,7 @@ public class DataStorage {
             @Override
             public void run() {
                 boolean sqlEnabled = MythicSkywars.get().getConfig().getBoolean("sqldatabase.enabled");
+                sqlEnabled = sqlEnabled && isSqlEnabledAndAvailable();
                 if (sqlEnabled) {
                     Database database = MythicSkywars.getDb();
 
@@ -446,7 +447,7 @@ public class DataStorage {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void removePlayerData(String uuid) {
-        boolean sqlEnabled = MythicSkywars.get().getConfig().getBoolean("sqldatabase.enabled");
+        boolean sqlEnabled = isSqlEnabledAndAvailable();
         if (!sqlEnabled) {
             File dataDirectory = MythicSkywars.get().getDataFolder();
             File playerDataDirectory = new File(dataDirectory, "player_data");
@@ -497,6 +498,7 @@ public class DataStorage {
             @Override
             public void run() {
                 boolean sqlEnabled = MythicSkywars.get().getConfig().getBoolean("sqldatabase.enabled");
+                sqlEnabled = sqlEnabled && isSqlEnabledAndAvailable();
                 if (sqlEnabled) {
                     Database database = MythicSkywars.getDb();
 
@@ -574,7 +576,7 @@ public class DataStorage {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!MythicSkywars.get().getConfig().getBoolean("sqldatabase.enabled")) {
+                if (!isSqlEnabledAndAvailable()) {
                     try {
                         File dataDirectory = MythicSkywars.get().getDataFolder();
                         File playerDataDirectory = new File(dataDirectory, "player_data");
@@ -645,7 +647,7 @@ public class DataStorage {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!MythicSkywars.get().getConfig().getBoolean("sqldatabase.enabled")) {
+                if (!isSqlEnabledAndAvailable()) {
                     try {
                         File dataDirectory = MythicSkywars.get().getDataFolder();
                         File playerDataDirectory = new File(dataDirectory, "player_data");
@@ -708,4 +710,14 @@ public class DataStorage {
     }
 
 
+    private boolean isSqlEnabledAndAvailable() {
+        if (!MythicSkywars.get().getConfig().getBoolean("sqldatabase.enabled")) {
+            return false;
+        }
+        Database database = MythicSkywars.getDb();
+        if (database == null) {
+            return false;
+        }
+        return !database.checkConnection();
+    }
 }

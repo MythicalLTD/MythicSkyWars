@@ -72,6 +72,7 @@ permissions:
       sw.start: true
       sw.send: true
       sw.select: true
+      sw.eco: true
       sw.allowcommands: true
       sw.spectate: true
       sw.updatetop: true
@@ -127,6 +128,7 @@ permissions:
     children:
       sw.join: true
       sw.stats: true
+      sw.coins: true
       sw.top: true
       sw.quit: true
       sw.soulwell: true
@@ -144,6 +146,9 @@ permissions:
     default: op
   sw.stats:
     description: Allows a player to view player stats.
+    default: true
+  sw.coins:
+    description: Allows a player to view economy balance with /sw coins.
     default: true
   sw.top:
     description: Allows a player to view the leaderboard.
@@ -171,6 +176,9 @@ permissions:
     default: op
   sw.select:
     description: Allows selecting a player for /sw send (/sw select).
+    default: op
+  sw.eco:
+    description: Allows managing balances with /sw eco.
     default: op
   sw.winsound:
     description: Allows a player to use sw winsound command.

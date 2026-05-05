@@ -40,7 +40,6 @@ public final class SoulWellMenu {
         }
         PlayerStat ps = PlayerStat.getPlayerStats(player);
         int souls = ps != null ? ps.getSouls() : 0;
-        int per = MythicSkywars.getCfg().getSoulWellSoulsPerSpin();
         int max = MythicSkywars.getCfg().getSoulWellMaxSpinsAtOnce();
 
         int menuSize = 27;
@@ -57,8 +56,9 @@ public final class SoulWellMenu {
                 break;
             }
             List<String> lore = Lists.newArrayList();
+            int spinCost = SoulWellService.calculateSpinCost(player, rolls);
             lore.add(new Messaging.MessageFormatter()
-                    .setVariable("souls", "" + (per * rolls))
+                    .setVariable("souls", "" + spinCost)
                     .format("soulwell.spin-lore"));
             if (rolls == 1 && ps != null && ps.hasSoulWellXezbethFreeRollPending()) {
                 lore.add(new Messaging.MessageFormatter().format("soulwell.xezbeth-free-lore"));

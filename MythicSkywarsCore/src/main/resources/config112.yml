@@ -64,6 +64,8 @@ lobby:
   hideDeathMessages: true
 # Whether you want to use Vault Economy to let players buy game options such as cages, killsounds etc.
 economyEnabled: false
+# ESSENTIALSX (Vault provider) or BUILTIN (sw_player.economy SQL column)
+economyProvider: BUILTIN
 # Whether you want the player's inventory to be cleared when they join the skywars lobby world
 clearInventoryOnLobbyJoin: true
 # The format that in which we should format the time countdowns.
@@ -471,6 +473,12 @@ soulwell:
     deathangel:
       souls: 50
       cost: 750
+  upgrades:
+    discount-costs:
+      level1: 400
+      level2: 1000
+      level3: 2000
+    frame-cost: 900
   rewards:
     coins:
       weight: 20
@@ -633,6 +641,15 @@ sqldatabase:
   database: database
   username: username
   password: password
+  # Disable SSL/certificate checks if your MySQL host does not provide TLS certificates.
+  ssl: false
+  verifyCertificate: false
+  publicKeyRetrieval: false
+  connectTimeoutMs: 10000
+  socketTimeoutMs: 30000
+  serverTimezone: UTC
+  useUnicode: true
+  characterEncoding: utf8
 migration:
   ultimateskywars:
     mongodb:
@@ -643,6 +660,13 @@ migration:
       authDatabase: admin
       # auto, scram-sha-1, or scram-sha-256
       authMechanism: auto
+      # ESSENTIALSX (via Vault), BUILTIN (store in sw_player.economy), or SKIP.
+      economyImportMode: BUILTIN
+      # Optional ID mappings for importing USW-owned kits/perks into SWR permissions.
+      # If left empty, migrateusw auto-detects mappings from plugins/Skywars/UltraSkyWars/kits.yml and perks.yml.
+      mappings:
+        kits: {}
+        perks: {}
       # Print resolved migration Mongo settings and full exception chain.
       debug: false
       username: ''
