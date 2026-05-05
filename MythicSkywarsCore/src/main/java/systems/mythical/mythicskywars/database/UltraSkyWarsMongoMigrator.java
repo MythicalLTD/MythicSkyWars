@@ -732,7 +732,7 @@ public final class UltraSkyWarsMongoMigrator {
         for (String key : in.getConfigurationSection("glasses").getKeys(false)) {
             String base = "glasses." + key;
             String name = in.getString(base + ".name", key);
-            String outKey = normalizeYamlKey(name);
+            String outKey = cosmeticKey(name);
             int level = 1 + (in.getInt(base + ".id", 0) * 5);
             int cost = in.getInt(base + ".price", 100);
             int dataValue = in.getInt(base + ".item.damage", -1);
@@ -763,7 +763,7 @@ public final class UltraSkyWarsMongoMigrator {
         for (String key : in.getConfigurationSection("killsounds").getKeys(false)) {
             String base = "killsounds." + key;
             String name = in.getString(base + ".name", key);
-            String outKey = normalizeYamlKey(name);
+            String outKey = cosmeticKey(name);
             String legacySound = in.getString(base + ".sound", "LEVEL_UP");
             double volume = in.getDouble(base + ".vol1", 1.0);
             double pitch = in.getDouble(base + ".vol2", 1.0);
@@ -847,7 +847,7 @@ public final class UltraSkyWarsMongoMigrator {
         for (String key : in.getConfigurationSection("taunts").getKeys(false)) {
             String base = "taunts." + key;
             String name = in.getString(base + ".name", key);
-            String outKey = normalizeYamlKey(name);
+            String outKey = cosmeticKey(name);
             String icon = in.getString(base + ".icon.type", "BLAZE_POWDER");
             int level = 1 + (in.getInt(base + ".id", 0) * 5);
             int cost = in.getInt(base + ".price", 100);
@@ -890,16 +890,16 @@ public final class UltraSkyWarsMongoMigrator {
         for (String key : in.getConfigurationSection("trails").getKeys(false)) {
             String base = "trails." + key;
             String name = in.getString(base + ".name", key);
-            String outKey = normalizeYamlKey(name);
+            String outKey = cosmeticKey(name);
             out.set("effects." + outKey + ".displayname", "&b" + name);
             out.set("effects." + outKey + ".icon", "NETHER_STAR");
             out.set("effects." + outKey + ".level", 1 + (in.getInt(base + ".id", 0) * 5));
             out.set("effects." + outKey + ".cost", in.getInt(base + ".price", 100));
             String particle = in.getString(base + ".particle", "CRIT");
-            double ox = in.getDouble(base + ".offsetX", 0);
-            double oy = in.getDouble(base + ".offsetY", 0);
-            double oz = in.getDouble(base + ".offsetZ", 0);
-            double speed = in.getDouble(base + ".speed", 1);
+            int ox = (int) in.getDouble(base + ".offsetX", 0);
+            int oy = (int) in.getDouble(base + ".offsetY", 0);
+            int oz = (int) in.getDouble(base + ".offsetZ", 0);
+            int speed = Math.max(1, (int) in.getDouble(base + ".speed", 1));
             int amount = in.getInt(base + ".amount", 2);
             out.set("effects." + outKey + ".particles", Collections.singletonList(
                     particle + ":" + ox + ":" + oy + ":" + oz + ":" + speed + ":" + amount));
@@ -918,7 +918,7 @@ public final class UltraSkyWarsMongoMigrator {
         for (String key : in.getConfigurationSection("killeffects").getKeys(false)) {
             String base = "killeffects." + key;
             String name = in.getString(base + ".name", key);
-            String outKey = normalizeYamlKey(name);
+            String outKey = cosmeticKey(name);
             out.set("effects." + outKey + ".displayname", "&b" + name);
             out.set("effects." + outKey + ".icon", "NETHER_STAR");
             out.set("effects." + outKey + ".level", 1 + (in.getInt(base + ".id", 0) * 5));
@@ -947,7 +947,7 @@ public final class UltraSkyWarsMongoMigrator {
         int position = 2;
         for (String key : in.getConfigurationSection("sounds").getKeys(false)) {
             String base = "sounds." + key;
-            String outKey = normalizeYamlKey(key);
+            String outKey = cosmeticKey(key);
             String sound = in.getString(base + ".sound", "LEVEL_UP");
             double volume = in.getDouble(base + ".volume", 1.0);
             double pitch = in.getDouble(base + ".pitch", 1.0);
@@ -1160,6 +1160,16 @@ public final class UltraSkyWarsMongoMigrator {
     private static String normalizeYamlKey(String value) {
         if (value == null || value.trim().isEmpty()) return "entry";
         return value.toLowerCase(Locale.ENGLISH).replaceAll("[^a-z0-9]+", "_").replaceAll("^_+|_+$", "");
+    }
+
+    /**
+     * Produces cosmetic keys that match the plugin's default format: lowercased with no separators.
+     * E.g. "Pig Death" -> "pigdeath", "Cat Hiss" -> "cathiss", "Lightning Impact" -> "lightning"
+     * This matches the keys used in killsounds18.yml, taunts18.yml, winsounds18.yml, projectileeffects.yml, etc.
+     */
+    private static String cosmeticKey(String value) {
+        if (value == null || value.trim().isEmpty()) return "entry";
+        return value.toLowerCase(Locale.ENGLISH).replaceAll("[^a-z0-9]", "");
     }
 
     private static void mergeIfMissing(Map<Integer, String> base, Map<Integer, String> discovered) {
