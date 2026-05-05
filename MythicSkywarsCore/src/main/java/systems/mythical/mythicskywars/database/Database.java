@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,7 +38,7 @@ public class Database {
         password = config.getString("sqldatabase.password");
 
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            ensureMySqlDriverLoaded();
             connect();
 
         } catch (SQLException sqlException) {
@@ -63,7 +64,21 @@ public class Database {
         }
 
         if (connection == null || connection.isClosed()) {
+            Driver selectedDriver = DriverManager.getDriver(connectionUri);
+            String selectedDriverName = selectedDriver == null ? "none" : selectedDriver.getClass().getName();
+            if (selectedDriverName.toLowerCase().contains("sqlite")) {
+                throw new SQLException("MySQL JDBC driver not active. Selected driver: " + selectedDriverName
+                        + ". Add mysql-connector-j to the plugin runtime classpath.");
+            }
             connection = DriverManager.getConnection(connectionUri, username, password);
+        }
+    }
+
+    private void ensureMySqlDriverLoaded() throws ClassNotFoundException {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException ignored) {
+            Class.forName("com.mysql.jdbc.Driver");
         }
     }
 

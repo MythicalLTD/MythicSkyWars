@@ -722,14 +722,18 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         try {
             db = new Database();
         } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+            getLogger().severe("Failed to initialize SQL database: " + e.getMessage());
+            db = null;
+            return;
         }
         try {
             db.createTables();
         } catch (IOException | SQLException e) {
-            e.printStackTrace();
+            getLogger().severe("Failed creating SQL tables: " + e.getMessage());
         }
-        db.ensureSoulColumn();
+        if (db != null) {
+            db.ensureSoulColumn();
+        }
     }
 
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
