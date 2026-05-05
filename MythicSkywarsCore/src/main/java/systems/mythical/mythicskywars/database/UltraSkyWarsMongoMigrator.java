@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 public final class UltraSkyWarsMongoMigrator {
     private static final Pattern INT_FIELD_PATTERN = Pattern.compile("\"([^\"]+)\"\\s*:\\s*(-?\\d+)");
     private static final Pattern STRING_FIELD_PATTERN = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"([^\"]*)\"");
+    private static final int MONGO_BATCH_SIZE = 250;
+    private static final int PROGRESS_LOG_EVERY = 1000;
 
     private UltraSkyWarsMongoMigrator() {
     }
@@ -36,6 +38,8 @@ public final class UltraSkyWarsMongoMigrator {
         private int imported;
         private int skipped;
         private int failed;
+        private long total;
+        private long elapsedMillis;
 
         public int getScanned() {
             return scanned;
@@ -52,9 +56,89 @@ public final class UltraSkyWarsMongoMigrator {
         public int getFailed() {
             return failed;
         }
+
+        public long getTotal() {
+            return total;
+        }
+
+        public long getElapsedMillis() {
+            return elapsedMillis;
+        }
+    }
+
+    public interface ProgressListener {
+        void onProgress(ProgressSnapshot snapshot);
+    }
+
+    public static final class ProgressSnapshot {
+        private final long total;
+        private final int scanned;
+        private final int imported;
+        private final int skipped;
+        private final int failed;
+        private final long elapsedMillis;
+
+        private ProgressSnapshot(long total, int scanned, int imported, int skipped, int failed, long elapsedMillis) {
+            this.total = total;
+            this.scanned = scanned;
+            this.imported = imported;
+            this.skipped = skipped;
+            this.failed = failed;
+            this.elapsedMillis = elapsedMillis;
+        }
+
+        public long getTotal() {
+            return total;
+        }
+
+        public int getScanned() {
+            return scanned;
+        }
+
+        public int getImported() {
+            return imported;
+        }
+
+        public int getSkipped() {
+            return skipped;
+        }
+
+        public int getFailed() {
+            return failed;
+        }
+
+        public long getElapsedMillis() {
+            return elapsedMillis;
+        }
+
+        public double getDocsPerSecond() {
+            if (elapsedMillis <= 0L) {
+                return 0D;
+            }
+            return scanned / Math.max(0.001D, elapsedMillis / 1000D);
+        }
+
+        public long getRemainingDocs() {
+            if (total <= 0L) {
+                return -1L;
+            }
+            return Math.max(0L, total - scanned);
+        }
+
+        public long getEtaMillis() {
+            double rate = getDocsPerSecond();
+            if (rate <= 0D || total <= 0L) {
+                return -1L;
+            }
+            return (long) ((getRemainingDocs() / rate) * 1000D);
+        }
     }
 
     public static MigrationResult migrateFromConfig(boolean overwrite) throws Exception {
+        return migrateFromConfig(overwrite, null);
+    }
+
+    public static MigrationResult migrateFromConfig(boolean overwrite, ProgressListener progressListener) throws Exception {
         FileConfiguration cfg = MythicSkywars.get().getConfig();
         String root = "migration.ultimateskywars.mongodb.";
         String host = cfg.getString(root + "host", "").trim();
@@ -121,23 +205,69 @@ public final class UltraSkyWarsMongoMigrator {
         }
 
         MigrationResult result = new MigrationResult();
+        long startMillis = System.currentTimeMillis();
         try {
             DB database = mongoClient.getDB(databaseName);
             DBCollection players = database.getCollection(collectionName);
-            DBCursor cursor = players.find(new BasicDBObject());
-            while (cursor.hasNext()) {
-                DBObject playerDoc = cursor.next();
-                result.scanned++;
-                try {
-                    if (migrateOne(playerDoc, overwrite)) {
-                        result.imported++;
-                    } else {
-                        result.skipped++;
+            result.total = players.count();
+            BasicDBObject projection = new BasicDBObject("_id", 0)
+                    .append("uuid", 1)
+                    .append("name", 1)
+                    .append("skywars", 1)
+                    .append("wins", 1)
+                    .append("losses", 1)
+                    .append("kills", 1)
+                    .append("deaths", 1)
+                    .append("coins", 1)
+                    .append("elo", 1)
+                    .append("level", 1)
+                    .append("xp", 1)
+                    .append("souls", 1)
+                    .append("soulwell_usages", 1)
+                    .append("soulwell_legendaries", 1)
+                    .append("soulwell_rares", 1)
+                    .append("soulwell_souls_gathered", 1)
+                    .append("soulwell_souls_purchased", 1)
+                    .append("pareffect", 1)
+                    .append("proeffect", 1)
+                    .append("glasscolor", 1)
+                    .append("killsound", 1)
+                    .append("winsound", 1)
+                    .append("taunt", 1)
+                    .append("prestige_icon", 1)
+                    .append("prestigeIcon", 1);
+            DBCursor cursor = players.find(new BasicDBObject(), projection).batchSize(MONGO_BATCH_SIZE);
+            try {
+                while (cursor.hasNext()) {
+                    DBObject playerDoc = cursor.next();
+                    result.scanned++;
+                    try {
+                        if (migrateOne(playerDoc, overwrite)) {
+                            result.imported++;
+                        } else {
+                            result.skipped++;
+                        }
+                    } catch (Exception ex) {
+                        result.failed++;
+                        MythicSkywars.get().getLogger().warning("Failed to migrate one USW record: " + ex.getMessage());
                     }
-                } catch (Exception ex) {
-                    result.failed++;
-                    MythicSkywars.get().getLogger().warning("Failed to migrate one USW record: " + ex.getMessage());
+                    if (migrationDebug && result.scanned % PROGRESS_LOG_EVERY == 0) {
+                        ProgressSnapshot snapshot = buildSnapshot(result, startMillis);
+                        MythicSkywars.get().getLogger().info("[MigrationDebug] Progress scanned=" + snapshot.getScanned()
+                                + "/" + snapshot.getTotal()
+                                + ", imported=" + snapshot.getImported()
+                                + ", skipped=" + snapshot.getSkipped()
+                                + ", failed=" + snapshot.getFailed()
+                                + ", elapsed=" + formatDuration(snapshot.getElapsedMillis())
+                                + ", rate=" + String.format("%.2f", snapshot.getDocsPerSecond()) + "/s"
+                                + ", eta=" + formatDuration(snapshot.getEtaMillis()));
+                    }
+                    if (progressListener != null && result.scanned % PROGRESS_LOG_EVERY == 0) {
+                        progressListener.onProgress(buildSnapshot(result, startMillis));
+                    }
                 }
+            } finally {
+                cursor.close();
             }
         } catch (Exception ex) {
             if (migrationDebug) {
@@ -145,9 +275,32 @@ public final class UltraSkyWarsMongoMigrator {
             }
             throw ex;
         } finally {
+            result.elapsedMillis = Math.max(0L, System.currentTimeMillis() - startMillis);
             mongoClient.close();
         }
         return result;
+    }
+
+    private static ProgressSnapshot buildSnapshot(MigrationResult result, long startMillis) {
+        long elapsed = Math.max(0L, System.currentTimeMillis() - startMillis);
+        return new ProgressSnapshot(result.total, result.scanned, result.imported, result.skipped, result.failed, elapsed);
+    }
+
+    private static String formatDuration(long millis) {
+        if (millis < 0L) {
+            return "unknown";
+        }
+        long totalSeconds = millis / 1000L;
+        long hours = totalSeconds / 3600L;
+        long minutes = (totalSeconds % 3600L) / 60L;
+        long seconds = totalSeconds % 60L;
+        if (hours > 0L) {
+            return hours + "h " + minutes + "m " + seconds + "s";
+        }
+        if (minutes > 0L) {
+            return minutes + "m " + seconds + "s";
+        }
+        return seconds + "s";
     }
 
     private static void logExceptionChain(Throwable throwable) {

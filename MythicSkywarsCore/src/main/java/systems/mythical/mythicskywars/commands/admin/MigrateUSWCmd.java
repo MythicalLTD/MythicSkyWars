@@ -25,6 +25,8 @@ public class MigrateUSWCmd extends BaseCmd {
         if (args.length >= 2 && !overwrite) {
             return false;
         }
+        final long[] lastProgressSentAt = {0L};
+        final long progressIntervalMillis = 5000L;
 
         sender.sendMessage(new Messaging.MessageFormatter().format("command.migrateusw-start"));
         sender.sendMessage(new Messaging.MessageFormatter()
@@ -35,7 +37,28 @@ public class MigrateUSWCmd extends BaseCmd {
             @Override
             public void run() {
                 try {
-                    UltraSkyWarsMongoMigrator.MigrationResult result = UltraSkyWarsMongoMigrator.migrateFromConfig(overwrite);
+                    UltraSkyWarsMongoMigrator.MigrationResult result = UltraSkyWarsMongoMigrator.migrateFromConfig(overwrite, snapshot -> {
+                        long now = System.currentTimeMillis();
+                        if (now - lastProgressSentAt[0] < progressIntervalMillis) {
+                            return;
+                        }
+                        lastProgressSentAt[0] = now;
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                String total = snapshot.getTotal() > 0 ? Long.toString(snapshot.getTotal()) : "?";
+                                String eta = snapshot.getEtaMillis() >= 0L ? formatDuration(snapshot.getEtaMillis()) : "unknown";
+                                sender.sendMessage("§b§lSkyWars §7▸ §r§7USW migration progress: §b"
+                                        + snapshot.getScanned() + "§7/§b" + total
+                                        + " §7| imported: §a" + snapshot.getImported()
+                                        + " §7| skipped: §e" + snapshot.getSkipped()
+                                        + " §7| failed: §c" + snapshot.getFailed()
+                                        + " §7| elapsed: §f" + formatDuration(snapshot.getElapsedMillis())
+                                        + " §7| rate: §f" + String.format("%.2f", snapshot.getDocsPerSecond()) + "/s"
+                                        + " §7| eta: §f" + eta);
+                            }
+                        }.runTask(MythicSkywars.get());
+                    });
                     new BukkitRunnable() {
                         @Override
                         public void run() {
@@ -46,6 +69,10 @@ public class MigrateUSWCmd extends BaseCmd {
                                     .setVariable("skipped", Integer.toString(result.getSkipped()))
                                     .setVariable("failed", Integer.toString(result.getFailed()))
                                     .format("command.migrateusw-summary"));
+                            String total = result.getTotal() > 0 ? Long.toString(result.getTotal()) : "?";
+                            sender.sendMessage("§b§lSkyWars §7▸ §r§7USW migration timing: total=§b" + total
+                                    + " §7| elapsed=§f" + formatDuration(result.getElapsedMillis())
+                                    + " §7| avgRate=§f" + String.format("%.2f", (result.getElapsedMillis() <= 0L ? 0D : (result.getScanned() / Math.max(0.001D, result.getElapsedMillis() / 1000D)))) + "/s");
                         }
                     }.runTask(MythicSkywars.get());
                 } catch (Exception ex) {
@@ -61,5 +88,22 @@ public class MigrateUSWCmd extends BaseCmd {
             }
         }.runTaskAsynchronously(MythicSkywars.get());
         return true;
+    }
+
+    private static String formatDuration(long millis) {
+        if (millis < 0L) {
+            return "unknown";
+        }
+        long totalSeconds = millis / 1000L;
+        long hours = totalSeconds / 3600L;
+        long minutes = (totalSeconds % 3600L) / 60L;
+        long seconds = totalSeconds % 60L;
+        if (hours > 0L) {
+            return hours + "h " + minutes + "m " + seconds + "s";
+        }
+        if (minutes > 0L) {
+            return minutes + "m " + seconds + "s";
+        }
+        return seconds + "s";
     }
 }
