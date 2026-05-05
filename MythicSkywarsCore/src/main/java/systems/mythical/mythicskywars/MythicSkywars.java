@@ -347,16 +347,32 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         this.getServer().getPluginManager().registerEvents(new SpectateListener(), this);
         this.getServer().getPluginManager().registerEvents(new ChatListener(), this);
         this.getServer().getPluginManager().registerEvents(new ProjectileSpleefListener(), this);
-        this.getServer().getPluginManager().registerEvents(new LunarApolloGameplayListener(), this);
+        try {
+            this.getServer().getPluginManager().registerEvents(new LunarApolloGameplayListener(), this);
+        } catch (NoClassDefFoundError e) {
+            // Apollo not available, skip listener registration
+        }
         this.getServer().getPluginManager().registerEvents(new WorldGuardBypassListener(), this);
 
         // LOAD BEFORE HOLO - Holo needs server to be loaded to update correctly
         load();
         // Apollo-Bukkit / Feather / LabyMod API may enable after this plugin; re-scan client bridges next tick.
         Bukkit.getScheduler().runTaskLater(this, () -> {
-            LunarApolloBridge.reload(this);
-            FeatherClientBridge.reload(this);
-            LabyModBridge.reload(this);
+            try {
+                LunarApolloBridge.reload(this);
+            } catch (NoClassDefFoundError e) {
+                // Apollo not available
+            }
+            try {
+                FeatherClientBridge.reload(this);
+            } catch (NoClassDefFoundError e) {
+                // Feather not available
+            }
+            try {
+                LabyModBridge.reload(this);
+            } catch (NoClassDefFoundError e) {
+                // LabyMod not available
+            }
         }, 1L);
 
         // Requires IM - aka load()
@@ -494,9 +510,21 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
     public void onDisable() {
         loaded = false;
         unregisterBuiltInVaultEconomy();
-        LunarApolloBridge.shutdown();
-        FeatherClientBridge.shutdown();
-        LabyModBridge.shutdown();
+        try {
+            LunarApolloBridge.shutdown();
+        } catch (NoClassDefFoundError e) {
+            // Apollo not available, skip
+        }
+        try {
+            FeatherClientBridge.shutdown();
+        } catch (NoClassDefFoundError e) {
+            // Feather not available, skip
+        }
+        try {
+            LabyModBridge.shutdown();
+        } catch (NoClassDefFoundError e) {
+            // LabyMod not available, skip
+        }
         if (updateChecker != null) {
             updateChecker.stop();
         }
@@ -547,9 +575,21 @@ public class MythicSkywars extends JavaPlugin implements PluginMessageListener {
         mergeConfigFromBundledTemplate();
         reloadConfig();
         config.load();
-        LunarApolloBridge.reload(this);
-        FeatherClientBridge.reload(this);
-        LabyModBridge.reload(this);
+        try {
+            LunarApolloBridge.reload(this);
+        } catch (NoClassDefFoundError e) {
+            getLogger().fine("Lunar Apollo not available (Apollo plugin not installed)");
+        }
+        try {
+            FeatherClientBridge.reload(this);
+        } catch (NoClassDefFoundError e) {
+            getLogger().fine("Feather Client not available");
+        }
+        try {
+            LabyModBridge.reload(this);
+        } catch (NoClassDefFoundError e) {
+            getLogger().fine("LabyMod not available");
+        }
         // Register BUILTIN Vault provider as early as possible so other plugins can discover it on startup.
         if (MythicSkywars.getCfg().economyEnabled() && "BUILTIN".equalsIgnoreCase(MythicSkywars.getCfg().economyProvider())) {
             registerBuiltInVaultEconomy();

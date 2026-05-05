@@ -23,6 +23,10 @@ public class LobbyWaterPortalListener implements org.bukkit.event.Listener {
         if (MythicSkywars.getLobbyWaterPortals() != null) {
             MythicSkywars.getLobbyWaterPortals().tryEnterPortal(player);
         }
-        LunarLobbyWaterPortalApollo.onPlayerMove(player, event.getTo());
+        try {
+            LunarLobbyWaterPortalApollo.onPlayerMove(player, event.getTo());
+        } catch (NoClassDefFoundError e) {
+            // Apollo not available
+        }
     }
 }

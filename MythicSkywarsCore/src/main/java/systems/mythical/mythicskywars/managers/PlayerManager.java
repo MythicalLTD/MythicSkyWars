@@ -82,7 +82,11 @@ public class PlayerManager {
         // Filter which type of remove we should perform
         // Player is in an arena - else we don't handle removes
         if (gameMap != null) {
-            LunarApolloBridge.resetForPlayer(playerRemoved);
+            try {
+                LunarApolloBridge.resetForPlayer(playerRemoved);
+            } catch (NoClassDefFoundError e) {
+                // Apollo not available
+            }
             MatchState mState = gameMap.getMatchState();
             boolean shouldRestorePlayer = true;
             boolean shouldSendToLobby = shouldSendToLobbyIn;

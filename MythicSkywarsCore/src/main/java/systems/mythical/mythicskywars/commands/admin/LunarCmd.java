@@ -15,7 +15,11 @@ public class LunarCmd extends systems.mythical.mythicskywars.commands.BaseCmd {
 
     @Override
     public boolean run(CommandSender sender, Player player, String[] args) {
-        sender.sendMessage(ChatColor.AQUA + "[Lunar] " + ChatColor.GRAY + LunarApolloBridge.getStatusSummary());
+        try {
+            sender.sendMessage(ChatColor.AQUA + "[Lunar] " + ChatColor.GRAY + LunarApolloBridge.getStatusSummary());
+        } catch (NoClassDefFoundError e) {
+            sender.sendMessage(ChatColor.RED + "[Lunar] Apollo classes not available (Apollo plugin not installed)");
+        }
         return true;
     }
 }

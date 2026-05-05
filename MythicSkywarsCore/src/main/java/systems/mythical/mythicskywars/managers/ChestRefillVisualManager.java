@@ -102,7 +102,11 @@ public final class ChestRefillVisualManager {
         }
         keys.clear();
         cancelRefreshTask(mapName);
-        LunarApolloBridge.notifyChestRefill(gameMap);
+        try {
+            LunarApolloBridge.notifyChestRefill(gameMap);
+        } catch (NoClassDefFoundError e) {
+            // Apollo not available
+        }
     }
 
     private void trackAndOpenChest(GameMap gameMap, Block block) {

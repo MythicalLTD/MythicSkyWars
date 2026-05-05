@@ -859,15 +859,23 @@ public class MatchManager {
 
         if (MythicSkywars.getCfg().getEnablePVPTimer() && MythicSkywars.getCfg().getPVPTimerTime() >= 1) {
             gameMap.setDisableDamage(true);
-            LunarApolloBridge.showPvpProtectionCooldowns(
-                    gameMap, MythicSkywars.getCfg().getPVPTimerTime());
+            try {
+                LunarApolloBridge.showPvpProtectionCooldowns(
+                        gameMap, MythicSkywars.getCfg().getPVPTimerTime());
+            } catch (NoClassDefFoundError e) {
+                // Apollo not available
+            }
 
             Bukkit.getScheduler().scheduleSyncDelayedTask(MythicSkywars.get(), () -> {
                 gameMap.setDisableDamage(false);
                 gameMap.getWaitingPlayers().clear();
                 for (Player player : gameMap.getAlivePlayers()) {
-                    LunarApolloBridge.clearPvpCooldown(player);
-                    LunarApolloBridge.notifyPvpEnabled(player, gameMap);
+                    try {
+                        LunarApolloBridge.clearPvpCooldown(player);
+                        LunarApolloBridge.notifyPvpEnabled(player, gameMap);
+                    } catch (NoClassDefFoundError e) {
+                        // Apollo not available
+                    }
                     String pvpMsg = MythicSkywars.getMessaging().getFile().getString("game.pvp-timer-disabled-message");
                     if (pvpMsg != null && !pvpMsg.isEmpty()) {
                         player.sendMessage(new Messaging.MessageFormatter().setVariable("player", player.getName()).setVariable("arena", gameMap.getName()).format("game.pvp-timer-disabled-message"));
@@ -884,7 +892,11 @@ public class MatchManager {
             }, 20L * MythicSkywars.getCfg().getPVPTimerTime());
         } else {
             for (Player player : gameMap.getAlivePlayers()) {
-                LunarApolloBridge.notifyPvpEnabled(player, gameMap);
+                try {
+                    LunarApolloBridge.notifyPvpEnabled(player, gameMap);
+                } catch (NoClassDefFoundError e) {
+                    // Apollo not available
+                }
             }
         }
     }
@@ -932,10 +944,22 @@ public class MatchManager {
         gameMap.update();
         gameMap.setTimer(this.getGameTime());
         gameMap.resetMatchRuntimeEventState();
-        LunarApolloBridge.onMatchPlaying(gameMap);
-        LunarApolloBridge.notifyMatchStarted(gameMap);
-        FeatherClientBridge.onMatchPlaying(gameMap);
-        LabyModBridge.onMatchPlaying(gameMap);
+        try {
+            LunarApolloBridge.onMatchPlaying(gameMap);
+            LunarApolloBridge.notifyMatchStarted(gameMap);
+        } catch (NoClassDefFoundError e) {
+            // Apollo not available
+        }
+        try {
+            FeatherClientBridge.onMatchPlaying(gameMap);
+        } catch (NoClassDefFoundError e) {
+            // Feather not available
+        }
+        try {
+            LabyModBridge.onMatchPlaying(gameMap);
+        } catch (NoClassDefFoundError e) {
+            // LabyMod not available
+        }
 
         new BukkitRunnable() {
             public void run() {
@@ -1153,17 +1177,37 @@ public class MatchManager {
                     }
                     pWinner.sendMessage(new Messaging.MessageFormatter()
                             .setVariable("map", gameMap.getName()).format("game.won"));
-                    LunarApolloBridge.notifyVictory(pWinner, gameMap);
-                    FeatherClientBridge.updateLobbyActivity(pWinner);
-                    LabyModBridge.updateLobbyRpc(pWinner);
+                    try {
+                        LunarApolloBridge.notifyVictory(pWinner, gameMap);
+                    } catch (NoClassDefFoundError e) {
+                        // Apollo not available
+                    }
+                    try {
+                        FeatherClientBridge.updateLobbyActivity(pWinner);
+                    } catch (NoClassDefFoundError e) {
+                        // Feather not available
+                    }
+                    try {
+                        LabyModBridge.updateLobbyRpc(pWinner);
+                    } catch (NoClassDefFoundError e) {
+                        // LabyMod not available
+                    }
                 }
             }
 
         }
         if (gameMap.getMatchState() != MatchState.OFFLINE) {
             gameMap.setMatchState(MatchState.ENDING);
-            FeatherClientBridge.onMatchEnd(gameMap);
-            LabyModBridge.onMatchEnd(gameMap);
+            try {
+                FeatherClientBridge.onMatchEnd(gameMap);
+            } catch (NoClassDefFoundError e) {
+                // Feather not available
+            }
+            try {
+                LabyModBridge.onMatchEnd(gameMap);
+            } catch (NoClassDefFoundError e) {
+                // LabyMod not available
+            }
             gameMap.getGameBoard().updateScoreboard();
             for (MatchEvent mEvent : gameMap.getEvents()) {
                 if (mEvent.isEnabled() && mEvent.hasFired()) {
@@ -1178,7 +1222,11 @@ public class MatchManager {
         if (debug) {
             Util.get().logToFile(getDebugName(gameMap) + ChatColor.YELLOW + "SkyWars Match Has Ended - Waiting for teleport");
         }
-        LunarApolloBridge.onMatchEnd(gameMap);
+        try {
+            LunarApolloBridge.onMatchEnd(gameMap);
+        } catch (NoClassDefFoundError e) {
+            // Apollo not available
+        }
         gameMap.update();
         gameMap.setTimer(0);
         if (MythicSkywars.get().isEnabled() && !gameMap.getMatchState().equals(MatchState.OFFLINE)) {

@@ -22,9 +22,21 @@ public class PlayerQuitListener implements org.bukkit.event.Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
         final UUID uuid = player.getUniqueId();
-        LunarLobbyWaterPortalApollo.onQuit(player);
-        FeatherClientBridge.onQuit(player);
-        LabyModBridge.onQuit(player);
+        try {
+            LunarLobbyWaterPortalApollo.onQuit(player);
+        } catch (NoClassDefFoundError e) {
+            // Apollo not available
+        }
+        try {
+            FeatherClientBridge.onQuit(player);
+        } catch (NoClassDefFoundError e) {
+            // Feather not available
+        }
+        try {
+            LabyModBridge.onQuit(player);
+        } catch (NoClassDefFoundError e) {
+            // LabyMod not available
+        }
         Party party = Party.getParty(player);
         if (party != null) {
             party.removeMember(player);
