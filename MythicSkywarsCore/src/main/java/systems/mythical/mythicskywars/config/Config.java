@@ -195,6 +195,8 @@ public class Config {
     private boolean balanceUnselectedPlayersAcrossTeams;
 
     private int timeAfterMatch;
+    /** 0 = disabled. Otherwise force deathmatch when arena timer reaches this many seconds. */
+    private int suddenDeathAfterSeconds;
     private boolean fireworksEnabled;
     private int fireworksPer5Tick;
     private int maxMapSize;
@@ -400,6 +402,7 @@ public class Config {
             spawn = Util.get().stringToLocation(MythicSkywars.get().getConfig().getString("spawn"));
             debugTesting();
             timeAfterMatch =        MythicSkywars.get().getConfig().getInt("game.timeAfterMatch");
+            suddenDeathAfterSeconds = MythicSkywars.get().getConfig().getInt("game.suddenDeathAfterSeconds", 0);
             fireworksPer5Tick =     MythicSkywars.get().getConfig().getInt("fireworks.per5Ticks");
             fireworksEnabled =      MythicSkywars.get().getConfig().getBoolean("fireworks.enabled");
             waitTimer =             MythicSkywars.get().getConfig().getInt("game.waitTimer");
@@ -925,6 +928,13 @@ public class Config {
 
     public int getTimeAfterMatch() {
         return timeAfterMatch;
+    }
+
+    /**
+     * Arena playing timer (seconds) after which deathmatch is forced if the match is still active. 0 = off.
+     */
+    public int getSuddenDeathAfterSeconds() {
+        return suddenDeathAfterSeconds;
     }
 
     public int getFireWorksPer5Tick() {

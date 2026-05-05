@@ -464,7 +464,7 @@ public class JoinSingleMenu {
             // Search button clicked
             if (ChatColor.stripColor(name).equalsIgnoreCase("Search")) {
                 player.closeInventory();
-                player.sendMessage(new Messaging.MessageFormatter().format("items.search-prompt"));
+                player.sendMessage(new Messaging.MessageFormatter().withUniversalPrefixForced().format("items.search-prompt"));
                 MapSearchListener.startSearch(player, "solo");
                 return;
             }

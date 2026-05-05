@@ -149,7 +149,7 @@ public class OptionSelectionMenu {
                     return;
                 } else if (level >= option.getLevel() && !player.hasPermission(option.getPermission()) && !VaultUtils.get().canBuy(player, option.getCost())) {
                     Util.get().playSound(player, player.getLocation(), MythicSkywars.getCfg().getErrorSound(), 1, 1);
-                    player.sendMessage(new Messaging.MessageFormatter().format("menu.insufficientfunds"));
+                    player.sendMessage(new Messaging.MessageFormatter().withUniversalPrefixForced().format("menu.insufficientfunds"));
                     player.closeInventory();
                     return;
                 }

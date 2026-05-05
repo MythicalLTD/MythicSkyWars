@@ -393,7 +393,6 @@ public class PlayerManager {
             ) {
                 if (wasKilledByTagger) {
                     this.matchManager.message(gameMap, new Messaging.MessageFormatter()
-                            .withPrefix()
                             .setVariable("player", playerRemoved.getName())
                             .setVariable("killer", taggerPlayer.getName())
                             .format("game.death.quit-while-tagged"), null
@@ -470,8 +469,13 @@ public class PlayerManager {
             player.getInventory().setItem(8, exitItem);
 
             // Feedback
+            player.sendMessage(new Messaging.MessageFormatter().format("spectate.starting"));
             player.sendMessage(new Messaging.MessageFormatter().format("spectate.startmessage"));
             player.sendMessage(new Messaging.MessageFormatter().format("spectate.startmessage2"));
+            String specTip = MythicSkywars.getMessaging().formatRandomListLine("spectate.join-tips", new Messaging.MessageFormatter());
+            if (specTip != null && !specTip.isEmpty()) {
+                player.sendMessage(specTip);
+            }
             if (debug) {
                 Util.get().logToFile(matchManager.getDebugName(gameMap) + ChatColor.YELLOW + player.getName() + " has been added to spectators");
             }

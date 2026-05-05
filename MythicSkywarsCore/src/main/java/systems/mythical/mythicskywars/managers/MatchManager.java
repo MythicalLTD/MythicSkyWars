@@ -12,6 +12,7 @@ import systems.mythical.mythicskywars.enums.ScoreVar;
 import systems.mythical.mythicskywars.events.MythicSkywarsWinEvent;
 import systems.mythical.mythicskywars.game.*;
 import systems.mythical.mythicskywars.game.cages.schematics.SchematicCage;
+import systems.mythical.mythicskywars.matchevents.DeathMatchEvent;
 import systems.mythical.mythicskywars.matchevents.MatchEvent;
 import systems.mythical.mythicskywars.menus.MapSearchListener;
 import systems.mythical.mythicskywars.menus.gameoptions.objects.CoordLoc;
@@ -365,17 +366,22 @@ public class MatchManager {
     }
 
     public void message(@NotNull final GameMap gameMap, final String message, @Nullable Player skip) {
-        World w = gameMap.getCurrentWorld();
-        if (w == null) return;
-        List<Player> worldPlayers = w.getPlayers();
-        if (worldPlayers != null && !worldPlayers.isEmpty()) {
-            if (debug) {
-                Util.get().logToFile(getDebugName(gameMap) + ChatColor.YELLOW + "Message from [" + gameMap.getName() + "]: " + message);
-            }
-            for (Player player : worldPlayers) {
-                if (player != null && player != skip) {
-                    player.sendMessage(message);
-                }
+        if (message == null || message.isEmpty()) {
+            return;
+        }
+        if (gameMap.getCurrentWorld() == null) {
+            return;
+        }
+        ArrayList<Player> recipients = gameMap.getAllPlayers();
+        if (recipients.isEmpty()) {
+            return;
+        }
+        if (debug) {
+            Util.get().logToFile(getDebugName(gameMap) + ChatColor.YELLOW + "Message from [" + gameMap.getName() + "]: " + message);
+        }
+        for (Player player : recipients) {
+            if (player != null && player != skip) {
+                player.sendMessage(message);
             }
         }
     }
@@ -491,13 +497,13 @@ public class MatchManager {
         if (!gameMap.getAlivePlayers().contains(player) || gameMap.getTeamSize() == 1) {
             // Add 1 to join index since we want 1-max and not 0-maxIndex
             String playerCount = gameMap.getMatchState() == MatchState.WAITINGLOBBY ? gameMap.getWaitingPlayers().size() + "" : String.valueOf(pCard.getJoinIndex() + 1); // String.valueOf(gameMap.getAllPlayers().size());
-            // Send join message to all
-            for (final Player p : gameMap.getAllPlayers()) {
-                p.sendMessage(new Messaging.MessageFormatter().setVariable("player", player.getDisplayName())
-                        .setVariable("players", playerCount)
-                        .setVariable("playercount", playerCount)
-                        .setVariable("maxplayers", "" + gameMap.getMaxPlayers()).format("game.waitstart-joined-the-game"));
-            }
+            String joinLine = new Messaging.MessageFormatter().setVariable("player", player.getDisplayName())
+                    .setVariable("players", playerCount)
+                    .setVariable("playercount", playerCount)
+                    .setVariable("maxplayers", "" + gameMap.getMaxPlayers())
+                    .setVariable("map", gameMap.getDisplayName())
+                    .format("game.waitstart-joined-the-game");
+            this.message(gameMap, joinLine, null);
         }
 
         for (final Player p : gameMap.getAlivePlayers()) {
@@ -632,6 +638,9 @@ public class MatchManager {
                             if (gameMap.getTimer() % 5 == 0 || gameMap.getTimer() <= 5) {
                                 MatchManager.this.announceTimer(gameMap);
                             }
+                            if (gameMap.getTimer() > 15 && gameMap.getTimer() % 23 == 0) {
+                                MatchManager.this.broadcastRandomTip(gameMap, "game.wait-pregame-tips", queuedPlayers);
+                            }
                         }
                         // Decrease the timer unless we are already at 0
                         gameMap.setTimer(gameMap.getTimer() > 0 ? gameMap.getTimer() - 1 : 0);
@@ -680,6 +689,36 @@ public class MatchManager {
                             // Wait 15 seconds before starting the game
                             gameMap.setTimer(15); // todo make this editable
                         } else { // if (gameMap.getTimer() <= 0)
+                            if (gameMap.getTimer() <= 5 && gameMap.getMatchState() != MatchState.ENDING) {
+                                for (UUID waitingUuid : ImmutableList.copyOf(gameMap.getWaitingPlayers())) {
+                                    Player wp = Bukkit.getPlayer(waitingUuid);
+                                    if (wp == null) {
+                                        continue;
+                                    }
+                                    if (MythicSkywars.getCfg().titlesEnabled()) {
+                                        Util.get().sendTitle(wp, 2, 20, 2, new Messaging.MessageFormatter()
+                                                        .setVariable("time", "" + gameMap.getTimer()).format("titles.warmup-title"),
+                                                new Messaging.MessageFormatter().format("titles.warmup-subtitle"));
+                                    }
+                                    if (gameMap.getTimer() == 5) {
+                                        Util.get().playSound(wp, wp.getLocation(), MythicSkywars.getCfg().getCountdownSound(), 1, 0.5F);
+                                    } else if (gameMap.getTimer() == 4) {
+                                        Util.get().playSound(wp, wp.getLocation(), MythicSkywars.getCfg().getCountdownSound(), 1, 0.6F);
+                                    } else if (gameMap.getTimer() == 3) {
+                                        Util.get().playSound(wp, wp.getLocation(), MythicSkywars.getCfg().getCountdownSound(), 1, 0.7F);
+                                    } else if (gameMap.getTimer() == 2) {
+                                        Util.get().playSound(wp, wp.getLocation(), MythicSkywars.getCfg().getCountdownSound(), 1, 0.8F);
+                                    } else if (gameMap.getTimer() == 1) {
+                                        Util.get().playSound(wp, wp.getLocation(), MythicSkywars.getCfg().getCountdownSound(), 1, 0.9F);
+                                    }
+                                }
+                            }
+                            if (gameMap.getTimer() % 5 == 0 || gameMap.getTimer() <= 5) {
+                                MatchManager.this.announceTimer(gameMap);
+                            }
+                            if (gameMap.getTimer() > 18 && gameMap.getTimer() % 27 == 0) {
+                                MatchManager.this.broadcastRandomTip(gameMap, "game.team-lobby-tips", queuedPlayers);
+                            }
                             gameMap.setTimer(gameMap.getTimer() - 1);
                         }
                     } else { // if not at least 1 player per team AND force start is not triggered
@@ -688,6 +727,18 @@ public class MatchManager {
                 }
             }
         }.runTaskTimer(MythicSkywars.get(), 0L, 20L);
+    }
+
+    private void broadcastRandomTip(GameMap gameMap, String listKey, int playerCount) {
+        String tip = MythicSkywars.getMessaging().formatRandomListLine(listKey,
+                new Messaging.MessageFormatter()
+                        .setVariable("map", gameMap.getDisplayName())
+                        .setVariable("playercount", String.valueOf(playerCount))
+                        .setVariable("maxplayers", String.valueOf(gameMap.getMaxPlayers()))
+                        .setVariable("needed", String.valueOf(Math.max(0, gameMap.getMinTeams() - playerCount))));
+        if (tip != null && !tip.isEmpty()) {
+            this.message(gameMap, tip, null);
+        }
     }
 
     private void assignUnselectedWaitingPlayersBalanced(GameMap gameMap) {
@@ -835,7 +886,8 @@ public class MatchManager {
                 for (Player player : gameMap.getAlivePlayers()) {
                     LunarApolloBridge.clearPvpCooldown(player);
                     LunarApolloBridge.notifyPvpEnabled(player, gameMap);
-                    if (!MythicSkywars.getMessaging().getFile().getString("game.pvp-timer-disabled-message").isEmpty()) {
+                    String pvpMsg = MythicSkywars.getMessaging().getFile().getString("game.pvp-timer-disabled-message");
+                    if (pvpMsg != null && !pvpMsg.isEmpty()) {
                         player.sendMessage(new Messaging.MessageFormatter().setVariable("player", player.getName()).setVariable("arena", gameMap.getName()).format("game.pvp-timer-disabled-message"));
                     }
                     if (!MythicSkywars.getMessaging().getFile().getString("game.pvp-timer-disabled-title").isEmpty()) {
@@ -897,6 +949,7 @@ public class MatchManager {
         gameMap.getGameBoard().updateScoreboard();
         gameMap.update();
         gameMap.setTimer(this.getGameTime());
+        gameMap.resetMatchRuntimeEventState();
         LunarApolloBridge.onMatchPlaying(gameMap);
         LunarApolloBridge.notifyMatchStarted(gameMap);
         FeatherClientBridge.onMatchPlaying(gameMap);
@@ -907,15 +960,47 @@ public class MatchManager {
                 if (gameMap.getMatchState() == MatchState.ENDING) {
                     this.cancel();
                 } else {
-                    for (MatchEvent event : gameMap.getEvents()) {
-                        if (event.isEnabled() && event.willFire() && !event.hasFired()) {
-                            if (event.getStartTime() <= gameMap.getTimer()) {
-                                event.doEvent();
-                            } else {
-                                if (event.announceEnabled()) {
-                                    event.announceTimer();
-                                }
+                    int suddenAfter = MythicSkywars.getCfg().getSuddenDeathAfterSeconds();
+                    if (suddenAfter > 0
+                            && gameMap.getAlivePlayers().size() >= 2
+                            && gameMap.getTimer() >= suddenAfter
+                            && !gameMap.isSuddenDeathTriggeredThisMatch()) {
+                        gameMap.setSuddenDeathTriggeredThisMatch(true);
+                        DeathMatchEvent dm = gameMap.getDeathMatchEvent();
+                        if (dm != null && !dm.hasFired() && !gameMap.getDeathMatchSpawns().isEmpty()) {
+                            dm.forceSuddenDeath();
+                            int hold = dm.getExclusiveHoldSecondsAfterTrigger();
+                            if (hold > 0) {
+                                gameMap.blockMatchEventsUntilGameSecond(gameMap.getTimer() + hold);
                             }
+                        } else if (dm == null || gameMap.getDeathMatchSpawns().isEmpty()) {
+                            MythicSkywars.get().getLogger().warning("Sudden death at " + suddenAfter + "s: map "
+                                    + gameMap.getName() + " is missing deathmatch spawns (or DeathMatchEvent).");
+                        }
+                    }
+
+                    List<MatchEvent> readyToFire = new ArrayList<>();
+                    for (MatchEvent event : gameMap.getEvents()) {
+                        if (!event.isEnabled() || !event.willFire() || event.hasFired()) {
+                            continue;
+                        }
+                        if (event.getStartTime() <= gameMap.getTimer()) {
+                            readyToFire.add(event);
+                        } else if (event.announceEnabled()) {
+                            event.announceTimer();
+                        }
+                    }
+                    readyToFire.sort(Comparator.comparingInt(MatchEvent::getStartTime)
+                            .thenComparing(e -> e.getEventName() != null ? e.getEventName() : ""));
+                    for (MatchEvent event : readyToFire) {
+                        if (gameMap.areMatchEventsExclusiveBlocked(gameMap.getTimer())) {
+                            break;
+                        }
+                        event.doEvent();
+                        int hold = event.getExclusiveHoldSecondsAfterTrigger();
+                        if (hold > 0) {
+                            gameMap.blockMatchEventsUntilGameSecond(gameMap.getTimer() + hold);
+                            break;
                         }
                     }
                     if (MythicSkywars.getCfg().isChestRefillEnabled()) {
@@ -923,6 +1008,17 @@ public class MatchManager {
                         if (refillInterval > 0 && gameMap.getTimer() > 0 && gameMap.getTimer() % refillInterval == 0) {
                             gameMap.getChestOption().completeOption();
                             ChestRefillVisualManager.get().onRefill(gameMap);
+                        }
+                    }
+                    int aliveTip = gameMap.getAlivePlayers().size();
+                    if (aliveTip >= 2 && gameMap.getTimer() > 50 && gameMap.getTimer() % 95 == 0) {
+                        String tip = MythicSkywars.getMessaging().formatRandomListLine("game.playing-tips",
+                                new Messaging.MessageFormatter()
+                                        .setVariable("map", gameMap.getDisplayName())
+                                        .setVariable("alive", String.valueOf(aliveTip))
+                                        .setVariable("seconds", String.valueOf(gameMap.getTimer())));
+                        if (tip != null && !tip.isEmpty()) {
+                            MatchManager.this.message(gameMap, tip, null);
                         }
                     }
                 }
@@ -1619,7 +1715,11 @@ public class MatchManager {
             }
             time = v1 + " " + ((v1 > 1) ? new Messaging.MessageFormatter().format("timer.seconds") : new Messaging.MessageFormatter().format("timer.second"));
         }
-        this.message(gameMap, new Messaging.MessageFormatter().setVariable("time", time).format("timer.wait-timer"), null);
+        String template = MythicSkywars.getMessaging().pickGameLineTemplate("timer.wait-timer-variants", "timer.wait-timer");
+        if (template == null || template.isEmpty()) {
+            return;
+        }
+        this.message(gameMap, new Messaging.MessageFormatter().setVariable("time", time).format(template), null);
     }
 
     private static final class RejoinState {

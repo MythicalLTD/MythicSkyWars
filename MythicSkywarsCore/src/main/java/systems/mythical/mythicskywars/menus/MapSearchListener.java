@@ -50,7 +50,7 @@ public class MapSearchListener implements Listener {
                 if (SEARCHING.remove(uuid) != null) {
                     SEARCH_TASKS.remove(uuid);
                     if (player.isOnline()) {
-                        player.sendMessage(new Messaging.MessageFormatter().format("items.search-timeout"));
+                        player.sendMessage(new Messaging.MessageFormatter().withUniversalPrefixForced().format("items.search-timeout"));
                     }
                 }
             }
@@ -90,7 +90,7 @@ public class MapSearchListener implements Listener {
         String query = event.getMessage().trim();
 
         if (query.equalsIgnoreCase("cancel")) {
-            player.sendMessage(new Messaging.MessageFormatter().format("items.search-cancelled"));
+            player.sendMessage(new Messaging.MessageFormatter().withUniversalPrefixForced().format("items.search-cancelled"));
             return;
         }
 
@@ -123,7 +123,7 @@ public class MapSearchListener implements Listener {
         }
 
         if (results.isEmpty()) {
-            player.sendMessage(new Messaging.MessageFormatter().setVariable("query", query).format("items.search-no-results"));
+            player.sendMessage(new Messaging.MessageFormatter().withUniversalPrefixForced().setVariable("query", query).format("items.search-no-results"));
             return;
         }
 
@@ -205,7 +205,7 @@ public class MapSearchListener implements Listener {
         });
 
         MythicSkywars.getIC().show(player, null);
-        player.sendMessage(new Messaging.MessageFormatter().setVariable("count", "" + results.size()).setVariable("query", query).format("items.search-results"));
+        player.sendMessage(new Messaging.MessageFormatter().withUniversalPrefixForced().setVariable("count", "" + results.size()).setVariable("query", query).format("items.search-results"));
     }
 
     private static ChatColor getStateColor(MatchState state) {

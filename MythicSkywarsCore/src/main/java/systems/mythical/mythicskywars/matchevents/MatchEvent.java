@@ -314,4 +314,13 @@ public abstract class MatchEvent {
         }
         MatchManager.get().message(gMap, msg);
     }
+
+    /**
+     * How long (in game seconds, same scale as {@link GameMap#getTimer()}) other random match events
+     * should wait after this one triggers. Used so timed events (wither, arrow rain, etc.) do not overlap.
+     * Default: {@code length} when it is a positive duration in seconds; {@code 0} means no hold.
+     */
+    public int getExclusiveHoldSecondsAfterTrigger() {
+        return length > 0 ? length : 0;
+    }
 }

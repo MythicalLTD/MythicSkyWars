@@ -142,6 +142,10 @@ public class GameMap {
     private boolean luckyModeEnabled;
     /** Set when lucky chest replacement succeeds; used for join items and refills. */
     private LuckyBlockHook.LuckyProfile activeLuckyProfile;
+    /** While {@code getTimer() < this}, scheduled random match events will not {@link MatchEvent#doEvent()}. */
+    private int matchEventsExclusiveUntilSecond = -1;
+    /** Sudden death (forced deathmatch) already ran this playing phase. */
+    private boolean suddenDeathTriggeredThisMatch;
 
     public GameMap(final String name) {
         this.name = name;
@@ -405,6 +409,11 @@ public class GameMap {
         events.add(new GhastEvent(this, GameEventsConfig.resolveEnabled(this, "GhastEvent", fc.getBoolean("events.GhastEvent.enabled"))));
         for (MatchEvent event : events) {
             GameEventsConfig.apply(this, event);
+        }
+        // Roll chance (useThisMatch) and start times — apply() only called resetStartTime(), so without this
+        // events never run after loadEvents() rebuilds the list (refreshMap reset ran on an empty list).
+        for (MatchEvent event : events) {
+            event.reset();
         }
     }
 
@@ -1255,6 +1264,7 @@ public class GameMap {
         waitingPlayers.clear();
         luckyModeEnabled = false;
         activeLuckyProfile = null;
+        resetMatchRuntimeEventState();
         spectators.clear();
         playerKills.clear();
         if (MythicSkywars.getCfg().kitVotingEnabled()) {
@@ -2118,6 +2128,42 @@ public class GameMap {
 
     public ArrayList<MatchEvent> getEvents() {
         return events;
+    }
+
+    /** Clears per-match event scheduling flags (call when a playing session begins or map refreshes). */
+    public void resetMatchRuntimeEventState() {
+        matchEventsExclusiveUntilSecond = -1;
+        suddenDeathTriggeredThisMatch = false;
+    }
+
+    public boolean areMatchEventsExclusiveBlocked(int currentGameTimer) {
+        return matchEventsExclusiveUntilSecond >= 0 && currentGameTimer < matchEventsExclusiveUntilSecond;
+    }
+
+    /**
+     * Blocks other random match events until {@code exclusiveEndGameSecond} on the arena game clock
+     * (same unit as {@link #getTimer()} after match start).
+     */
+    public void blockMatchEventsUntilGameSecond(int exclusiveEndGameSecond) {
+        this.matchEventsExclusiveUntilSecond = Math.max(this.matchEventsExclusiveUntilSecond, exclusiveEndGameSecond);
+    }
+
+    public boolean isSuddenDeathTriggeredThisMatch() {
+        return suddenDeathTriggeredThisMatch;
+    }
+
+    public void setSuddenDeathTriggeredThisMatch(boolean suddenDeathTriggeredThisMatch) {
+        this.suddenDeathTriggeredThisMatch = suddenDeathTriggeredThisMatch;
+    }
+
+    @Nullable
+    public DeathMatchEvent getDeathMatchEvent() {
+        for (MatchEvent e : events) {
+            if (e instanceof DeathMatchEvent) {
+                return (DeathMatchEvent) e;
+            }
+        }
+        return null;
     }
 
     public ArrayList<CoordLoc> getDeathMatchSpawns() {

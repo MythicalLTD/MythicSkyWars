@@ -51,6 +51,9 @@ game:
   winCommands: []
   killCommands: []
   timeAfterMatch: 15
+  # After this many seconds of match time (scoreboard clock), force deathmatch if the game is still going.
+  # Set 0 to disable. Runs even when DeathMatchEvent is disabled in gameevents.yml (still needs deathmatch spawns on the map).
+  suddenDeathAfterSeconds: 900
   waitTimer: 10
   resetTimerOnJoin: false
   kitVotingEnabled: false

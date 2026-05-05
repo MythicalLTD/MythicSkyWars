@@ -336,7 +336,7 @@ public final class ArenaSetupMenu {
     }
 
     private static String msg(String key) {
-        return new Messaging.MessageFormatter().format(key);
+        return new Messaging.MessageFormatter().withoutUniversalPrefix().format(key);
     }
 
     private static void removeTeamSpawnsAtLocation(Player player, GameMap gMap) {

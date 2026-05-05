@@ -196,11 +196,14 @@ public class TauntOption extends PlayerOption {
             doTauntParticles(player.getUniqueId().toString());
 
             if (this.getMessage() != null && this.getMessage().length() != 0) {
-                String prefix = new Messaging.MessageFormatter().setVariable("player", player.getDisplayName()).format("taunt.prefix");
+                String line = new Messaging.MessageFormatter()
+                        .setVariable("player", player.getDisplayName())
+                        .setVariable("text", ChatColor.translateAlternateColorCodes('&', this.getMessage()))
+                        .format("taunt.line");
                 List<Player> players = player.getWorld().getPlayers();
                 for (Player p : players) {
                     if (p.getLocation().distance(player.getLocation()) < this.getVolume() * 15) {
-                        p.sendMessage(ChatColor.translateAlternateColorCodes('&', prefix + " " + this.getMessage()));
+                        p.sendMessage(line);
                     }
                 }
             }

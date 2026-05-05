@@ -58,7 +58,7 @@ public final class GameEventsConfig {
         }
         applyIntField(event, node, "spawnPer2Tick", "per2Tick");
         applyIntField(event, node, "spawnPer5Tick", "per5Tick");
-        event.resetStartTime();
+        // Caller must invoke MatchEvent.reset() after apply so chance (useThisMatch) is rolled — not only start time.
     }
 
     private static ConfigurationSection resolveNode(GameMap map, String eventName) {

@@ -295,56 +295,46 @@ public class Util {
 
         if (dCause.equals(DamageCause.BLOCK_EXPLOSION) || dCause.equals(DamageCause.ENTITY_EXPLOSION)) {
             first = new Messaging.MessageFormatter()
-                    .withPrefix()
                     .setVariable("player", target.getName())
                     .format("game.death.explosion");
         } else if (dCause.equals(DamageCause.DROWNING)) {
             first = new Messaging.MessageFormatter()
-                    .withPrefix()
                     .setVariable("player", target.getName())
                     .format("game.death.drowning");
         } else if (dCause.equals(DamageCause.FIRE) || dCause.equals(DamageCause.FIRE_TICK)) {
             first = new Messaging.MessageFormatter()
-                    .withPrefix()
                     .setVariable("player", target.getName())
                     .format("game.death.fire");
         } else if (dCause.equals(DamageCause.ENTITY_ATTACK) && killer != null) {
             first = new Messaging.MessageFormatter()
-                    .withPrefix()
                     .setVariable("player", target.getName())
                     .setVariable("killer", killer.getName())
                     .format("game.death.pvp");
             second = "";
         } else if (dCause.equals(DamageCause.FALLING_BLOCK)) {
             first = new Messaging.MessageFormatter()
-                    .withPrefix()
                     .setVariable("player", target.getName())
                     .format("game.death.falling-block");
         } else if (dCause.equals(DamageCause.LAVA)) {
             first = new Messaging.MessageFormatter()
-                    .withPrefix()
                     .setVariable("player", target.getName())
                     .format("game.death.lava");
         } else if (dCause.equals(DamageCause.PROJECTILE) && killer != null) {
             first = new Messaging.MessageFormatter()
-                    .withPrefix()
                     .setVariable("player", target.getName())
                     .setVariable("killer", killer.getName())
                     .format("game.death.projectile");
             second = "";
         } else if (dCause.equals(DamageCause.SUFFOCATION)) {
             first = new Messaging.MessageFormatter()
-                    .withPrefix()
                     .setVariable("player", target.getName())
                     .format("game.death.suffocation");
         } else if (dCause.equals(DamageCause.VOID)) {
             first = new Messaging.MessageFormatter()
-                    .withPrefix()
                     .setVariable("player", target.getName())
                     .format("game.death.void");
         } else {
             first = new Messaging.MessageFormatter()
-                    .withPrefix()
                     .setVariable("player", target.getName())
                     .format("game.death.general");
         }

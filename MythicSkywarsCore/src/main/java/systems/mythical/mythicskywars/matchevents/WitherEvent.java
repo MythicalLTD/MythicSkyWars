@@ -71,10 +71,12 @@ public class WitherEvent extends MatchEvent {
 
     public void endEvent(boolean force) {
         if (fired) {
-            if ((force) && (length != -1)) {
+            if ((force) && (length != -1) && br != null) {
                 br.cancel();
             }
-            entity.remove();
+            if (entity != null) {
+                entity.remove();
+            }
             if (gMap.getMatchState() == MatchState.PLAYING) {
                 messageMapIfPresent(endMessage);
             }

@@ -178,7 +178,7 @@ public class TeamSelectionMenu {
                     if (tc != null) {
                         if (tc.getPosition() == event.getSlot()) {
                             // send same team error message
-                            player.sendMessage(new Messaging.MessageFormatter().format("menu.teamselection-menu-alredy_in_team"));
+                            player.sendMessage(new Messaging.MessageFormatter().withUniversalPrefixForced().format("menu.teamselection-menu-alredy_in_team"));
                             return;
                         }
                         PlayerCard pc = gMap.getPlayerCard(player);
@@ -211,7 +211,7 @@ public class TeamSelectionMenu {
                     Bukkit.getPluginManager().callEvent(new MythicSkywarsSelectTeamEvent(player, gMap, tCard));
                     // +1 position for index to be human readable
                     int realTeam = tCard.getPosition()+1;
-                    player.sendMessage(new Messaging.MessageFormatter().setVariable("team", "" + realTeam).format("menu.teamselection-menu-join"));
+                    player.sendMessage(new Messaging.MessageFormatter().withUniversalPrefixForced().setVariable("team", "" + realTeam).format("menu.teamselection-menu-join"));
                     player.playSound(player.getLocation(), Sound.valueOf(MythicSkywars.getCfg().getTeamJoinSound()), 1, 1);
                     player.closeInventory();
                     MythicSkywars.getIC().getMenu(gMap.getName() + "teamselect").update();

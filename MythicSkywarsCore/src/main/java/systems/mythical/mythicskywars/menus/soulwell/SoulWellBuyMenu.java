@@ -117,7 +117,7 @@ public final class SoulWellBuyMenu {
             return;
         }
         if (!VaultUtils.get().canBuy(player, cost)) {
-            player.sendMessage(new Messaging.MessageFormatter().format("menu.insufficientfunds"));
+            player.sendMessage(new Messaging.MessageFormatter().withUniversalPrefixForced().format("menu.insufficientfunds"));
             Util.get().playSound(player, player.getLocation(), MythicSkywars.getCfg().getErrorSound(), 1, 1);
             return;
         }

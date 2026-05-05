@@ -42,7 +42,7 @@ public class SpectateTeamMenu {
             // Search button
             if (org.bukkit.ChatColor.stripColor(name).equalsIgnoreCase("Search")) {
                 player.closeInventory();
-                player.sendMessage(new systems.mythical.mythicskywars.utilities.Messaging.MessageFormatter().format("items.search-prompt"));
+                player.sendMessage(new systems.mythical.mythicskywars.utilities.Messaging.MessageFormatter().withUniversalPrefixForced().format("items.search-prompt"));
                 MapSearchListener.startSearch(player, "team");
                 return;
             }

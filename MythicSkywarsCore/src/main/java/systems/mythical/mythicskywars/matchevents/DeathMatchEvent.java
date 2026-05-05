@@ -52,52 +52,76 @@ public class DeathMatchEvent extends MatchEvent {
     @Override
     public void onDoEvent() {
         if (gMap.getMatchState() == MatchState.PLAYING) {
-            this.fired = true;
-            Collections.shuffle(gMap.getDeathMatchSpawns());
-            int delay = 0;
-            for (int i = 0; i < gMap.getAlivePlayers().size(); i++) {
-                int spawn;
-                if (i < gMap.getDeathMatchSpawns().size()) {
-                    spawn = i;
-                } else {
-                    spawn = 0;
-                }
-                CoordLoc cLoc = gMap.getDeathMatchSpawns().get(spawn);
-                Location loc = new Location(gMap.getCurrentWorld(), cLoc.getX(), cLoc.getY(), cLoc.getZ());
-                loc.getChunk().load(true);
-                Player player = gMap.getAlivePlayers().get(i);
-                delay = i * 2;
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        if (player != null) {
-                            player.teleport(loc.add(0, 2, 0), TeleportCause.END_PORTAL);
-                            gMap.addDeathMatchWaiter(player);
-                        }
-                    }
-                }.runTaskLater(MythicSkywars.get(), delay);
-            }
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    sendTitle();
-                }
-            }.runTaskLater(MythicSkywars.get(), 2 + delay);
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    gMap.clearDeathMatchWaiters();
-                    for (final Player player : gMap.getAlivePlayers()) {
-                        if (MythicSkywars.getCfg().titlesEnabled()) {
-                            Util.get().sendTitle(player, 2, 20, 2, colorize(endMessage), "");
-                        }
-                    }
-                    endEvent(false);
-                }
-            }.runTaskLater(MythicSkywars.get(), 60 + delay);
+            runDeathMatchSequence();
         }
+    }
+
+    /**
+     * Runs deathmatch teleports even when this event is disabled in {@code gameevents.yml}
+     * (used for configured sudden death at max match time). Skips {@code MythicSkywarsGameEventTriggerEvent}.
+     */
+    public void forceSuddenDeath() {
+        if (gMap.getMatchState() != MatchState.PLAYING) {
+            return;
+        }
+        if (gMap.getDeathMatchSpawns() == null || gMap.getDeathMatchSpawns().isEmpty()) {
+            return;
+        }
+        runDeathMatchSequence();
+    }
+
+    private void runDeathMatchSequence() {
+        this.fired = true;
+        Collections.shuffle(gMap.getDeathMatchSpawns());
+        int delay = 0;
+        for (int i = 0; i < gMap.getAlivePlayers().size(); i++) {
+            int spawn;
+            if (i < gMap.getDeathMatchSpawns().size()) {
+                spawn = i;
+            } else {
+                spawn = 0;
+            }
+            CoordLoc cLoc = gMap.getDeathMatchSpawns().get(spawn);
+            Location loc = new Location(gMap.getCurrentWorld(), cLoc.getX(), cLoc.getY(), cLoc.getZ());
+            loc.getChunk().load(true);
+            Player player = gMap.getAlivePlayers().get(i);
+            delay = i * 2;
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (player != null) {
+                        player.teleport(loc.clone().add(0, 2, 0), TeleportCause.END_PORTAL);
+                        gMap.addDeathMatchWaiter(player);
+                    }
+                }
+            }.runTaskLater(MythicSkywars.get(), delay);
+        }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                sendTitle();
+            }
+        }.runTaskLater(MythicSkywars.get(), 2 + delay);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                gMap.clearDeathMatchWaiters();
+                for (final Player player : gMap.getAlivePlayers()) {
+                    if (MythicSkywars.getCfg().titlesEnabled()) {
+                        Util.get().sendTitle(player, 2, 20, 2, colorize(endMessage), "");
+                    }
+                }
+                endEvent(false);
+            }
+        }.runTaskLater(MythicSkywars.get(), 60 + delay);
+    }
+
+    @Override
+    public int getExclusiveHoldSecondsAfterTrigger() {
+        int fromLength = super.getExclusiveHoldSecondsAfterTrigger();
+        return Math.max(90, fromLength);
     }
 
     @Override

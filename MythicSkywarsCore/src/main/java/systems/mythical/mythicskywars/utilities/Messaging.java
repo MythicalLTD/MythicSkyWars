@@ -15,15 +15,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public final class Messaging {
-    private static final Pattern COLOR_PATTERN = Pattern.compile("(?i)([&§])[0-9A-FK-OR]");
-    private static final Pattern HEX_PATTERN = Pattern.compile("(?i)[&§]#([0-9A-F]{6})");
+    private static final Pattern COLOR_PATTERN = Pattern.compile("(?i)([&\\u00A7])[0-9A-FK-OR]");
+    private static final Pattern HEX_PATTERN = Pattern.compile("(?i)[&\\u00A7]#([0-9A-F]{6})");
     // Detects MiniMessage tags like <red>, <bold>, <#FF5555>, <gradient:red:blue>, <reset>, etc.
     private static final Pattern MINIMESSAGE_PATTERN = Pattern.compile("<(/?[a-zA-Z_#][a-zA-Z0-9_:#.\\-]*)>");
 
@@ -42,10 +45,11 @@ public final class Messaging {
             plugin.saveResource("messages.yml", false);
         }
 
+        FileConfiguration loaded = YamlConfiguration.loadConfiguration(storageFile);
         if (storageFile.exists()) {
-            copyDefaults(storageFile);
+            applyBundledDefaultsInMemoryOnly(loaded);
         }
-        storage = YamlConfiguration.loadConfiguration(storageFile);
+        storage = loaded;
     }
 
     public static String stripColor(String input) {
@@ -60,10 +64,6 @@ public final class Messaging {
         return storage;
     }
 
-    private String getPrefix() {
-        return storage.getString("prefix", "");
-    }
-
     public String getMessage(String format) {
         if (storage.contains(format)) {
             return storage.getString(format);
@@ -71,29 +71,147 @@ public final class Messaging {
         return null;
     }
 
-    private void copyDefaults(File playerFile) {
-        try {
-            FileConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
-            int added = ConfigMerge.mergeMissingKeysFromResource(MythicSkywars.get(), "messages.yml", playerConfig);
-            if (added > 0) {
-                playerConfig.save(playerFile);
-                MythicSkywars.get().getLogger().info("Merged " + added + " new message key(s) from messages.yml.");
+    /**
+     * Primary unified chat prefix ({@code &} codes). Set {@code message-prefix} in {@code messages.yml};
+     * if unset, falls back to {@code game.broadcast-prefix} for compatibility.
+     */
+    public String getUniversalMessagePrefixRaw() {
+        String p = storage.getString("message-prefix");
+        if (p != null && !p.isEmpty()) {
+            return p;
+        }
+        p = storage.getString("game.broadcast-prefix");
+        return p != null ? p : "";
+    }
+
+    /** @deprecated use {@link #getUniversalMessagePrefixRaw()} */
+    @Deprecated
+    public String getGameBroadcastPrefixRaw() {
+        return getUniversalMessagePrefixRaw();
+    }
+
+    /**
+     * Keys passed as the first argument to {@link MessageFormatter#format(String)} that must not get the
+     * universal prefix (inventory titles, item names, hologram snippets, titles, scoreboards, sign lines, etc.).
+     */
+    public boolean isUniversalPrefixExcludedForKey(String lookupKey) {
+        if (lookupKey == null || lookupKey.isEmpty()) {
+            return true;
+        }
+        if ("chat.externalPrefix".equals(lookupKey)) {
+            return true;
+        }
+        if (lookupKey.endsWith("-actionbar")) {
+            return true;
+        }
+        if (lookupKey.startsWith("game.select-team-before")) {
+            return true;
+        }
+        List<String> extra = storage.getStringList("message-prefix-exclude-prefixes");
+        for (String p : getBuiltInExcludedPrefixes()) {
+            if (matchesPrefixRule(lookupKey, p)) {
+                return true;
             }
-        } catch (IOException e) {
-            MythicSkywars.get().getLogger().warning("Failed to merge messages.yml defaults: " + e.getMessage());
+        }
+        if (extra != null) {
+            for (String p : extra) {
+                if (p != null && !p.isEmpty() && matchesPrefixRule(lookupKey, p.trim())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static List<String> getBuiltInExcludedPrefixes() {
+        return Collections.unmodifiableList(Arrays.asList(
+                "items.",
+                "menu.",
+                "maps.editor.item.",
+                "maps.editor.hologram.",
+                "titles.",
+                "scoreboards.",
+                "signs.line",
+                "lunar.",
+                "kit.",
+                "soulwell.holo-",
+                "game.chest-refill-hologram."
+        ));
+    }
+
+    private static boolean matchesPrefixRule(String key, String rule) {
+        if (rule.endsWith("*")) {
+            return key.startsWith(rule.substring(0, rule.length() - 1));
+        }
+        return key.startsWith(rule) || key.equals(rule);
+    }
+
+    /**
+     * Picks a random template line from a string list in config, or falls back to a single message key.
+     * List key should reference a {@link List} of strings (e.g. {@code timer.wait-timer-variants}).
+     */
+    public String pickGameLineTemplate(String variantsListKey, String fallbackMessageKey) {
+        List<String> variants = storage.getStringList(variantsListKey);
+        if (variants != null && !variants.isEmpty()) {
+            return variants.get(ThreadLocalRandom.current().nextInt(variants.size()));
+        }
+        return storage.getString(fallbackMessageKey, "");
+    }
+
+    /**
+     * Picks a random line from a YAML string list and runs it through {@link MessageFormatter#format(String)}.
+     * Each list entry may be a message key or a raw template with {@code {placeholders}}.
+     */
+    public String formatRandomListLine(String listKey, MessageFormatter formatter) {
+        List<String> lines = storage.getStringList(listKey);
+        if (lines == null || lines.isEmpty()) {
+            return "";
+        }
+        String tpl = lines.get(ThreadLocalRandom.current().nextInt(lines.size()));
+        if (tpl == null || tpl.isEmpty()) {
+            return "";
+        }
+        return formatter.format(tpl.trim());
+    }
+
+    /**
+     * Fills in any keys present in the jar's {@code messages.yml} but missing from disk, only in memory.
+     * The on-disk file is never rewritten here, so reload/restart does not reformat or clobber user edits.
+     */
+    private static void applyBundledDefaultsInMemoryOnly(FileConfiguration playerConfig) {
+        int added = ConfigMerge.mergeMissingKeysFromResource(MythicSkywars.get(), "messages.yml", playerConfig);
+        if (added > 0) {
+            MythicSkywars.get().getLogger().info("Loaded " + added + " default message key(s) from the jar "
+                    + "(missing from messages.yml on disk; disk file was not modified).");
         }
     }
 
     public static class MessageFormatter {
         private static final Pattern PATTERN = Pattern.compile("(?i)(\\{[a-z0-9_]+})");
         private final Map<String, String> variableMap = Maps.newHashMap();
-        private boolean prefix;
+        /** When true, universal prefix is applied for keys not on the exclusion list (default: true). */
+        private boolean universalPrefixEnabled = true;
+        /** When true, universal prefix is applied even for excluded keys (e.g. a {@code menu.*} line sent as chat). */
+        private boolean forceUniversalPrefix = false;
 
         public MessageFormatter() {
         }
 
+        /** Disables the global {@code message-prefix} for this format chain (raw / UI strings). */
+        public MessageFormatter withoutUniversalPrefix() {
+            this.universalPrefixEnabled = false;
+            return this;
+        }
+
+        /** Forces {@code message-prefix} even for keys that are normally excluded (inventory/menu keys used in chat). */
+        public MessageFormatter withUniversalPrefixForced() {
+            this.forceUniversalPrefix = true;
+            return this;
+        }
+
+        /** @deprecated Legacy hook; universal prefix is used instead. Kept for API compatibility (no-op). */
+        @Deprecated
         public MessageFormatter withPrefix() {
-            prefix = true;
             return this;
         }
 
@@ -126,10 +244,12 @@ public final class Messaging {
                 return "";
             }
 
+            final String lookupKey = message;
+
             if (MythicSkywars.getMessaging().getMessage(message) != null) {
                 message = MythicSkywars.getMessaging().getMessage(message);
             } else if (message.contains(".") && !message.contains(" ")) {
-                // Looks like an unresolved message key — log it once
+                // Looks like an unresolved message key; log it once.
                 MythicSkywars.get().getLogger().warning("[Messages] Missing translation key: " + message);
             }
 
@@ -151,8 +271,15 @@ public final class Messaging {
                 message = message.replaceFirst(Pattern.quote(matcher.group()), Matcher.quoteReplacement(value));
             }
 
-            if (prefix) {
-                message = MythicSkywars.getMessaging().getPrefix() + message;
+            Messaging messaging = MythicSkywars.getMessaging();
+            if (messaging != null && universalPrefixEnabled) {
+                boolean excluded = messaging.isUniversalPrefixExcludedForKey(lookupKey);
+                if (forceUniversalPrefix || !excluded) {
+                    String p = messaging.getUniversalMessagePrefixRaw();
+                    if (p != null && !p.isEmpty()) {
+                        message = p + message;
+                    }
+                }
             }
 
             return colorize(message);
@@ -195,8 +322,8 @@ public final class Messaging {
     }
 
     /**
-     * Translates hex color codes in the format {@code &#RRGGBB} or {@code §#RRGGBB}
-     * to the Minecraft-compatible {@code §x§R§R§G§G§B§B} format.
+     * Translates hex color codes in the format {@code &#RRGGBB} or {@code \u00A7#RRGGBB}
+     * to the Minecraft-compatible {@code \u00A7x\u00A7R\u00A7R\u00A7G\u00A7G\u00A7B\u00A7B} format.
      * Only applies on servers that support RGB colors (1.16+).
      */
     private static String translateHexColors(String message) {
@@ -207,9 +334,9 @@ public final class Messaging {
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String hex = matcher.group(1);
-            StringBuilder replacement = new StringBuilder("§x");
+            StringBuilder replacement = new StringBuilder("\u00A7x");
             for (char c : hex.toCharArray()) {
-                replacement.append('§').append(c);
+                replacement.append('\u00A7').append(c);
             }
             matcher.appendReplacement(sb, replacement.toString());
         }
