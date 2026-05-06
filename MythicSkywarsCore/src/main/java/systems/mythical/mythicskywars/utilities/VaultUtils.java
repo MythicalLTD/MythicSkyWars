@@ -121,7 +121,11 @@ public class VaultUtils {
     public void give(Player win, int i) {
         if (win == null) return;
         if (useBuiltInEconomy()) {
-            addBuiltInBalance(win.getUniqueId().toString(), win.getName(), i);
+            final String uuid = win.getUniqueId().toString();
+            final String name = win.getName();
+            Bukkit.getScheduler().runTaskAsynchronously(MythicSkywars.get(), () -> {
+                addBuiltInBalance(uuid, name, i);
+            });
             return;
         }
         if (econ == null) return;
