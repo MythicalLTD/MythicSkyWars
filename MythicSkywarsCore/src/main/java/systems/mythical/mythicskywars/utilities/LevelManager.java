@@ -135,17 +135,10 @@ public final class LevelManager {
             return;
         }
         String trimmed = raw.trim().startsWith("/") ? raw.trim().substring(1) : raw.trim();
-        String lowered = trimmed.toLowerCase(Locale.ROOT);
-        boolean selfPlayer = MythicSkywars.get().getName().equalsIgnoreCase("skywars")
-                || lowered.startsWith("skywars ")
-                || lowered.startsWith("sw ");
 
-        if (lowered.startsWith("tell ") || lowered.startsWith("msg ") || lowered.startsWith("minecraft:tell ")) {
+        if (trimmed.toLowerCase(Locale.ROOT).startsWith("tell ") || trimmed.toLowerCase(Locale.ROOT).startsWith("msg ") || trimmed.toLowerCase(Locale.ROOT).startsWith("minecraft:tell ")) {
             trimmed = applyPlaceholders(player, trimmed);
             Bukkit.dispatchCommand(player, trimmed);
-        } else if (selfPlayer) {
-            trimmed = applyPlaceholders(player, trimmed);
-            player.performCommand(trimmed);
         } else {
             trimmed = applyPlaceholders(player, trimmed);
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), trimmed);

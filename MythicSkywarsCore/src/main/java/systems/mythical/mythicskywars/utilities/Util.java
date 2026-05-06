@@ -116,7 +116,11 @@ public class Util {
             if (player != null) {
                 command = com.replace("<player>", player.getName());
             }
-            MythicSkywars.get().getServer().dispatchCommand(MythicSkywars.get().getServer().getConsoleSender(), command);
+            try {
+                MythicSkywars.get().getServer().dispatchCommand(MythicSkywars.get().getServer().getConsoleSender(), command);
+            } catch (Exception e) {
+                MythicSkywars.get().getLogger().warning("Failed to execute command: " + command + " - " + e.getMessage());
+            }
         }
     }
 

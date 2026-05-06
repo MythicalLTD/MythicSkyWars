@@ -15,7 +15,7 @@ public class SWCoinsCmd extends BaseCmd {
 
     public SWCoinsCmd(String t) {
         type = t;
-        forcePlayer = true;
+        forcePlayer = false;
         cmdName = "coins";
         alias = new String[]{"balance", "bal"};
         argLength = 1;
@@ -31,7 +31,7 @@ public class SWCoinsCmd extends BaseCmd {
 
         OfflinePlayer target = player;
         if (args.length >= 2) {
-            if (!sender.hasPermission("sw.admin")) {
+            if (sender instanceof Player && !sender.hasPermission("sw.admin")) {
                 sender.sendMessage(new Messaging.MessageFormatter().format("error.cmd-no-perm"));
                 return true;
             }
@@ -46,6 +46,9 @@ public class SWCoinsCmd extends BaseCmd {
                     return true;
                 }
             }
+        } else if (target == null) {
+            // Console must specify a player name
+            return false;
         }
 
         String targetName = target.getName() != null ? target.getName() : target.getUniqueId().toString();
