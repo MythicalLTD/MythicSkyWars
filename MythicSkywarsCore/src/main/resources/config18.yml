@@ -23,8 +23,6 @@ lobby:
   hideJoinQuitMessages: true
   hideDeathMessages: true
 economyEnabled: false
-# ESSENTIALSX (Vault provider) or BUILTIN (sw_player.economy SQL column)
-economyProvider: BUILTIN
 clearInventoryOnLobbyJoin: true
 timeFormat: simplified
 defaultKit: "null" #Name of the starter kit

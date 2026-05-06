@@ -105,7 +105,6 @@ public class Config {
     private boolean bungeeRandomMapPickOnStart;
     private String bungeeLobby;
     private boolean economyEnabled;
-    private String economyProvider;
     private List<String> gameEndCommands;
     private boolean resetTimerOnJoin;
     private String resourcePack;
@@ -356,7 +355,6 @@ public class Config {
             bungeeLobby = MythicSkywars.get().getConfig().getString("bungeeLobby");
             isLobbyServer = MythicSkywars.get().getConfig().getBoolean("isLobbyServer");
             economyEnabled = MythicSkywars.get().getConfig().getBoolean("economyEnabled");
-            economyProvider = MythicSkywars.get().getConfig().getString("economyProvider", "ESSENTIALSX");
             gameEndCommands = MythicSkywars.get().getConfig().getStringList("gameEndCommands");
             resourcePack = MythicSkywars.get().getConfig().getString("resourcepack");
             promptResource = MythicSkywars.get().getConfig().getBoolean("promptForResourcePackOnJoin");
@@ -702,7 +700,6 @@ public class Config {
         }
 
         MythicSkywars.get().getConfig().set("economyEnabled", economyEnabled);
-        MythicSkywars.get().getConfig().set("economyProvider", economyProvider);
         MythicSkywars.get().getConfig().set("bungeeMode", bungeeMode);
         MythicSkywars.get().getConfig().set("bungeeModeType", bungeeModeType);
         MythicSkywars.get().getConfig().set("bungeeRandomMapPickOnStart", bungeeRandomMapPickOnStart);
@@ -1420,10 +1417,6 @@ public class Config {
 
     public boolean economyEnabled() {
         return economyEnabled;
-    }
-
-    public String economyProvider() {
-        return economyProvider == null ? "ESSENTIALSX" : economyProvider;
     }
 
     public boolean protectLobby() {

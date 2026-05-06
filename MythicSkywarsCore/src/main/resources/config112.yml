@@ -64,8 +64,6 @@ lobby:
   hideDeathMessages: true
 # Whether you want to use Vault Economy to let players buy game options such as cages, killsounds etc.
 economyEnabled: false
-# ESSENTIALSX (Vault provider) or BUILTIN (sw_player.economy SQL column)
-economyProvider: BUILTIN
 # Whether you want the player's inventory to be cleared when they join the skywars lobby world
 clearInventoryOnLobbyJoin: true
 # The format that in which we should format the time countdowns.
