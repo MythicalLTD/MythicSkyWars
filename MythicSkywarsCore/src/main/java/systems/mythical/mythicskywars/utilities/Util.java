@@ -184,7 +184,8 @@ public class Util {
             if (MythicSkywars.getCfg().debugEnabled()) MythicSkywars.get().getLogger().info("#isBusy pStats " + player.getName() + ": null");
             ps = new PlayerStat(player);
             PlayerStat.getPlayers().add(ps);
-            ps.updatePlayerIfInLobby(player);
+            final PlayerStat createdStats = ps;
+            createdStats.loadStats(() -> createdStats.updatePlayerIfInLobby(player));
             return true;
         } else {
             return !ps.isInitialized();
