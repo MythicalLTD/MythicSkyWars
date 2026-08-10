@@ -58,7 +58,7 @@ public class PlayerStat {
     private int soulWellSoulsPurchased;
     /** One free Soul Well roll after a win with Xezbeth Luck (not persisted). */
     private transient boolean soulWellXezbethFreeRollPending;
-    private boolean initialized;
+    private volatile boolean initialized;
     private PermissionAttachment perms;
 
     public PlayerStat(UUID uuid, String name) {

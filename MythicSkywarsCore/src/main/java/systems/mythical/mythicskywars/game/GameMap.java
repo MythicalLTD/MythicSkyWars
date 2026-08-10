@@ -446,10 +446,17 @@ public class GameMap {
             return true;
         }
 
-        // If busy return false
+        // If already in a match / spectating / dead, reject
         if (Util.get().isBusy(playerId)) {
             if (MythicSkywars.getCfg().debugEnabled()) {
                 MythicSkywars.get().getLogger().info("#addPlayers: " + player.getName() + " is busy, cannot join " + this.getName());
+            }
+            return false;
+        }
+        // Stats must be loaded before join (distinct from "busy")
+        if (!Util.get().isStatsReady(playerId)) {
+            if (MythicSkywars.getCfg().debugEnabled()) {
+                MythicSkywars.get().getLogger().info("#addPlayers: " + player.getName() + " stats not ready, cannot join " + this.getName());
             }
             return false;
         }
@@ -531,7 +538,14 @@ public class GameMap {
             for (UUID uuid : party.getMembers()) {
                 Player player = Bukkit.getPlayer(uuid);
                 if (Util.get().isBusy(uuid)) {
-                    party.sendPartyMessage(new Messaging.MessageFormatter().setVariable("player", player.getName()).format("party.memberbusy"));
+                    if (player != null) {
+                        party.sendPartyMessage(new Messaging.MessageFormatter().setVariable("player", player.getName()).format("party.memberbusy"));
+                    }
+                } else if (!Util.get().isStatsReady(uuid)) {
+                    // Stats still loading — skip this member for now (leader can retry shortly)
+                    if (player != null) {
+                        party.sendPartyMessage(new Messaging.MessageFormatter().format("error.send-stats-not-loaded"));
+                    }
                 } else {
                     PlayerStat ps = PlayerStat.getPlayerStats(uuid);
                     if (ps != null && player != null && ps.isInitialized()) {

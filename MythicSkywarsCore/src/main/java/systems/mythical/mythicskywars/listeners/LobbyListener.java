@@ -385,13 +385,25 @@ public class LobbyListener implements org.bukkit.event.Listener {
                         if (party != null) {
                             if (party.getLeader().equals(player.getUniqueId())) {
                                 boolean tryJoin = true;
+                                boolean statsPending = false;
                                 for (UUID uuid : party.getMembers()) {
                                     if (Util.get().isBusy(uuid)) {
                                         tryJoin = false;
-                                        party.sendPartyMessage(new Messaging.MessageFormatter().setVariable("player", org.bukkit.Bukkit.getPlayer(uuid).getName()).format("party.memberbusy"));
+                                        Player member = org.bukkit.Bukkit.getPlayer(uuid);
+                                        if (member != null) {
+                                            party.sendPartyMessage(new Messaging.MessageFormatter().setVariable("player", member.getName()).format("party.memberbusy"));
+                                        }
+                                    } else if (!Util.get().isStatsReady(uuid)) {
+                                        tryJoin = false;
+                                        statsPending = true;
                                     }
                                 }
-                                if (!tryJoin) break;
+                                if (!tryJoin) {
+                                    if (statsPending) {
+                                        player.sendMessage(new Messaging.MessageFormatter().format("error.send-stats-not-loaded"));
+                                    }
+                                    break;
+                                }
                                 if (e.getClickedBlock().getType() == MythicSkywars.getNMS().getMaterial("STONE_PLATE").getType()) {
                                     joined = MatchManager.get().joinGame(party, GameType.ALL) != null;
                                 } else if (e.getClickedBlock().getType() == MythicSkywars.getNMS().getMaterial("IRON_PLATE").getType()) {

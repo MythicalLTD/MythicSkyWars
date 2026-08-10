@@ -1,6 +1,6 @@
 # MythicSkyWars
 
-A modern, high-performance SkyWars plugin built for Spigot and Paper servers, supporting Minecraft versions from 1.8 up to 26.1.2.
+A modern, high-performance SkyWars plugin built for Spigot and Paper servers, supporting Minecraft versions from 1.8 up to 26.2.
 
 This project started as a hard fork of MythicSkywars but has evolved into a fully independent and heavily extended solution focused on performance, scalability, and modern features.
 
@@ -120,7 +120,8 @@ MythicSkyWars is designed for both standalone servers and large proxy networks. 
 | 1.19 | v1_19_R1 |
 | 1.20.6 | v1_20_R1 |
 | 1.21.1 | v1_21_R1 |
-| 26.1.2 | v26_1_R1 |
+| 26.1.x | v26_1_R1 |
+| 26.2 | v26_1_R1 (compat alias) |
 
 ---
 
@@ -423,7 +424,7 @@ v1_18_R2/               NMS 1.18.2
 v1_19_R1/               NMS 1.19
 v1_20_R1/               NMS 1.20.6
 v1_21_R1/               NMS 1.21.1
-v26_1_R1/               NMS 26.1.2
+v26_1_R1/               NMS 26.1.x / 26.2
 mythicskywars-assembly/       Shaded build module
 build.bat               Build + deploy to server
 deploy-to-nexus.ps1     Upload BuildTools artifacts to Nexus

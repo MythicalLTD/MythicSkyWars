@@ -390,7 +390,7 @@ error:
   send-map-not-found: "&cNo arena found with that name."
   send-cannot-join: "&cThat player could not be added to the arena (full, wrong
     state, or not registered)."
-  send-stats-not-loaded: "&cThat player's SkyWars stats are still loading; try again in a moment."
+  send-stats-not-loaded: "&cSkyWars stats are still loading; try again in a moment."
   send-already-in-arena: "&cThat player is already in that arena."
 game:
   # Legacy fallback if root message-prefix is empty (older configs).

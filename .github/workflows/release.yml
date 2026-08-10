@@ -10,6 +10,8 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      HAS_MYTHIC_RELEASE: ${{ secrets.MYTHIC_PRODUCT_ID != '' && secrets.MYTHIC_RELEASE_TOKEN != '' }}
 
     steps:
       - name: Checkout
@@ -130,7 +132,7 @@ jobs:
               {"project_id": "w02MKsTg", "dependency_type": "optional"},
               {"project_id": "3wmN97b8", "dependency_type": "optional"}
             ],
-            "game_versions": ["1.8.9","1.9.4","1.10.2","1.11.2","1.12.2","1.13.2","1.14.4","1.15.2","1.16.5","1.17.1","1.18.2","1.19.4","1.20.6","1.21.11", "26.1.2", "26.1.1","26.1"],
+            "game_versions": ["1.8.9","1.9.4","1.10.2","1.11.2","1.12.2","1.13.2","1.14.4","1.15.2","1.16.5","1.17.1","1.18.2","1.19.4","1.20.6","1.21.11", "26.1.2", "26.1.1","26.1","26.2"],
             "version_type": "release",
             "loaders": ["bukkit","spigot","paper", "waterfall", "purpur"],
             "featured": true,
@@ -165,3 +167,26 @@ jobs:
             -H "User-Agent: MythicalSystems/MythicSkywars/${{ steps.version.outputs.version }} (github-actions)" \
             -d "$PAYLOAD" \
             --fail-with-body
+
+      - name: Publish to Mythic Marketplace
+        id: mythic_publish
+        if: env.HAS_MYTHIC_RELEASE == 'true'
+        uses: MythicalLTD/.github/actions/publish-release@v1
+        with:
+          product_id: ${{ secrets.MYTHIC_PRODUCT_ID }}
+          environment: production
+          version: ${{ steps.version.outputs.version }}
+          changelog: ${{ github.event.release.body || format('MythicSkywars {0}', steps.version.outputs.version) }}
+          file_path: target/MythicSkywars-${{ steps.version.outputs.version }}.jar
+          title: MythicSkywars ${{ steps.version.outputs.version }}
+          release_token: ${{ secrets.MYTHIC_RELEASE_TOKEN }}
+
+      - name: Mythic Marketplace summary
+        if: steps.mythic_publish.outcome == 'success'
+        shell: bash
+        run: |
+          {
+            echo "### Mythic Marketplace"
+            echo "| Version | \`${{ steps.version.outputs.version }}\` |"
+            echo "| Release | \`${{ steps.mythic_publish.outputs.release_url }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

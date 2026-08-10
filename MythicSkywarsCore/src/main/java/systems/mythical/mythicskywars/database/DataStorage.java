@@ -142,29 +142,13 @@ public class DataStorage {
                     Database database = MythicSkywars.getDb();
 
                     if (database.checkConnection()) {
-                        MythicSkywars.get().getLogger().severe("Failed to connect to the database, player data will not be loaded and will be unable to play!");
-                        return;
-                    }
-
-                    if (!database.doesPlayerExist(pData.getId())) {
+                        // Never leave players stuck uninitialized — fall back to blank defaults so joins still work.
+                        MythicSkywars.get().getLogger().severe("Failed to connect to the database; loading blank defaults for "
+                                + pData.getPlayerName() + " so they can still play.");
+                        applyBlankStatDefaults(pData);
+                    } else if (!database.doesPlayerExist(pData.getId())) {
                         database.createNewPlayer(pData.getId(), pData.getPlayerName());
-                        pData.setWins(0);
-                        pData.setLosts(0);
-                        pData.setKills(0);
-                        pData.setDeaths(0);
-                        pData.setXp(0);
-                        pData.setParticleEffect("none");
-                        pData.setProjectileEffect("none");
-                        pData.setGlassColor("none");
-                        pData.setKillSound("none");
-                        pData.setWinSound("none");
-                        pData.setTaunt("none");
-                        pData.setSouls(0);
-                        pData.setSoulWellUsages(0);
-                        pData.setSoulWellLegendaries(0);
-                        pData.setSoulWellRares(0);
-                        pData.setSoulWellSoulsGathered(0);
-                        pData.setSoulWellSoulsPurchased(0);
+                        applyBlankStatDefaults(pData);
                     } else {
                         Connection connection = database.getConnection();
                         PreparedStatement preparedStatement = null;
@@ -266,11 +250,41 @@ public class DataStorage {
                         pData.setSoulWellSoulsPurchased(fc.getInt("soulwell_souls_purchased", 0));
                     } catch (IOException ioException) {
                         MythicSkywars.get().getLogger().severe("Failed to load player " + pData.getId() + ": " + ioException.getMessage());
+                        applyBlankStatDefaults(pData);
                     }
                 }
-                postLoadStatsTask.run();
+                // Always finish on the main thread so initialized flags and join logic see a consistent state.
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        if (postLoadStatsTask != null) {
+                            postLoadStatsTask.run();
+                        }
+                    }
+                }.runTask(MythicSkywars.get());
             }
         }.runTaskAsynchronously(MythicSkywars.get());
+    }
+
+    private void applyBlankStatDefaults(PlayerStat pData) {
+        pData.setWins(0);
+        pData.setLosts(0);
+        pData.setKills(0);
+        pData.setDeaths(0);
+        pData.setXp(0);
+        pData.setParticleEffect("none");
+        pData.setProjectileEffect("none");
+        pData.setGlassColor("none");
+        pData.setKillSound("none");
+        pData.setWinSound("none");
+        pData.setTaunt("none");
+        pData.setPrestigeIcon("icon1");
+        pData.setSouls(0);
+        pData.setSoulWellUsages(0);
+        pData.setSoulWellLegendaries(0);
+        pData.setSoulWellRares(0);
+        pData.setSoulWellSoulsGathered(0);
+        pData.setSoulWellSoulsPurchased(0);
     }
 
     private void copyDefaults(File playerFile) {

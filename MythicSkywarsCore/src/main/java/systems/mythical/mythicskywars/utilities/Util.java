@@ -177,19 +177,40 @@ public class Util {
         if (player == null) return true;
         if (player.isDead()) return true;
 
-        if (MatchManager.get().isSpectating(player)) return true;
+        MatchManager mm = MatchManager.get();
+        if (mm.isSpectating(player)) return true;
+        if (mm.getPlayerMap(player) != null) return true;
+        if (mm.getDeadPlayerMap(player) != null) return true;
+
+        // Stats still loading is not "busy" (in another match) — only blocks joins via isStatsReady().
+        return false;
+    }
+
+    /**
+     * Ensures a PlayerStat exists and load has been started. Returns true once stats are initialized.
+     */
+    public boolean isStatsReady(UUID uuid) {
+        Player player = MythicSkywars.get().getServer().getPlayer(uuid);
+        if (player == null) return false;
 
         PlayerStat ps = PlayerStat.getPlayerStats(player);
         if (ps == null) {
-            if (MythicSkywars.getCfg().debugEnabled()) MythicSkywars.get().getLogger().info("#isBusy pStats " + player.getName() + ": null");
+            if (MythicSkywars.getCfg().debugEnabled()) {
+                MythicSkywars.get().getLogger().info("#isStatsReady pStats " + player.getName() + ": null — creating");
+            }
             ps = new PlayerStat(player);
             PlayerStat.getPlayers().add(ps);
             final PlayerStat createdStats = ps;
             createdStats.loadStats(() -> createdStats.updatePlayerIfInLobby(player));
-            return true;
-        } else {
-            return !ps.isInitialized();
+            return false;
         }
+        if (!ps.isInitialized()) {
+            if (MythicSkywars.getCfg().debugEnabled()) {
+                MythicSkywars.get().getLogger().info("#isStatsReady pStats " + player.getName() + ": not initialized yet");
+            }
+            return false;
+        }
+        return true;
     }
 
     public BukkitTask fireworks(final Player player, final int length, final int fireworksPer5Tick) {

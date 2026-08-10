@@ -8,10 +8,13 @@ import systems.mythical.mythicskywars.utilities.LuckyBlockHook;
 import systems.mythical.mythicskywars.utilities.Messaging;
 import systems.mythical.mythicskywars.utilities.Party;
 import systems.mythical.mythicskywars.utilities.SWRServer;
+import systems.mythical.mythicskywars.utilities.Util;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Locale;
+import java.util.UUID;
 
 public class SWJoinCmd extends systems.mythical.mythicskywars.commands.BaseCmd {
     public SWJoinCmd(String t) {
@@ -77,6 +80,26 @@ public class SWJoinCmd extends systems.mythical.mythicskywars.commands.BaseCmd {
         // Prevent re-running join flow while already in or recently dead from a match.
         if (MatchManager.get().getPlayerMap(player) != null || MatchManager.get().getDeadPlayerMap(player) != null) {
             player.sendMessage(new Messaging.MessageFormatter().format("error.could-not-join2"));
+            return true;
+        }
+
+        // Wait for stats — previously this was misreported as "busy" and could soft-lock joins.
+        if (party != null) {
+            for (UUID memberId : party.getMembers()) {
+                if (!Util.get().isStatsReady(memberId)) {
+                    player.sendMessage(new Messaging.MessageFormatter().format("error.send-stats-not-loaded"));
+                    return true;
+                }
+                if (Util.get().isBusy(memberId)) {
+                    Player member = Bukkit.getPlayer(memberId);
+                    if (member != null) {
+                        party.sendPartyMessage(new Messaging.MessageFormatter().setVariable("player", member.getName()).format("party.memberbusy"));
+                    }
+                    return true;
+                }
+            }
+        } else if (!Util.get().isStatsReady(player.getUniqueId())) {
+            player.sendMessage(new Messaging.MessageFormatter().format("error.send-stats-not-loaded"));
             return true;
         }
 
