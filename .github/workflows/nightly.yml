@@ -11,6 +11,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      HAS_MYTHIC_RELEASE: ${{ secrets.MYTHIC_PRODUCT_ID != '' && secrets.MYTHIC_RELEASE_TOKEN != '' }}
 
     steps:
       - name: Checkout
@@ -184,3 +186,31 @@ jobs:
             -H "User-Agent: MythicalSystems/MythicSkywars/${{ steps.version.outputs.version }} (github-actions)" \
             -d "$PAYLOAD" \
             --fail-with-body
+
+      - name: Publish nightly to Mythic Marketplace
+        id: mythic_publish
+        if: env.HAS_MYTHIC_RELEASE == 'true'
+        uses: MythicalLTD/.github/actions/publish-release@v1
+        with:
+          product_id: ${{ secrets.MYTHIC_PRODUCT_ID }}
+          environment: production
+          version: ${{ steps.version.outputs.version }}
+          changelog: |
+            Nightly build — may be unstable. Prefer release builds for production.
+
+            Commit: ${{ github.sha }}
+            Branch: ${{ github.ref_name }}
+            ${{ github.event.head_commit.message }}
+          file_path: target/MythicSkywars-${{ steps.version.outputs.version }}.jar
+          title: MythicSkywars Nightly #${{ github.run_number }} (${{ steps.version.outputs.version }})
+          release_token: ${{ secrets.MYTHIC_RELEASE_TOKEN }}
+
+      - name: Mythic Marketplace summary
+        if: steps.mythic_publish.outcome == 'success'
+        shell: bash
+        run: |
+          {
+            echo "### Mythic Marketplace (nightly)"
+            echo "| Version | \`${{ steps.version.outputs.version }}\` |"
+            echo "| Release | \`${{ steps.mythic_publish.outputs.release_url }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
